@@ -12,6 +12,26 @@
  */
 
 export const CAPTURED_AT = '2026-11-20T13:24:00Z';
+
+/**
+ * Re-verification pass (session b4e5648a, 2026-11-20 ~20:10Z UTC). Each row below was re-read from the
+ * exact `sourceUrl` on the official demo API and compared field by field with the snapshot above.
+ */
+export const REVERIFIED = {
+  checkedAt: '2026-11-20 ~20:10Z',
+  method: 'GET /markets/{ticker} on the demo REST base, compared with lastPrice, yesBid, yesAsk, noBid, noAsk, volume, volume24h, openInterest.',
+  rows: [
+    { ticker: 'KXAAAGASM-26NOV30-4.80', result: 'match' },
+    { ticker: 'KXPGATOUR-THRC26-BHAA', result: 'corrected', detail: 'yes_ask and no_bid were reversed in the snapshot. Live: yes_ask 1.0000, no_bid 0.0000.' },
+    { ticker: 'KXPGATOUR-THRC26-RSTR', result: 'corrected', detail: 'yes_ask and no_bid were reversed in the snapshot. Live: yes_ask 1.0000, no_bid 0.0000.' },
+    { ticker: 'KXBTCD-26NOV2101-T70799.99', result: 'match' },
+    { ticker: 'KXBTCD-26NOV2101-T70599.99', result: 'match' },
+    { ticker: 'KXELONMARS-99', result: 'updated', detail: 'Live volume_fp 14074.86, volume_24h_fp 7.00, open_interest_fp 12699.57 (snapshot values were 14067.86, 6.00, 12693.57; the market is still trading).' },
+    { ticker: 'KXNEXTNATOSECGEN-99-MFRE', result: 'match' },
+    { ticker: 'KXNEXTNATOSECGEN-99-PPAV', result: 'match' },
+    { ticker: 'KXNEXTNATOSECGEN-99-KIOH', result: 'match' },
+  ],
+};
 export const DEMO_REST = 'https://external-api.demo.kalshi.co/trade-api/v2';
 export const DEMO_WS = 'wss://external-api-ws.demo.kalshi.co/trade-api/ws/v2';
 
@@ -104,8 +124,8 @@ export const MARKETS = [
     lastPrice: '0.0000',
     previousPrice: '0.0000',
     yesBid: '0.0000',
-    yesAsk: '0.0000',
-    noBid: '1.0000',
+    yesAsk: '1.0000',
+    noBid: '0.0000',
     noAsk: '1.0000',
     volume: '0.00',
     volume24h: '0.00',
@@ -131,8 +151,8 @@ export const MARKETS = [
     lastPrice: '0.0000',
     previousPrice: '0.0000',
     yesBid: '0.0000',
-    yesAsk: '0.0000',
-    noBid: '1.0000',
+    yesAsk: '1.0000',
+    noBid: '0.0000',
     noAsk: '1.0000',
     volume: '0.00',
     volume24h: '0.00',
@@ -215,9 +235,9 @@ export const MARKETS = [
     yesAsk: '1.0000',
     noBid: '0.0000',
     noAsk: '0.8600',
-    volume: '14067.86',
-    volume24h: '6.00',
-    openInterest: '12693.57',
+    volume: '14074.86',
+    volume24h: '7.00',
+    openInterest: '12699.57',
     closeTime: '2099-08-01T04:59:00Z',
     settlementSourceName: null,
     settlementSourceUrl: null,
@@ -592,10 +612,10 @@ export const FLAGS = [
     severity: 'Low',
     item: 'Some demo series metadata looks like placeholder data',
     detail:
-      'Several demo series return placeholder settlement sources such as {"name":"ABC","url":"https://kalshi.com/"} and striking text such as "local news outlets with verifiable mastheads in ". This is demo fixture data, not a parsing bug.',
-    evidence: 'Observed in GET /events and GET /series responses.',
-    sourceUrl: `${DEMO_REST}/events?status=open&limit=3`,
-    status: 'Informational.',
+      'Several demo Culture series list settlement sources that are not official publishers: a Google search URL labelled "account holder of ", a Google search URL labelled "Ars Technica", and a personal X account labelled "Elon Musk" (https://x.com/elonmusk). Re-checked on 2026-11-20 against GET /series?category=Culture. This is demo fixture data; the site does not present these as official settlement sources.',
+        evidence: 'GET /series?category=Culture (re-read 2026-11-20).',
+    sourceUrl: `${DEMO_REST}/series?category=Culture`,
+    status: 'Informational. Flagged again as F10 with the non-official sources listed.',
   },
   {
     id: 'F8',
@@ -606,5 +626,110 @@ export const FLAGS = [
     evidence: 'Both API calls returned 403 with that message.',
     sourceUrl: 'https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site',
     status: 'Needs a human or a token with Pages scope.',
+  },
+  {
+    id: 'F9',
+    severity: 'High',
+    item: 'The Culture category exists but has no markets',
+    detail:
+      'Kalshi\'s Culture category returns two series (KXXBANNEDGROK and KXXBANNEDMURRAYHILLGUY1). KXXBANNEDGROK has no open markets, and KXXBANNEDMURRAYHILLGUY1 has no markets at all, so the Culture category itself shows zero rows. The Culture page is not limited to that category, though: the classifier also routes markets by tags and title keywords (see F20). Kalshi\'s Entertainment category is large and is the closest broader match; whether to include it is a decision for the owner (see F15).',
+    evidence: 'GET /series?category=Culture returned both series. GET /markets?series_ticker=KXXBANNEDGROK&status=open returned an empty list, and GET /markets?series_ticker=KXXBANNEDMURRAYHILLGUY1 (no status filter) returned an empty list, on 2026-11-20.',
+    sourceUrl: `${DEMO_REST}/series?category=Culture`,
+    alsoUrl: `${DEMO_REST}/markets?series_ticker=KXXBANNEDMURRAYHILLGUY1`,
+    status: 'Open. Culture shows zero rows by design until Kalshi lists Culture markets or the owner chooses another scope.',
+  },
+  {
+    id: 'F10',
+    severity: 'Medium',
+    item: 'Some official-looking settlement sources are not official publishers',
+    detail:
+      'The Culture series settlement_sources include Google search URLs (for example https://www.google.com/search?q=Ars+Technica), a personal X account (https://x.com/elonmusk) and a source name with a trailing space and no URL of its own ("account holder of "). A settlement source that is a search page cannot be confirmed as an official source, so this build does not link them as settlement sources.',
+    evidence: 'Verbatim in GET /series?category=Culture (settlement_sources array).',
+    sourceUrl: `${DEMO_REST}/series?category=Culture`,
+    status: 'Open. Needs Kalshi confirmation of the intended settlement reference for these series.',
+  },
+  {
+    id: 'F11',
+    severity: 'Medium',
+    item: 'Contract PDFs are hosted on a staging S3 bucket',
+    detail:
+      'The contract_url field on many series points to https://kalshi-public-docs-staging.s3.us-east-1.amazonaws.com/regulatory/product-certifications/... for example KXAAAGASM (AAAGAS.pdf), KXPGATOUR (PGATOUR.pdf) and KXBTCD (BTC.pdf). Some series use the non-staging host https://assets.kalshi.com/... instead. The contract terms PDFs are linked from this site only as the API returns them.',
+    evidence: 'GET /series/KXAAAGASM, GET /series/KXPGATOUR and GET /series/KXBTCD returned these fields on 2026-11-20.',
+    sourceUrl: `${DEMO_REST}/series/KXAAAGASM`,
+    alsoUrl: `${DEMO_REST}/series/KXPGATOUR`,
+    status: 'Open. A staging host in production metadata is worth raising with Kalshi.',
+  },
+  {
+    id: 'F12',
+    severity: 'Medium',
+    item: 'The tags-by-category map has no Culture key',
+    detail:
+      'GET /search/tags_by_categories has 19 keys (categories), each with its tag list or null, but it has no "Culture" key, even though series with category "Culture" exist. Routing that depends on the tags map alone would miss Culture entirely. This build routes Culture by the series category field directly.',
+    evidence: 'Full response of GET /search/tags_by_categories checked on 2026-11-20.',
+    sourceUrl: `${DEMO_REST}/search/tags_by_categories`,
+    status: 'Open. Documented so reviewers do not rely on the tags map for Culture.',
+  },
+  {
+    id: 'F13',
+    severity: 'Medium',
+    item: '"Oil & Gas" is a tag under two categories, and a gas series sits under Entertainment',
+    detail:
+      'The tags map lists "Oil & Gas" under Commodities and "Oil and energy" under Economics. The gas series KXAAAGASM uses category Economics with tags "Oil & Gas" and "Oil and energy". Separately, KXNATGASD ("Natural Gas Daily") is under category Entertainment with tag "Oil & Gas". Routing gas by tag alone would mix categories; this build routes gas by category Economics plus those tags, so KXNATGASD is not in the gas topic.',
+    evidence: 'GET /search/tags_by_categories and GET /series?category=Entertainment (KXNATGASD record).',
+    sourceUrl: `${DEMO_REST}/search/tags_by_categories`,
+    alsoUrl: `${DEMO_REST}/series?category=Entertainment`,
+    status: 'Handled by routing rule. Left open so reviewers see the overlap.',
+  },
+  {
+    id: 'F14',
+    severity: 'High',
+    item: 'Snapshot error found and corrected: two golf rows had yes-ask and no-bid reversed',
+    detail:
+      'During the 2026-11-20 re-verification, rows KXPGATOUR-THRC26-BHAA and KXPGATOUR-THRC26-RSTR were found to have yesAsk 0.0000 and noBid 1.0000 in the snapshot. The live record returns yes_ask_dollars 1.0000 and no_bid_dollars 0.0000 (with no_ask 1.0000 and yes_bid 0.0000). Both rows are corrected to the live values. Other rows checked matched; KXELONMARS-99 volume and open interest had drifted since capture and were updated.',
+    evidence: 'GET /markets/KXPGATOUR-THRC26-BHAA and GET /markets/KXPGATOUR-THRC26-RSTR, re-read 2026-11-20. Row-by-row results are in REVERIFIED.',
+    sourceUrl: `${DEMO_REST}/markets/KXPGATOUR-THRC26-BHAA`,
+    alsoUrl: `${DEMO_REST}/markets/KXPGATOUR-THRC26-RSTR`,
+    status: 'Corrected. Other snapshot rows are still a 2026-11-20 snapshot, not live values.',
+  },
+  {
+    id: 'F15',
+    severity: 'Medium',
+    item: 'Decision needed: should Culture include Kalshi\'s Entertainment category?',
+    detail:
+      'The brief asks for "culture" as a topic. Kalshi\'s Culture category has no markets. Kalshi\'s Entertainment category is much larger and includes music, awards, film, TV and streaming series. Including it would fill the Culture page, but it is a broader scope than Kalshi\'s own Culture category, so this build does not include it by default.',
+    evidence: 'GET /series?category=Entertainment returns a large list (hasMore is true at limit 20).',
+    sourceUrl: `${DEMO_REST}/series?category=Entertainment&limit=20`,
+    status: 'Open. Owner decision. Switching is a one-line change in the topic configuration.',
+  },
+  {
+    id: 'F16',
+    severity: 'Low',
+    item: 'Series lists are page-limited',
+    detail:
+      'Series queries are paginated. For example GET /series?category=Sports&tags=Golf&limit=20 reports hasMore true. This build reads the first page of series per topic and tag (limit 100), so golf and other large topics can have series that are not shown.',
+    evidence: 'Re-read of GET /series?category=Sports&tags=Golf&limit=20 on 2026-11-20 (hasMore true).',
+    sourceUrl: `${DEMO_REST}/series?category=Sports&tags=Golf&limit=20`,
+    status: 'Open. Coverage limit, not a verified missing series.',
+  },
+  {
+    id: 'F20',
+    severity: 'Medium',
+    item: 'Culture routing is broader than Kalshi\'s Culture category',
+    detail:
+      'server/topics.js routes a market to Culture when its series tags include ai, entertainment, pop culture, awards, music, movies or tv, or when its title contains a Culture keyword (for example "oscar", "grammy", "album", "celebrity", "banned from x"). The collector fetches series from several categories, including Entertainment, so Culture can include markets whose official category is not Culture. The tag "AI" is also used by other categories, so an AI-tagged market in another topic could be routed here. Gas and golf are decided before this step by their tags and scope.',
+    evidence: 'server/topics.js (classifyMarket, steps 3 and 4) and server/collector.js (SERIES_CATEGORIES). Official category example: GET /series?category=Culture.',
+    sourceUrl: `${DEMO_REST}/series?category=Culture`,
+    alsoUrl: `${DEMO_REST}/series?category=Entertainment&limit=20`,
+    status: 'Open. Owner decision: restrict Culture to the Culture category, or keep the tag and keyword rules and say so on the page (see F15).',
+  },
+  {
+    id: 'F17',
+    severity: 'Low',
+    item: 'Settlement URL normalised for KXBTCD',
+    detail:
+      'The API returns the CF Benchmarks settlement URL for KXBTCD as https://www.cfbenchmarks.com/data/indices/BRTI?ref=blog.cfbenchmarks.com. The build stores the same URL without the ?ref query string. The page path is the same.',
+    evidence: 'GET /series/KXBTCD, re-read 2026-11-20.',
+    sourceUrl: `${DEMO_REST}/series/KXBTCD`,
+    status: 'Informational.',
   },
 ];

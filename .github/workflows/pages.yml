@@ -3,8 +3,9 @@
 # The site is plain HTML/CSS/ES modules with no build step, so this workflow only
 # verifies then uploads /docs. A broken site never deploys.
 #
+# Requires Settings -> Pages -> Source: GitHub Actions (one-time owner setting).
 # If Actions/Pages are not available, the alternative is
-# Settings → Pages → Source: "Deploy from a branch" → main / docs.
+# Settings -> Pages -> Source: "Deploy from a branch" -> main / docs.
 
 name: Deploy site to GitHub Pages
 
@@ -54,14 +55,27 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/configure-pages@v5
+      - id: configure
+        uses: actions/configure-pages@v5
+        continue-on-error: true
         with:
-          # Try to turn Pages on automatically. If the repository token is not
-          # allowed to do that, this fails and the site owner must enable it once at
-          # Settings -> Pages -> Source: GitHub Actions. Everything else still passes.
+          # Try to turn Pages on automatically. The repository token may not be allowed
+          # to do that (it returns 403 "Resource not accessible by integration"). This step
+          # is non-fatal so that the upload and deploy still run: if the owner has already
+          # enabled Pages (Settings -> Pages -> Source: GitHub Actions), the deploy succeeds.
           enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: docs
       - id: deployment
         uses: actions/deploy-pages@v4
+      - name: Explain a Pages enablement failure
+        if: failure() && steps.configure.outcome == 'failure'
+        run: |
+          {
+            echo "## GitHub Pages is not enabled for this repository"
+            echo ""
+            echo "The site in /docs was verified and uploaded, but GitHub Pages could not be enabled automatically."
+            echo "Owner action (one time): **Settings -> Pages -> Build and deployment -> Source: GitHub Actions -> Save**."
+            echo "After that, re-run this workflow or push to main."
+          } >> "$GITHUB_STEP_SUMMARY"

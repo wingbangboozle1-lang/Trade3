@@ -58,9 +58,23 @@ required for market data.
 - **Data**: `docs/data/series.json` — verified series snapshot (2026-11-20) with per-row API links.
   Live prices are never snapshotted as facts.
 
+## Re-verification and publish status (2026-11-20, session b4e5648a)
+
+| Item | Result | Evidence |
+|---|---|---|
+| Series rows in the topic tables (gas 10, elections 5, crypto 10, golf 4, culture 2) | Re-read from `GET /series/{ticker}`. Corrections: two crypto series list no settlement source; one golf settlement list was incomplete; one URL shown exactly as returned. | [series.json](docs/data/series.json) (each row links its record) · [VERIFICATION.md](VERIFICATION.md) V21–V24 |
+| Culture topic | **Corrected.** Kalshi has a Culture category (2 series, no markets). The earlier "no Culture category" claim was wrong. | [Series by category: Culture](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture) |
+| Market rows in the published data file (Build B: 10 rows; 9 re-read) | 6 matched. 2 golf rows had yes-ask and no-bid reversed and were corrected. 1 row (KXELONMARS-99) had drifted volume and open interest and was updated. `KXAAAGASM-26NOV30-4.50` was not re-read in this pass. | [data.js](docs/dashboard-site/assets/data.js) `REVERIFIED` · V25 |
+| Fee schedule | Formula and effective date (July 7, 2026) confirmed. | [Fee schedule PDF](https://kalshi.com/docs/kalshi-fee-schedule.pdf) · V26 |
+| GitHub Pages | **Not live yet.** The build token cannot enable Pages (HTTP 403). One owner action is needed: Settings → Pages → Source: **GitHub Actions**. | [Flagged F8](docs/flagged.html) |
+
+**Decisions for the owner (not blocking):** whether Culture should include Kalshi's larger Entertainment category (F15), and whether “highest dollar amount” should be volume × price or raw volume (F4).
+
+Full list with source links: [Flagged for Review](docs/flagged.html).
+
 ## Irregularities / flags (non-blocking)
 
-- **F1 Culture mapping (corrected):** An earlier build incorrectly said Kalshi had no Culture category. The official demo API query returned two series with `category: Culture`; routing now uses Culture directly. The checked `KXXBANNEDGROK` series had no open markets at verification time. See [Flagged for Review](docs/flagged.html) and [the official query](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture).
+- **F1 Culture mapping (corrected 2026-11-20):** Kalshi **does** have a Culture category (2 series, no markets at capture). The Culture topic now uses it. Whether to add Kalshi’s broader Entertainment category is an owner decision (F15).
 - **F2 News attribution:** no news API → settlement-source links only.
 - **F3 Live execution/WS:** needs user demo keys (by design, never in repo).
 - **F4 $ volume definition:** volume × price approximation; confirm intent.
@@ -68,6 +82,7 @@ required for market data.
 - **F6 CORS:** verify live fetch on GitHub Pages HTTPS (Kalshi docs show browser fetch examples).
 - **Sandbox note:** this build sandbox cannot reach Kalshi REST directly (egress allowlist);
   verification used official docs + live API JSON fetched through the docs proxy. The site itself
-  fetches from the user's browser, which is unrestricted.
+  fetches from the user's browser; whether the browser is allowed to read those responses from a
+  GitHub Pages origin (CORS) could not be confirmed from the sandbox (F6, still unverified).
 
 Full line-by-line verification: [VERIFICATION.md](VERIFICATION.md). Coordination: [COORDINATION.md](COORDINATION.md).

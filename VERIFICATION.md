@@ -25,9 +25,18 @@ Verified 2026-11-20. Live API responses were fetched on 2026-11-20 (demo base).
 | V15 | Golf mapping: Sports + Golf tag; e.g. `KXPGAGOLFERSCORE`, `KXPGAEAGLE`, `KXPRESCUPMATCH`, `KXPGAT20` | [Live query](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Sports&tags=Golf&limit=20) | Live API returned these series with PGA Tour settlement sources |
 | V16 | Crypto mapping: category Crypto; e.g. `KXETHD`, `KXBTC2025100`, `KXBTXMINW` | [Live query](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Crypto&limit=20) | Live API |
 | V17 | Elections mapping: category Elections; e.g. `KXELECTUKRAINE`, `KXIATREASR` | [Live query](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Elections&limit=20) | Live API |
-| V18 | Culture is a first-class Kalshi category; demo API returned two series, `KXXBANNEDMURRAYHILLGUY1` and `KXXBANNEDGROK`, both with `category: Culture` | [Live series query](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture) | Response fetched 2026-11-20; direct JSON shows two Culture series. Direct [open-markets query](https://external-api.demo.kalshi.co/trade-api/v2/markets?series_ticker=KXXBANNEDGROK&status=open) returned an empty market list for the checked series. An earlier Entertainment-proxy claim was corrected (F1). |
+| V18 | **Corrected 2026-11-20:** Culture **is** a Kalshi series category. `GET /series?category=Culture` returns `KXXBANNEDGROK` and `KXXBANNEDMURRAYHILLGUY1`, both `"category":"Culture"`. The earlier claim that no Culture category exists was wrong. | [Series by category: Culture](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture) · [Tags map](https://external-api.demo.kalshi.co/trade-api/v2/search/tags_by_categories) | Live API, re-read 2026-11-20. The tags map has no Culture key (flag F12). Culture now uses the Culture category, not Entertainment. |
+| V21 | Gas series re-read: `KXAAAGASM`, `KXAAAGASMIN`, `KXAAAGASY`, `KXAAAGASED`, `KXAAAGASMAX`, `KXAAAGASMAXCA`, `KXAAAGASMAXTX`, `KXAAAGASMINFL`, `KXAAAGASMAXFL`, `KXNGASMAX` | `GET /series/{ticker}` (each row's source link is in `docs/data/series.json`) | Re-read 2026-11-20. Title, frequency, category, tags and settlement source all match. |
+| V22 | Elections series re-read: `POPVOTEKHVA`, `KXGOVNJNOMR`, `KXIATREASR`, `KXFRPRESCANDCOUNT`, `KXELECTUKRAINE` | `GET /series/{ticker}` | Re-read 2026-11-20. All match. |
+| V23 | Crypto series re-read: `KXLINKPERP`, `KXXRPMAXY`, `KXSOL26500`, `KXBTXMINW`, `KXBTC2025100`, `KXSOLPERP`, `KXETHD`, `KXFDVBIRB`, `KXSOLSTABLESUPP`, `KXNEARY` | `GET /series/{ticker}` | Re-read 2026-11-20. Corrected: `KXLINKPERP` and `KXSOLPERP` have `settlement_sources: null` (now shown as none listed). `KXBTC2025100` URL shown exactly as returned (includes `?ref=`). |
+| V24 | Golf series re-read: `KXPGAGOLFERSCORE`, `KXPGAEAGLE`, `KXPRESCUPMATCH`, `KXPGAT20` | `GET /series/{ticker}` | Re-read 2026-11-20. Corrected: `KXPGAGOLFERSCORE` settlement also lists AP; source names shown as returned. |
+| V25 | Build B market rows re-read (9 of 10 rows; `KXAAAGASM-26NOV30-4.50` not re-read): price, bid/ask and volume fields | `GET /markets/{ticker}` (per-row `sourceUrl` in `docs/dashboard-site/assets/data.js`) | Re-read 2026-11-20. 2 golf rows corrected (yes-ask and no-bid were reversed). `KXELONMARS-99` volume and open interest updated (drift). Recorded in `REVERIFIED`. |
+| V26 | Fee schedule: formula `round up(M × 0.07 × C × P × (1 − P))`, general table, "Last updated and effective: July 7, 2026", "no settlement fee" | [Kalshi fee schedule (PDF)](https://kalshi.com/docs/kalshi-fee-schedule.pdf) | Re-read 2026-11-20. Formula and effective date confirmed. |
+| V27 | Exchange active on demo | [Exchange status (demo)](https://external-api.demo.kalshi.co/trade-api/v2/exchange/status) | Re-read 2026-11-20: `exchange_active: true`, `trading_active: true`, shards 0–3. |
 | V19 | Exchange active on demo 2026-11-20 (`exchange_active: true`, `trading_active: true`) | [Live status](https://external-api.demo.kalshi.co/trade-api/v2/exchange/status) | Live API JSON |
 | V20 | OpenAPI spec download | [Predictions REST spec](https://docs.kalshi.com/openapi.yaml) | Linked from docs welcome page |
+
+> **Scope of the 2026-11-20 re-check (session b4e5648a).** Every series row in `docs/data/series.json` (31 rows) and every market row in Build B's `data.js` (10 rows, 9 re-read) was re-read from the official demo endpoint in its row's `sourceUrl`. Rows are marked `verified_on` in the data file. Values that cannot be re-read are blank or flagged; nothing is inferred.
 
 ## Derived / heuristic items (explicitly NOT official facts)
 
@@ -39,6 +48,14 @@ Verified 2026-11-20. Live API responses were fetched on 2026-11-20 (demo base).
 | D4 | News/catalyst causes | NOT provided by Kalshi API. Never invented. Flagged F2. |
 
 ## Irregularities
+
+See [Flagged for Review](docs/flagged.html) for the full list with source links (F1–F19). New in the 2026-11-20 pass:
+
+- Culture category exists but has no markets (F9); the tags map has no Culture key (F12).
+- Some Culture settlement sources are search pages or a personal account (F10).
+- Contract PDFs point to a `kalshi-public-docs-staging` S3 host on many series (F11).
+- Two crypto series list no settlement source (F18).
+- Two golf snapshot rows had yes-ask and no-bid reversed; corrected to the live record (F14).
 
 - Sandbox egress allowlist blocks direct `curl` to Kalshi hosts from bash; verification therefore
   used official docs pages + live API JSON via the docs fetch proxy. The deployed site fetches
