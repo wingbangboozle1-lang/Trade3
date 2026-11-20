@@ -3,3 +3,6 @@ data/
 tests/.tmp-data/
 *.tmp
 .DS_Store
+
+# Python cache from local page generation
+docs/__pycache__/
