@@ -99,15 +99,27 @@ def main() -> int:
     ap.add_argument("--base", default=DEMO)
     ap.add_argument("--json", type=Path)
     ap.add_argument("--from-cache", type=Path,
-                    help="JSON file of {ticker: <series response>} to verify offline")
+                    help="JSON file of {ticker: <series response>} (or {series_cache: {...}}) to verify offline")
+    ap.add_argument("--only", help="comma-separated tickers to check (default: every published row)")
+    ap.add_argument("--skip-uncached", action="store_true",
+                    help="with --from-cache: report rows absent from the cache as NOT CHECKED instead of failing on fetch")
     args = ap.parse_args()
 
     data = json.loads(DATA.read_text())
     cache = json.loads(args.from_cache.read_text()) if args.from_cache else None
+    if cache and "series_cache" in cache:          # evidence bundle written by the integration session
+        cache = cache["series_cache"]
+    only = {t.strip() for t in args.only.split(",")} if args.only else None
 
     rows = []
+    skipped = []
     for topic_id, topic in data["topics"].items():
         for row in topic["series"]:
+            if only and row["ticker"] not in only:
+                continue
+            if args.skip_uncached and cache is not None and row["ticker"] not in cache:
+                skipped.append(row["ticker"])
+                continue
             expect = dict(row, category=row.get("category") or topic["kalshi_category"])
             r = check_row(args.base, row["ticker"], expect, cache)
             r["topic"] = topic_id
@@ -121,6 +133,8 @@ def main() -> int:
             print(f"       ! {d}")
         for n in r["notes"]:
             print(f"       - {n}")
+    if skipped:
+        print(f"NOT CHECKED (absent from the cache): {len(skipped)} — {', '.join(skipped)}")
     print(f"\n{len(rows) - len(bad)}/{len(rows)} rows verified against {args.base}")
     if bad:
         print("Mismatches:", ", ".join(r["ticker"] for r in bad))

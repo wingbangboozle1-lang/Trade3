@@ -147,9 +147,19 @@ def check_data() -> None:
             src = row.get("source", "")
             if not src.startswith("https://external-api."):
                 errors.append(f"series.json {row.get('ticker','?')}: source must be an official API URL, got {src!r}")
-            if row.get("category") != topic.get("kalshi_category"):
+            # A row must carry the topic's own category, or — only when the topic declares a
+            # documented superset and the row says so — that superset's category. This keeps the
+            # "Culture = Entertainment" mapping honest instead of silently blurring topics.
+            allowed = {topic.get("kalshi_category")}
+            superset = topic.get("kalshi_category_superset")
+            if superset:
+                allowed.add(superset)
+            if row.get("category") not in allowed:
                 errors.append(f"series.json {row.get('ticker','?')}: category {row.get('category')!r} "
-                              f"!= topic category {topic.get('kalshi_category')!r}")
+                              f"not in topic categories {sorted(allowed)}")
+            elif superset and row.get("category") == superset and not row.get("via"):
+                errors.append(f"series.json {row.get('ticker','?')}: row from the {superset!r} superset "
+                              "must carry a 'via' note saying so")
     print(f"checked {total} series rows in series.json")
 
 

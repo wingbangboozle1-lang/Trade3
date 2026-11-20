@@ -3,7 +3,7 @@
 // Every row links to the exact official API call that returned it.
 // ============================================================================
 import {
-  TOPIC_BY_ID, apiGet, apiMarketUrl, discoverTopicSeries, dollarVolume, esc, fetchOpenEvents,
+  TOPIC_BY_ID, apiGet, apiMarketUrl, cleanTitle, discoverTopicSeries, dollarVolume, esc, fetchOpenEvents,
   fetchOpenMarkets, fmt$, fmtNum, fmtPx, kalshiSeriesUrl, lastPrice, until, yesAsk, yesBid,
 } from "./app.js";
 
@@ -19,8 +19,10 @@ async function loadStatic() {
   $("topic-title").textContent = t.label;
   $("topic-meta").innerHTML =
     `Kalshi category <code>${esc(t.kalshi_category)}</code>` +
+    (t.kalshi_category_superset
+      ? ` <span class="pill warn">+ ${esc(t.kalshi_category_superset)} as a disclosed superset</span>` : "") +
     (t.kalshi_tags?.length ? ` · tags <code>${esc(t.kalshi_tags.join(", "))}</code>` : "") +
-    ` · <a href="${esc(t.kalshi_site)}" target="_blank" rel="noopener">Kalshi ${esc(t.label)} hub ↗</a>`;
+    ` · <a href="${esc(t.kalshi_site)}" target="_blank" rel="noopener" title="Pattern-derived Kalshi page (kalshi.com/markets/&lt;series&gt;). Kalshi's site refuses automated fetches, so this link is not machine-verified — see flagged F12.">Kalshi ${esc(t.label)} page ↗</a>`;
   $("topic-why").textContent = t.why || "";
   $("topic-flag").innerHTML = topic.flag
     ? `<div class="note">${esc(topic.flag)} <a href="../flagged.html">See the review item →</a></div>` : "";
@@ -35,9 +37,9 @@ async function loadStatic() {
       : `<span class="pill warn">not published</span>`;
     return `<tr>
       <td><code>${esc(s.ticker)}</code></td>
-      <td>${esc(s.title)}${s.note ? `<div class="dim">${esc(s.note)}</div>` : ""}</td>
+      <td>${esc(cleanTitle(s.title))}${s.via ? `<div class="dim">via ${esc(s.via)}</div>` : ""}${s.note ? `<div class="dim">${esc(s.note)}</div>` : ""}</td>
       <td>${esc(s.frequency)}</td>
-      <td>${esc(s.category)}</td>
+      <td>${esc(s.category)}${s.open_markets === 0 ? ' <span class="pill warn">0 open markets</span>' : ""}</td>
       <td>${settle}</td>
       <td class="nowrap">
         <a href="${esc(s.source)}" target="_blank" rel="noopener" title="official API record used to verify this row">API</a>
@@ -61,10 +63,12 @@ async function loadLive() {
     const eventMeta = new Map(events.map((e) => [e.event_ticker, e]));
     const mine = markets.filter((m) => {
       const e = eventMeta.get(m.event_ticker);
-      return e && e.category === topic.category && topicSeries[topicId]?.has(e.series_ticker);
+      const cats = [topic.category, ...(topic.extraCategories || [])];
+      return e && cats.includes(e.category) && topicSeries[topicId]?.has(e.series_ticker);
     }).map((m) => {
       const e = eventMeta.get(m.event_ticker);
-      return { ...m, _series: e?.series_ticker, _eventTitle: e?.title, _eventSub: e?.sub_title };
+      return { ...m, _series: e?.series_ticker, _eventTitle: e?.title, _eventSub: e?.sub_title,
+               _viaSuperset: !!e && e.category !== topic.category };
     });
     live = mine.sort((a, b) => dollarVolume(b) - dollarVolume(a));
     $("live-status").innerHTML = `<span class="pill live">${live.length} open contracts</span>`;
@@ -81,7 +85,7 @@ function renderLive() {
     const spread = yesBid(m) != null && yesAsk(m) != null ? yesAsk(m) - yesBid(m) : null;
     return `<tr>
       <td><span class="mono">${esc(m.ticker)}</span></td>
-      <td>${esc(m._eventTitle || "")}<div class="dim">${esc(m.yes_sub_title || m.title || "")}</div></td>
+      <td>${esc(cleanTitle(m._eventTitle))}<div class="dim">${esc(cleanTitle(m.yes_sub_title || m.title))}</div>${m._viaSuperset ? `<span class="pill warn" title="Outside the topic category — this row is in the disclosed superset (flag F1)">superset</span>` : ''}</td>
       <td class="num">${fmtPx(lastPrice(m))}</td>
       <td class="num">${fmtPx(yesBid(m))} / ${fmtPx(yesAsk(m))}</td>
       <td class="num">${spread == null ? "—" : fmtPx(spread)}</td>

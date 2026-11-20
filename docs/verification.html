@@ -19,6 +19,7 @@
     <a href="methodology.html">Method</a>
     <a href="verification.html" class="active">Verification</a>
     <a href="flagged.html">Flagged</a>
+    <a href="dashboard-site/index.html">Audit edition</a>
   </nav>
 </header>
 
@@ -64,6 +65,45 @@
       </tr></thead>
       <tbody id="v-body"></tbody>
     </table></div>
+  </section>
+
+  <section class="card" id="integration-recheck">
+    <div class="card-head">
+      <h2>Integration re-check — 2026-11-20T20:0x UTC</h2>
+      <div class="right dim">6 rows re-read live; the other 33 keep the 13:20Z stamp and say so</div>
+    </div>
+    <p class="muted">The final integration session re-read the flagship rows of every disputed topic straight from
+    the demo API, then ran the repository's own row verifier over the captured records:
+    <code>python scripts/verify_series.py --from-cache docs/data/live-verification-2026-11-20.json --only
+    KXAAAGASM,KXNGASMAX,KXXBANNEDGROK,KXXBANNEDMURRAYHILLGUY1</code> → <b>4/4 rows verified, exit 0</b>.
+    The raw responses are published next to this page so the check can be reproduced by eye.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>What was asked</th><th>What the API answered</th><th>Effect on the site</th></tr></thead>
+      <tbody>
+        <tr><td><a href="https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture" target="_blank" rel="noopener">GET /series?category=Culture</a></td>
+            <td>2 series, each <code>"category":"Culture"</code></td>
+            <td>The Culture topic now uses Kalshi's real category; Entertainment became a labelled superset, not the mapping. Corrects flag F1.</td></tr>
+        <tr><td><a href="https://external-api.demo.kalshi.co/trade-api/v2/markets?series_ticker=KXXBANNEDGROK&amp;status=open" target="_blank" rel="noopener">open markets of KXXBANNEDGROK</a></td>
+            <td><code>{"markets":[]}</code></td>
+            <td>The topic page reports 0 open markets for the real Culture series instead of padding the table.</td></tr>
+        <tr><td><a href="https://external-api.demo.kalshi.co/trade-api/v2/series?category=Gas" target="_blank" rel="noopener">GET /series?category=Gas</a> · <a href="https://external-api.demo.kalshi.co/trade-api/v2/series?category=Golf" target="_blank" rel="noopener">…?category=Golf</a></td>
+            <td>both <code>{"series":null}</code></td>
+            <td>Confirms gas must be found via <code>Economics</code> + the oil/gas tags and golf via <code>Sports</code> + <code>Golf</code>. No query filters on a Gas or Golf category.</td></tr>
+        <tr><td><a href="https://external-api.demo.kalshi.co/trade-api/v2/markets?series_ticker=KXAAAGASM&amp;status=open" target="_blank" rel="noopener">GET /markets?series_ticker=KXAAAGASM</a></td>
+            <td>4 strikes; <code>KXAAAGASM-26NOV30-4.80</code> volume_fp 55571.52 @ $0.03; two strikes with volume 0.00; titles contain <code>**gas prices**</code></td>
+            <td>Dollar ranking = volume_fp × last price (F4); <code>cleanTitle()</code> strips the markdown for display only.</td></tr>
+        <tr><td><a href="https://external-api.demo.kalshi.co/trade-api/v2/markets?series_ticker=KXBTCD&amp;status=open&amp;limit=3" target="_blank" rel="noopener">GET /markets?series_ticker=KXBTCD</a></td>
+            <td>all three strikes at $0.0000 with zero volume; no <code>liquidity</code> field anywhere</td>
+            <td>Added V16; liquidity is read from the order book, never from the market record.</td></tr>
+        <tr><td><a href="https://external-api.demo.kalshi.co/trade-api/v2/exchange/status" target="_blank" rel="noopener">GET /exchange/status</a></td>
+            <td>exchange_active true, trading_active true, shards 0–3</td>
+            <td>Status pill on the dashboard is backed by this call, made at page load.</td></tr>
+      </tbody>
+    </table></div>
+    <p class="dim">Evidence file (raw records, first four settlement sources for the Culture series):
+    <a href="data/live-verification-2026-11-20.json">data/live-verification-2026-11-20.json</a>.
+    A workflow runs the same row check on a schedule with real network access:
+    <code>.github/workflows/verify-live.yml</code>.</p>
   </section>
 
   <section class="card">

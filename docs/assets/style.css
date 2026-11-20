@@ -98,6 +98,7 @@ footer {
 .pill.live::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--green-2); box-shadow: 0 0 0 0 rgba(34, 230, 164, .7); animation: pulse 2s infinite; }
 .pill.bad { color: var(--red); border-color: rgba(255, 92, 122, .55); }
 .pill.warn { color: var(--amber); border-color: rgba(255, 179, 71, .55); }
+.pill.ok { color: var(--green-2); border-color: rgba(0, 201, 138, .4); }
 .pill.info { color: var(--blue); border-color: rgba(90, 169, 255, .5); }
 .pill.roi { color: #08121f; background: var(--green-2); border-color: var(--green-2); }
 @keyframes pulse { 70% { box-shadow: 0 0 0 7px rgba(34, 230, 164, 0); } 100% { box-shadow: 0 0 0 0 rgba(34, 230, 164, 0); } }
@@ -197,3 +198,15 @@ pre { background: #070b13; border: 1px solid var(--line); border-radius: 10px; p
   canvas.chart { height: 240px; }
   .kpi { font-size: 20px; }
 }
+
+/* ---- catalyst panel ("what may have moved it") ---- */
+.cat-head{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px}
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media (max-width:900px){.cat-grid{grid-template-columns:1fr}}
+.cat-grid h4{margin:0 0 6px;font-size:.95rem}
+table.tape{width:100%;border-collapse:collapse;font-size:.85rem}
+table.tape th{text-align:left;font-weight:600;color:var(--muted,#9aa4b2);padding:4px 6px;border-bottom:1px solid var(--line,#2a3140)}
+table.tape td{padding:4px 6px;border-bottom:1px solid var(--line,#212836)}
+table.tape .num{text-align:right;font-variant-numeric:tabular-nums}
+ul.srcs{margin:0;padding-left:18px;font-size:.9rem}
+ul.srcs li{margin:3px 0}

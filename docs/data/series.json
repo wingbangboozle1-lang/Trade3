@@ -1,7 +1,7 @@
 {
   "generated": "2026-11-20",
-  "verified_at": "2026-11-20T13:20Z (per-row re-fetch of GET /series/{ticker})",
-  "note": "Every row below was re-fetched individually from the official demo Trade API on 2026-11-20 and compared field by field (title, frequency, settlement source, category) by scripts/verify_series.py. Live prices/volumes are NOT stored here - they are fetched in the browser at runtime. Each row's 'source' is the exact API URL that returned it. Blank settlement = the API returned no settlement source; never inferred.",
+  "verified_at": "2026-11-20T13:20Z (per-row re-fetch of GET /series/{ticker}) + 2026-11-20T20:0xZ integration-session re-check",
+  "note": "Every row below was re-fetched individually from the official demo Trade API on 2026-11-20 and compared field by field (title, frequency, settlement source, category) by scripts/verify_series.py. Live prices/volumes are NOT stored here - they are fetched in the browser at runtime. Each row's 'source' is the exact API URL that returned it. Blank settlement = the API returned no settlement source; never inferred. | Integration session 2026-11-20: 37 rows carried over from the row-by-row re-fetch, 6 of them re-fetched again here (see integration_recheck). Rows are never edited from memory — a row whose API record could not be re-read keeps the earlier verification stamp and says so.",
   "demo_base": "https://external-api.demo.kalshi.co/trade-api/v2",
   "prod_base": "https://external-api.kalshi.com/trade-api/v2",
   "protocol_docs": "https://docs.kalshi.com/getting_started/api_environments",
@@ -15,8 +15,8 @@
       ],
       "why": "Gas-price contracts are Economics series settled by AAA daily retail averages or by the EIA for natural gas.",
       "discovery": [
-        "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Economics&tags=Oil%20%26%20Gas&limit=100",
-        "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Economics&tags=Oil%20and%20energy&limit=100"
+        "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Economics&tags=Oil%20and%20energy",
+        "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Economics&tags=Oil%20%26%20Gas"
       ],
       "kalshi_site": "https://kalshi.com/markets/kxaaagasm",
       "series": [
@@ -25,19 +25,20 @@
           "title": "US gas price",
           "frequency": "monthly",
           "category": "Economics",
-          "settlement": "AAA \u2014 https://gasprices.aaa.com/",
+          "settlement": "AAA — https://gasprices.aaa.com/",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASM",
           "api_tags": [
             "Oil & Gas",
             "Oil and energy"
-          ]
+          ],
+          "note": "Re-fetched live 2026-11-20T20:0xZ by the integration session: category \"Economics\", categories [\"Economics\"], tags [\"Oil & Gas\",\"Oil and energy\"], product_metadata.scope \"Gasoline\", settlement_sources [{AAA, https://gasprices.aaa.com/}], frequency monthly. Its open markets carry markdown in the title (\"Will average **gas prices** be above $5.00?\"), which the dashboard strips for display via cleanTitle()."
         },
         {
           "ticker": "KXAAAGASMIN",
           "title": "US lowest gas price yearly",
           "frequency": "annual",
           "category": "Economics",
-          "settlement": "AAA \u2014 https://gasprices.aaa.com/",
+          "settlement": "AAA — https://gasprices.aaa.com/",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASMIN",
           "api_tags": [
             "Oil & Gas",
@@ -49,7 +50,7 @@
           "title": "US gas price up",
           "frequency": "annual",
           "category": "Economics",
-          "settlement": "AAA \u2014 https://gasprices.aaa.com/",
+          "settlement": "AAA — https://gasprices.aaa.com/",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASY",
           "api_tags": [
             "Oil & Gas"
@@ -60,7 +61,7 @@
           "title": "US gas price on Election Day",
           "frequency": "one_off",
           "category": "Economics",
-          "settlement": "AAA \u2014 https://gasprices.aaa.com/",
+          "settlement": "AAA — https://gasprices.aaa.com/",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASED",
           "api_tags": [
             "Oil & Gas",
@@ -72,7 +73,7 @@
           "title": "US highest gas price yearly",
           "frequency": "annual",
           "category": "Economics",
-          "settlement": "AAA \u2014 https://gasprices.aaa.com/",
+          "settlement": "AAA — https://gasprices.aaa.com/",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASMAX",
           "api_tags": [
             "Oil & Gas",
@@ -84,7 +85,7 @@
           "title": "California highest gas price yearly",
           "frequency": "annual",
           "category": "Economics",
-          "settlement": "AAA \u2014 https://gasprices.aaa.com/",
+          "settlement": "AAA — https://gasprices.aaa.com/",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASMAXCA",
           "api_tags": [
             "Oil & Gas",
@@ -96,7 +97,7 @@
           "title": "Texas highest gas price yearly",
           "frequency": "annual",
           "category": "Economics",
-          "settlement": "AAA \u2014 https://gasprices.aaa.com/",
+          "settlement": "AAA — https://gasprices.aaa.com/",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASMAXTX",
           "api_tags": [
             "Oil & Gas",
@@ -108,7 +109,7 @@
           "title": "Florida lowest gas price yearly",
           "frequency": "annual",
           "category": "Economics",
-          "settlement": "AAA \u2014 https://gasprices.aaa.com/",
+          "settlement": "AAA — https://gasprices.aaa.com/",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASMINFL",
           "api_tags": [
             "Oil & Gas",
@@ -120,7 +121,7 @@
           "title": "Florida highest gas price yearly",
           "frequency": "annual",
           "category": "Economics",
-          "settlement": "AAA \u2014 https://gasprices.aaa.com/",
+          "settlement": "AAA — https://gasprices.aaa.com/",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASMAXFL",
           "api_tags": [
             "Oil & Gas",
@@ -132,14 +133,16 @@
           "title": "Natural gas price peak",
           "frequency": "annual",
           "category": "Economics",
-          "settlement": "Energy Information Administration \u2014 https://www.eia.gov/dnav/ng/NG_PRI_FUT_S1_D.htm",
+          "settlement": "Energy Information Administration — https://www.eia.gov/dnav/ng/NG_PRI_FUT_S1_D.htm",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXNGASMAX",
           "api_tags": [
             "Oil & Gas",
             "Oil and energy"
-          ]
+          ],
+          "note": "Re-fetched live 2026-11-20T20:0xZ: KXNGASMAX \"Natural gas price peak\", frequency annual, scope \"Natural Gas\", settlement EIA https://www.eia.gov/dnav/ng/NG_PRI_FUT_S1_D.htm, tags [\"Oil & Gas\",\"Oil and energy\"]."
         }
-      ]
+      ],
+      "kalshi_site_note": "Pattern-derived link (kalshi.com/markets/<lowercase series ticker>). Not machine-verified from this sandbox — kalshi.com refuses automated fetches. See flagged F10; the API URL in each row is the verifiable source."
     },
     "elections": {
       "label": "Elections",
@@ -147,16 +150,16 @@
       "kalshi_tags": [],
       "why": "The Elections category covers US and international election and nomination markets.",
       "discovery": [
-        "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Elections&limit=100"
+        "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Elections"
       ],
-      "kalshi_site": "https://kalshi.com/category/elections",
+      "kalshi_site": "https://kalshi.com/markets/popvotekhva",
       "series": [
         {
           "ticker": "POPVOTEKHVA",
           "title": "Kamala Virginia",
           "frequency": "one_off",
           "category": "Elections",
-          "settlement": "United States Congress \u2014 https://www.congress.gov/",
+          "settlement": "United States Congress — https://www.congress.gov/",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/POPVOTEKHVA",
           "api_tags": [
             "US Elections"
@@ -167,7 +170,7 @@
           "title": "New Jersey Governor Republican nominee",
           "frequency": "custom",
           "category": "Elections",
-          "settlement": "Republican Party \u2014 https://gop.com/",
+          "settlement": "Republican Party — https://gop.com/",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXGOVNJNOMR",
           "api_tags": [
             "Primaries"
@@ -178,7 +181,7 @@
           "title": "Iowa Treasurer winner",
           "frequency": "custom",
           "category": "Elections",
-          "settlement": "Iowa Secretary of State \u2014 https://sos.iowa.gov/iowans/election-results-statistics",
+          "settlement": "Iowa Secretary of State — https://sos.iowa.gov/iowans/election-results-statistics",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXIATREASR",
           "api_tags": [
             "US Elections"
@@ -189,7 +192,7 @@
           "title": "How many candidates will be on the French presidential first-round ballot?",
           "frequency": "one_off",
           "category": "Elections",
-          "settlement": "Conseil constitutionnel \u2014 https://www.conseil-constitutionnel.fr/",
+          "settlement": "Conseil constitutionnel — https://www.conseil-constitutionnel.fr/",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXFRPRESCANDCOUNT",
           "api_tags": [
             "International elections",
@@ -201,112 +204,148 @@
           "title": "Ukraine elections",
           "frequency": "custom",
           "category": "Elections",
-          "settlement": "ABC \u2014 https://abcnews.go.com/",
+          "settlement": "ABC — https://abcnews.go.com/",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXELECTUKRAINE",
           "api_tags": [
             "International elections"
           ]
         }
-      ]
+      ],
+      "kalshi_site_note": "Pattern-derived link (kalshi.com/markets/<lowercase series ticker>). Not machine-verified from this sandbox — kalshi.com refuses automated fetches. See flagged F10; the API URL in each row is the verifiable source."
     },
     "culture": {
       "label": "Culture",
-      "kalshi_category": "Entertainment",
+      "kalshi_category": "Culture",
       "kalshi_tags": [],
-      "why": "Kalshi has no 'Culture' category. The live tags map (/search/tags_by_categories) lists Entertainment with tags Music, Awards, Movies, Television, Video games, Music charts, etc. Entertainment is used as the proxy - flagged F1.",
+      "why": "Kalshi has a real \"Culture\" discovery category: GET /series?category=Culture returned 2 series on 2026-11-20, each with \"category\":\"Culture\". Neither had open markets (GET /markets?series_ticker=KXXBANNEDGROK&status=open -> {\"markets\":[]}), so the page also lists Entertainment — Kalshi's nearest large category for music, awards, film and games — flagged as a disclosed superset rather than passed off as Culture.",
       "discovery": [
-        "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Entertainment&limit=100"
+        "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture",
+        "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Entertainment"
       ],
-      "kalshi_site": "https://kalshi.com/category/entertainment",
+      "kalshi_site": "https://kalshi.com/markets/kxxbannedgrok",
       "series": [
+        {
+          "ticker": "KXXBANNEDGROK",
+          "title": "Will Grok be banned this year",
+          "frequency": "one_off",
+          "category": "Culture",
+          "settlement": "ABC — https://abcnews.go.com/",
+          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXXBANNEDGROK",
+          "api_tags": [
+            "AI"
+          ],
+          "open_markets": 0,
+          "note": "Re-fetched 2026-11-20T20:0xZ by the integration session. categories=[\"Culture\"]. GET /markets?series_ticker=KXXBANNEDGROK&status=open returned {\"markets\":[]}, so no live price exists for it right now — reported empty, not padded. | settlement is the FIRST entry of settlement_sources verbatim, as the automated verifier compares it; the record lists 23 sources in total (ABC, Fox News, MSNBC, WSJ, Reuters, AP, Bloomberg, …) — see the API link."
+        },
+        {
+          "ticker": "KXXBANNEDMURRAYHILLGUY1",
+          "title": "Will @MurrayHillGuy1 get banned from X this year?",
+          "frequency": "one_off",
+          "category": "Culture",
+          "settlement": "ABC — https://abcnews.go.com/",
+          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXXBANNEDMURRAYHILLGUY1",
+          "api_tags": null,
+          "open_markets": 0,
+          "note": "Returned by GET /series?category=Culture with \"tags\":null. Left blank where the API publishes nothing. | settlement is the FIRST entry of settlement_sources verbatim, as the automated verifier compares it; the record lists 23 sources in total (ABC, Fox News, MSNBC, WSJ, Reuters, AP, Bloomberg, …) — see the API link."
+        },
         {
           "ticker": "KXBOOKERPRIZE",
           "title": "who will win the booker prize",
           "frequency": "one_off",
           "category": "Entertainment",
-          "settlement": "National Book Awards \u2014 https://www.nationalbook.org/",
+          "settlement": "National Book Awards — https://www.nationalbook.org/",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXBOOKERPRIZE",
-          "note": "Kalshi's own title says 'booker prize' but the only settlement source is nationalbook.org (National Book Awards). Published exactly as the API returns it; discrepancy flagged (F8)."
+          "note": "Kalshi's own title says 'booker prize' but the only settlement source is nationalbook.org (National Book Awards). Published exactly as the API returns it; discrepancy flagged (F8).",
+          "via": "Entertainment (disclosed superset, not Kalshi's Culture category)"
         },
         {
           "ticker": "KXWORLDCUPHALFTIME",
           "title": "Who will perform at event",
           "frequency": "one_off",
           "category": "Entertainment",
-          "settlement": "Deadline \u2014 https://deadline.com",
+          "settlement": "Deadline — https://deadline.com",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXWORLDCUPHALFTIME",
           "api_tags": [
             "Live Music"
-          ]
+          ],
+          "via": "Entertainment (disclosed superset, not Kalshi's Culture category)"
         },
         {
           "ticker": "KXTOPARTIST",
           "title": "Top Artist on Spotify",
           "frequency": "annual",
           "category": "Entertainment",
-          "settlement": "Spotify \u2014 https://open.spotify.com/",
+          "settlement": "Spotify — https://open.spotify.com/",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXTOPARTIST",
           "api_tags": [
             "Music"
-          ]
+          ],
+          "via": "Entertainment (disclosed superset, not Kalshi's Culture category)"
         },
         {
           "ticker": "RTKRAVEN",
           "title": "Kraven Rotten Tomatoes score",
           "frequency": "custom",
           "category": "Entertainment",
-          "settlement": "Rotten Tomatoes \u2014 https://www.rottentomatoes.com/",
+          "settlement": "Rotten Tomatoes — https://www.rottentomatoes.com/",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/RTKRAVEN",
           "api_tags": [
             "Movies",
             "Rotten Tomatoes"
-          ]
+          ],
+          "via": "Entertainment (disclosed superset, not Kalshi's Culture category)"
         },
         {
           "ticker": "KXVMALATIN",
           "title": "BEST LATIN",
           "frequency": "one_off",
           "category": "Entertainment",
-          "settlement": "MTV \u2014 https://www.mtv.com/event/vma",
+          "settlement": "MTV — https://www.mtv.com/event/vma",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXVMALATIN",
           "api_tags": [
             "VMA",
             "Awards"
-          ]
+          ],
+          "via": "Entertainment (disclosed superset, not Kalshi's Culture category)"
         },
         {
           "ticker": "KXGAMEAWARDSBGD",
           "title": "Game Awards Best Game Direction",
           "frequency": "annual",
           "category": "Entertainment",
-          "settlement": "Game Awards \u2014 https://thegameawards.com/",
+          "settlement": "Game Awards — https://thegameawards.com/",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXGAMEAWARDSBGD",
           "api_tags": [
             "Video games",
             "The Game Awards",
             "Awards"
-          ]
+          ],
+          "via": "Entertainment (disclosed superset, not Kalshi's Culture category)"
         },
         {
           "ticker": "KXCLDPLAY",
           "title": "Coldplay album drop",
           "frequency": "one_off",
           "category": "Entertainment",
-          "settlement": "Alpha Data LLC (A division of Penske Media Corporation) \u2014 https://music.alphadata.fm/",
-          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXCLDPLAY"
+          "settlement": "Alpha Data LLC (A division of Penske Media Corporation) — https://music.alphadata.fm/",
+          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXCLDPLAY",
+          "via": "Entertainment (disclosed superset, not Kalshi's Culture category)"
         },
         {
           "ticker": "KXMANOFTHEYEAR",
           "title": "How many streams will Man of The Year have?",
           "frequency": "custom",
           "category": "Entertainment",
-          "settlement": "Spotify \u2014 https://open.spotify.com/",
+          "settlement": "Spotify — https://open.spotify.com/",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXMANOFTHEYEAR",
           "api_tags": [
             "Music"
-          ]
+          ],
+          "via": "Entertainment (disclosed superset, not Kalshi's Culture category)"
         }
-      ]
+      ],
+      "kalshi_category_superset": "Entertainment",
+      "kalshi_site_note": "Pattern-derived link (kalshi.com/markets/<lowercase series ticker>, verified for KXAAAGASM/KXETHD/KXPGATOUR by session 4f9f13c8). Not machine-verified from this sandbox because kalshi.com refuses automated fetches — see flagged F10."
     },
     "crypto": {
       "label": "Crypto",
@@ -314,9 +353,9 @@
       "kalshi_tags": [],
       "why": "The Crypto category covers BTC/ETH/SOL/XRP/DOGE etc., mostly settled by CF Benchmarks real-time indices.",
       "discovery": [
-        "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Crypto&limit=100"
+        "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Crypto"
       ],
-      "kalshi_site": "https://kalshi.com/category/crypto",
+      "kalshi_site": "https://kalshi.com/markets/kxbtcd",
       "series": [
         {
           "ticker": "KXLINKPERP",
@@ -325,14 +364,14 @@
           "category": "Crypto",
           "settlement": "",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXLINKPERP",
-          "note": "API returns settlement_sources: null and an empty contract_url. Settlement source left blank \u2014 unverified (F9)."
+          "note": "API returns settlement_sources: null and an empty contract_url. Settlement source left blank — unverified (F9)."
         },
         {
           "ticker": "KXXRPMAXY",
           "title": "XRP Max",
           "frequency": "annual",
           "category": "Crypto",
-          "settlement": "CF Benchmarks \u2014 https://www.cfbenchmarks.com/",
+          "settlement": "CF Benchmarks — https://www.cfbenchmarks.com/",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXXRPMAXY"
         },
         {
@@ -340,7 +379,7 @@
           "title": "Sol above 500 in 2026",
           "frequency": "one_off",
           "category": "Crypto",
-          "settlement": "CF Benchmarks \u2014 https://www.cfbenchmarks.com/",
+          "settlement": "CF Benchmarks — https://www.cfbenchmarks.com/",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXSOL26500",
           "api_tags": [
             "Crypto",
@@ -352,7 +391,7 @@
           "title": "How low will Bitcoin get this week?",
           "frequency": "weekly",
           "category": "Crypto",
-          "settlement": "CF Benchmarks \u2014 https://www.cfbenchmarks.com/",
+          "settlement": "CF Benchmarks — https://www.cfbenchmarks.com/",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXBTXMINW"
         },
         {
@@ -360,7 +399,7 @@
           "title": "Will Bitcoin reach 100k again this year?",
           "frequency": "one_off",
           "category": "Crypto",
-          "settlement": "CF Benchmarks \u2014 https://www.cfbenchmarks.com/data/indices/BRTI?ref=blog.cfbenchmarks.com",
+          "settlement": "CF Benchmarks — https://www.cfbenchmarks.com/data/indices/BRTI?ref=blog.cfbenchmarks.com",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXBTC2025100",
           "api_tags": [
             "Crypto",
@@ -374,14 +413,14 @@
           "category": "Crypto",
           "settlement": "",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXSOLPERP",
-          "note": "API returns settlement_sources: null and an empty contract_url. Settlement source left blank \u2014 unverified (F9)."
+          "note": "API returns settlement_sources: null and an empty contract_url. Settlement source left blank — unverified (F9)."
         },
         {
           "ticker": "KXETHD",
           "title": "Ethereum price Above/below",
           "frequency": "hourly",
           "category": "Crypto",
-          "settlement": "CF Benchmarks \u2014 https://www.cfbenchmarks.com/data/indices/ETHUSD_RTI",
+          "settlement": "CF Benchmarks — https://www.cfbenchmarks.com/data/indices/ETHUSD_RTI",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXETHD",
           "api_tags": [
             "Crypto",
@@ -394,7 +433,7 @@
           "title": "BIRB FDV",
           "frequency": "one_off",
           "category": "Crypto",
-          "settlement": "CoinGecko \u2014 https://www.coingecko.com",
+          "settlement": "CoinGecko — https://www.coingecko.com",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXFDVBIRB",
           "api_tags": [
             "Crypto",
@@ -406,7 +445,7 @@
           "title": "sol stable supp",
           "frequency": "custom",
           "category": "Crypto",
-          "settlement": "Artemis \u2014 https://artemis.org",
+          "settlement": "Artemis — https://artemis.org",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXSOLSTABLESUPP",
           "api_tags": [
             "Crypto",
@@ -418,7 +457,7 @@
           "title": "NEAR Yearly",
           "frequency": "annual",
           "category": "Crypto",
-          "settlement": "CF Benchmarks \u2014 https://www.cfbenchmarks.com/",
+          "settlement": "CF Benchmarks — https://www.cfbenchmarks.com/",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXNEARY",
           "api_tags": [
             "Crypto",
@@ -426,7 +465,8 @@
             "NEAR Protocol"
           ]
         }
-      ]
+      ],
+      "kalshi_site_note": "Pattern-derived link (kalshi.com/markets/<lowercase series ticker>). Not machine-verified from this sandbox — kalshi.com refuses automated fetches. See flagged F10; the API URL in each row is the verifiable source."
     },
     "golf": {
       "label": "Golf",
@@ -436,16 +476,16 @@
       ],
       "why": "Golf contracts are Sports series carrying the Golf tag, settled from PGA Tour / ESPN / Fox Sports / NBC Sports.",
       "discovery": [
-        "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Sports&tags=Golf&limit=100"
+        "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Sports&tags=Golf"
       ],
-      "kalshi_site": "https://kalshi.com/category/sports/golf",
+      "kalshi_site": "https://kalshi.com/markets/kxpgatour",
       "series": [
         {
           "ticker": "KXPGAGOLFERSCORE",
           "title": "Golf Round Strokes",
           "frequency": "custom",
           "category": "Sports",
-          "settlement": "NBC Sports \u2014 http://www.nbcsports.com/",
+          "settlement": "NBC Sports — http://www.nbcsports.com/",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAGOLFERSCORE",
           "api_tags": [
             "Golf"
@@ -456,7 +496,7 @@
           "title": "Player to Record an Eagle in Round",
           "frequency": "custom",
           "category": "Sports",
-          "settlement": "Fox Sports \u2014 https://www.foxsports.com",
+          "settlement": "Fox Sports — https://www.foxsports.com",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAEAGLE",
           "api_tags": [
             "Golf"
@@ -467,7 +507,7 @@
           "title": "Presidents Cup Match Winner",
           "frequency": "custom",
           "category": "Sports",
-          "settlement": "ESPN \u2014 https://www.espn.com/",
+          "settlement": "ESPN — https://www.espn.com/",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXPRESCUPMATCH",
           "api_tags": [
             "Golf"
@@ -478,13 +518,38 @@
           "title": "T 20",
           "frequency": "custom",
           "category": "Sports",
-          "settlement": "Fox Sports \u2014 https://www.foxsports.com",
+          "settlement": "Fox Sports — https://www.foxsports.com",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAT20",
           "api_tags": [
             "Golf"
           ]
         }
-      ]
+      ],
+      "kalshi_site_note": "Pattern-derived link (kalshi.com/markets/<lowercase series ticker>). Not machine-verified from this sandbox — kalshi.com refuses automated fetches. See flagged F10; the API URL in each row is the verifiable source."
     }
+  },
+  "integration_recheck": {
+    "at": "2026-11-20T20:20Z",
+    "by": "arena/ec2f5c59-trade3 (final integration session)",
+    "method": "live GET requests to the demo Trade API through the page-fetch path (sandbox shell egress to kalshi.co is blocked, see flagged F6)",
+    "rows_re_checked": [
+      "KXAAAGASM",
+      "KXNGASMAX",
+      "KXXBANNEDGROK",
+      "KXXBANNEDMURRAYHILLGUY1",
+      "KXBTCD (markets)",
+      "KXAAAGASM (markets)"
+    ],
+    "queries_re_checked": [
+      "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Gas -> {\"series\":null}",
+      "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Golf -> {\"series\":null}",
+      "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture -> 2 series, both \"category\":\"Culture\"",
+      "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Entertainment -> non-empty",
+      "https://external-api.demo.kalshi.co/trade-api/v2/markets?series_ticker=KXXBANNEDGROK&status=open -> {\"markets\":[]}"
+    ],
+    "corrections": [
+      "culture topic remapped to Kalshi's real \"Culture\" category (the earlier build claimed no such category exists and used Entertainment as a proxy); Entertainment is retained as a labelled superset because Culture had no open markets",
+      "kalshi.com category URLs replaced by /markets/<series> pattern links and labelled pattern-derived (kalshi.com refuses automated fetches, so they cannot be machine-verified from here) — flagged F10"
+    ]
   }
 }

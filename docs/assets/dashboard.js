@@ -12,10 +12,10 @@
 // Nothing is estimated. Missing values render as "—".
 // ============================================================================
 import {
-  ALERT_THRESHOLD, TOPICS, TOPIC_BY_ID, apiGet, baseUrls, candlePlan, classify,
+  ALERT_THRESHOLD, TOPICS, TOPIC_BY_ID, apiGet, baseUrls, candlePlan, classify, cleanTitle, fetchTrades, sourceLinks,
   clockStr, depthWithin, discoverTopicSeries, esc, fetchCandles, fetchOpenEvents,
   fetchOpenMarkets, fetchOrderbook, fetchSettled, fmt$, fmtDelta, fmtNum, fmtPx,
-  getEnv, getPollMs, kalshiSeriesUrl, apiMarketUrl, lastPrice, netStats, roiCheck,
+  getEnv, getPollMs, kalshiSeriesUrl, apiMarketUrl, lastPrice, netStats, num, roiCheck,
   setEnv, setPollMs, store, timeStr, until, yesAsk, yesBid, bookSummary, bookDepth,
 } from "./app.js";
 
@@ -214,6 +214,7 @@ async function hydrateSeriesInfo(markets) {
         ticker: s, title: rec.title, category: rec.category,
         settlement: (rec.settlement_sources || [])[0] || null,
         allSources: rec.settlement_sources || [],
+        sources: sourceLinks(rec),
         tags: rec.tags || [],
       });
     } catch { /* leave unknown -> renders as "—" */ }
@@ -243,7 +244,7 @@ async function detectSwings(markets, now) {
       dollarVol: (Number(h.m.volume_fp) || 0) * h.to, depth,
     });
     const alert = {
-      ts: now, ticker: h.m.ticker, title: h.m.title || h.m._eventTitle || h.m.ticker,
+      ts: now, ticker: h.m.ticker, title: cleanTitle(h.m.title || h.m._eventTitle || h.m.ticker),
       topic: h.m._topic, from: h.from, to: h.to, delta: h.delta,
       spread: bs.spread, depth, roi: screen.pass, why: screen.reasons,
       event: h.m.event_ticker, series: h.m._series,
@@ -295,7 +296,7 @@ function alertRow(a) {
     <div class="mkt" data-pick="${esc(a.ticker)}" style="cursor:pointer">${esc(a.ticker)}</div>
     <div class="ttl">${esc(a.title)}</div>
     <div class="${dir}">${fmtPx(a.from)} → ${fmtPx(a.to)}</div>
-    <div class="why">spread ${a.spread == null ? "—" : fmtPx(a.spread)} · depth ${a.depth == null ? "—" : fmtNum(a.depth)} · <a href="${esc(apiMarketUrl(a.ticker))}" target="_blank" rel="noopener">API record</a></div>
+    <div class="why">spread ${a.spread == null ? "—" : fmtPx(a.spread)} · depth ${a.depth == null ? "—" : fmtNum(a.depth)} · <a href="${esc(apiMarketUrl(a.ticker))}" target="_blank" rel="noopener">API record</a> · <a href="#${esc(a.ticker)}" data-catalyst="${esc(a.ticker)}">what moved it</a></div>
     ${why}
   </div>`;
 }
@@ -461,15 +462,15 @@ async function renderDetail() {
     return;
   }
   const topic = TOPIC_BY_ID[m._topic];
-  $("detail-title").innerHTML = `${esc(m.title || m.ticker)} <span class="pill">${esc(topic?.label || m._topic)}</span>`;
-  $("detail-sub").innerHTML = `${esc(m._eventTitle || "")} <span class="dim">· ${esc(m.ticker)}</span>`;
+  $("detail-title").innerHTML = `${esc(cleanTitle(m.title) || m.ticker)} <span class="pill">${esc(topic?.label || m._topic)}</span>`;
+  $("detail-sub").innerHTML = `${esc(cleanTitle(m._eventTitle))} <span class="dim">· ${esc(m.ticker)}</span>`;
   $("d-price").textContent = fmtPx(lastPrice(m));
   $("d-quote").textContent = `${fmtPx(yesBid(m))} / ${fmtPx(yesAsk(m))}`;
   $("d-close").textContent = until(m.close_time);
   $("f-ticker").innerHTML = `<code>${esc(m.ticker)}</code>`;
   $("f-event").innerHTML = `${esc(m._eventTitle || "—")}<div class="dim mono">${esc(m.event_ticker)}</div>`;
   const s = state.seriesInfo.get(m._series);
-  $("f-series").innerHTML = `${esc(s?.title || "—")}<div class="dim mono">${esc(m._series || "")}</div>`;
+  $("f-series").innerHTML = `${esc(cleanTitle(s?.title) || "—")}<div class="dim mono">${esc(m._series || "")}</div>`;
   $("f-category").textContent = m._category || "—";
   $("f-volume").textContent = fmtNum(m.volume_fp);
   $("f-oi").textContent = fmtNum(m.open_interest_fp);
@@ -482,7 +483,88 @@ async function renderDetail() {
     `<a href="${esc(`https://kalshi.com/markets/${String(m._series || "").toLowerCase()}`)}" target="_blank" rel="noopener">Kalshi page</a>`,
   ].join(" · ");
   $("f-rules").textContent = m.rules_primary ? `Rule: ${m.rules_primary.slice(0, 320)}` : "";
-  await loadBook(m.ticker);
+  await Promise.all([loadBook(m.ticker), renderCatalysts(m)]);
+}
+
+// ---------------------------------------------------------------------------
+// "What may have moved it" — catalyst evidence for the selected contract
+// ---------------------------------------------------------------------------
+// The requirement is to show the events and links that MAY have caused a sharp move.
+// Kalshi's API carries no news feed, so this panel shows only two things that ARE in the
+// exchange record, both fetched live:
+//   1. the print tape around the move — GET /markets/trades?ticker=…&min_ts&max_ts, i.e.
+//      the actual executions (side, size, price) that carried the price through $0.10; and
+//   2. the series' own official settlement sources (series.settlement_sources), which are the
+//      publications whose numbers the contract settles on, so a release there can move it.
+// Nothing here asserts causation; it is the evidence a trader can check in one click.
+const tapeCache = new Map();   // ticker -> { at, trades, fetched, filteredOut }
+
+async function renderCatalysts(m) {
+  const box = $("catalysts");
+  if (!box) return;
+  const alert = state.alerts.find((a) => a.ticker === m.ticker) || null;
+  const now = Date.now();
+  const centre = alert ? new Date(alert.ts).getTime() : now;
+  const windowMs = 10 * 60 * 1000;
+
+  // (a) the source links from the series record — no extra request needed
+  const s = state.seriesInfo.get(m._series);
+  const links = (s?.sources || []).slice(0, 8)
+    .map((x) => `<li><a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.name)}</a>`
+      + `<span class="dim"> · settlement source for ${esc(m._series || "")}</span></li>`)
+    .join("");
+
+  // (b) the trade tape near the move (cached a minute so tab-spamming does not hammer the API)
+  let tape = tapeCache.get(m.ticker);
+  if (!tape || now - tape.at > 60_000) {
+    try {
+      const r = await fetchTrades(m.ticker, { fromTs: centre - windowMs, toTs: centre + windowMs, limit: 100 });
+      tape = { at: now, ...r };
+    } catch (e) {
+      tape = { at: now, trades: [], fetched: 0, filteredOut: 0, error: e.message };
+    }
+    tapeCache.set(m.ticker, tape);
+  }
+  const inWindow = (tape.trades || []).filter((t) => {
+    const ts = new Date(t.created_time).getTime();
+    return Number.isFinite(ts) && Math.abs(ts - centre) <= windowMs;
+  }).slice(0, 8);
+
+  const rows = inWindow.map((t) => {
+    const up = t.taker_book_side === "ask";
+    const px = num(t.yes_price_dollars);
+    return `<tr>
+      <td class="dim mono">${timeStr(t.created_time)}</td>
+      <td class="${up ? "up" : "down"}">${up ? "taker bought YES" : "taker sold YES"}${t.taker_outcome_side === "no" ? " (NO side)" : ""}</td>
+      <td class="num">${fmtNum(t.count_fp)}</td>
+      <td class="num">${fmtPx(px)}</td>
+      <td class="num dim">${t.is_block_trade ? "block" : "—"}</td>
+    </tr>`;
+  }).join("");
+
+  const tapeHead = `<tr><th>time</th><th>tape</th><th class="num">contracts</th><th class="num">yes price</th><th class="num">type</th></tr>`;
+  const tapeBody = rows
+    || `<tr><td colspan="5" class="muted">${tape.error
+        ? `Trade tape unavailable (${esc(tape.error)}).`
+        : `No prints for this contract within ±10 minutes of ${alert ? "the alert" : "now"} — the move (if any) came from a quote change, not a trade.`}</td></tr>`;
+
+  box.innerHTML = `
+    <div class="cat-head">
+      <span class="pill ${alert ? "roi" : ""}">${alert ? `alert ${fmtDelta(alert.delta)} @ ${timeStr(alert.ts)}` : "no alert this session"}</span>
+      <span class="dim">±10-minute window · tape filtered client-side (${tape.trades.length} of ${tape.fetched} prints belong to this ticker)</span>
+    </div>
+    <div class="cat-grid">
+      <div>
+        <h4>Executions around the move</h4>
+        <table class="tape">${tapeHead}${tapeBody}</table>
+        <p class="dim"><a href="${esc(`https://external-api.demo.kalshi.co/trade-api/v2/markets/trades?ticker=${encodeURIComponent(m.ticker)}&limit=100`)}" target="_blank" rel="noopener">GET /markets/trades?ticker=${esc(m.ticker)}</a> — official record</p>
+      </div>
+      <div>
+        <h4>Official sources for this series</h4>
+        ${links ? `<ul class="srcs">${links}</ul>` : `<p class="muted">The API publishes no settlement-source URLs for ${esc(m._series || "this series")}. Left blank rather than guessed — see <a href="flagged.html#F9">flag F9</a>.</p>`}
+        <p class="dim">Kalshi's API has no news field. These are the publications the contract settles on, not a claim about what caused a price move.</p>
+      </div>
+    </div>`;
 }
 
 async function loadBook(ticker) {

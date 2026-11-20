@@ -1,6 +1,6 @@
 // Page logic for methodology.html. Extracted from the inline module so the
 // render test can boot it exactly as a browser does.
-import { getProxy, setProxy } from "./assets/app.js";
+import { getProxy, setProxy } from "./app.js";
   const input = document.getElementById("proxy-input");
   const status = document.getElementById("proxy-status");
   const paint = () => {

@@ -19,6 +19,7 @@
     <a href="methodology.html">Method</a>
     <a href="verification.html">Verification</a>
     <a href="flagged.html">Flagged</a>
+    <a href="dashboard-site/index.html">Audit edition</a>
   </nav>
 </header>
 
@@ -188,6 +189,20 @@
         <p class="dim" style="margin-top:8px" id="f-rules"></p>
       </div>
     </div>
+  </section>
+
+  <!-- ============ catalyst evidence for the selected contract ============ -->
+  <section class="card" id="catalyst-card">
+    <div class="card-head">
+      <h2>What may have moved this contract</h2>
+      <p class="dim">Select a contract (or an alert's <em>what moved it</em> link). Shows the executed prints in a
+      ±10-minute window around the ≥ $0.10 move, plus the series' official settlement sources.
+      Correlation evidence only — Kalshi's API has no news field, so no cause is ever asserted.</p>
+    </div>
+    <div id="catalysts"><p class="muted">Select a contract to load its tape and source links.</p></div>
+    <p class="dim">Endpoint: <a href="https://docs.kalshi.com/api-reference/market/get-trades" target="_blank" rel="noopener">GET /markets/trades</a>
+    — documented filters are <code>ticker</code>, <code>limit</code>, <code>cursor</code>, <code>min_ts</code>,
+    <code>max_ts</code>, <code>is_block_trade</code>; <code>min_ts</code>/<code>max_ts</code> are Unix <b>seconds</b>.</p>
   </section>
 
   <!-- ============ resolutions ============ -->

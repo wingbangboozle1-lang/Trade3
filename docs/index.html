@@ -19,6 +19,7 @@
     <a href="methodology.html">Method</a>
     <a href="verification.html">Verification</a>
     <a href="flagged.html">Flagged</a>
+    <a href="dashboard-site/index.html">Audit edition</a>
   </nav>
 </header>
 
@@ -66,6 +67,32 @@
   </section>
 
   <!-- topics -->
+
+  <section class="card" id="editions">
+    <h2>Two editions of this dashboard, one verified dataset</h2>
+    <p class="muted">Both were built and verified independently against the same official sources, and the integration
+    kept both instead of letting one overwrite the other. Start here; jump across from the nav on any page.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Edition</th><th>Where</th><th>How it gets data</th><th>Use it when</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>Dashboard edition</b> (this site)</td>
+          <td><code>docs/</code> — <a href="dashboard.html">live dashboard</a>, <a href="portfolio.html">portfolio</a>, <a href="topics/gas.html">topics</a></td>
+          <td>Static pages calling Kalshi's public REST API straight from your browser. No server, no key, no build step.</td>
+          <td>You want the alert chats, the chart, the depth ladder and the paper strategies, running wherever the page is opened.</td>
+        </tr>
+        <tr>
+          <td><b>Audit edition</b></td>
+          <td><a href="dashboard-site/index.html">dashboard-site/</a> · <code>app/</code> + <code>server/</code></td>
+          <td>A Node collector that polls the same API server-side (<code>npm start</code>), with explicit <code>live</code> / <code>snapshot</code> / <code>demo</code> data modes.</td>
+          <td>You want the requirements traceability, per-topic findings, consolidated source list, or a collector you can run with your own demo keys.</td>
+        </tr>
+      </tbody>
+    </table></div>
+    <p class="dim">Anything the exchange did not return is blank on both sites and listed on
+    <a href="flagged.html">Flagged for review</a> (14 items) — never inferred.</p>
+  </section>
+
   <section class="card" id="topics">
     <div class="card-head">
       <h2>Topics</h2>
@@ -94,9 +121,9 @@
         </tr>
         <tr>
           <td><b>Culture</b></td>
-          <td><code>Entertainment</code> <span class="pill warn">F1</span></td>
-          <td class="num">8</td>
-          <td><code>KXTOPARTIST</code> Spotify top artist · <code>RTKRAVEN</code></td>
+          <td><code>Culture</code> + <code>Entertainment</code> <span class="pill warn">F1 corrected</span></td>
+          <td class="num">10</td>
+          <td><code>KXXBANNEDGROK</code> (the real Culture category; 0 open markets) · <code>KXTOPARTIST</code> Spotify top artist</td>
           <td><a href="topics/culture.html">Topic page →</a></td>
         </tr>
         <tr>
@@ -116,8 +143,8 @@
       </tbody>
     </table></div>
     <p class="dim" style="margin-top:8px">
-      37 series in total. Each row on a topic page carries the exact API URL that proves it, plus the
-      public Kalshi page. The culture mapping is the one judgement call — flagged, not hidden.
+      39 series rows in total (37 from the earlier row-by-row pass, plus the 2 real <code>Culture</code> series added at integration). Each row on a topic page carries the exact API URL that proves it, plus the
+      public Kalshi page (labelled as pattern-derived, since kalshi.com does not answer automated fetches). The culture mapping was re-checked live and corrected during integration: Kalshi does have a Culture category, it simply has no open markets — flagged, not hidden.
     </p>
   </section>
 

@@ -40,6 +40,8 @@ export const TOPICS = [
     label: "Gas prices",
     category: "Economics",
     tags: ["Oil and Gas", "Oil and energy"],   // matches both "Oil & Gas" and "Oil and energy"
+    extraCategories: [],
+    apiQuery: "series?category=Economics&tags=Oil and energy",
     site: "https://kalshi.com/markets/kxaaagasm",
     blurb: "Retail gasoline via AAA and natural gas via EIA.",
   },
@@ -48,24 +50,34 @@ export const TOPICS = [
     label: "Elections",
     category: "Elections",
     tags: [],
-    site: "https://kalshi.com/category/elections",
+    extraCategories: [],
+    apiQuery: "series?category=Elections",
+    site: "https://kalshi.com/markets/popvotekhva",
     blurb: "US and international elections, nominations and control of office.",
   },
   {
     id: "culture",
     label: "Culture",
-    category: "Entertainment",                 // Kalshi has no "Culture" category; see F1
+    // CORRECTED 2026-11-20 by the integration session: Kalshi DOES have a Culture
+    // discovery category. GET /series?category=Culture returned 2 series, both with
+    // "category":"Culture" (KXXBANNEDGROK, KXXBANNEDMURRAYHILLGUY1). It is tiny and had
+    // no open markets (GET /markets?series_ticker=KXXBANNEDGROK&status=open -> {"markets":[]}),
+    // so Entertainment is kept as a *disclosed* superset instead of being the whole mapping.
+    category: "Culture",
+    extraCategories: ["Entertainment"],
     tags: [],
-    site: "https://kalshi.com/category/entertainment",
-    blurb: "Entertainment is Kalshi's closest category to culture (music, awards, film, TV, games).",
-    flag: "F1: Kalshi has no Culture category. Entertainment is used as the proxy.",
+    apiQuery: "series?category=Culture",
+    blurb: "Kalshi's Culture category (2 series as at 2026-11-20, none open) plus Entertainment, the nearest large category for music, awards, film, TV and games.",
+    flag: "F1 (corrected): Culture is a real Kalshi category but has no open markets; Entertainment is included as a labelled superset so the page is not empty.",
   },
   {
     id: "crypto",
     label: "Crypto",
     category: "Crypto",
     tags: [],
-    site: "https://kalshi.com/category/crypto",
+    extraCategories: [],
+    apiQuery: "series?category=Crypto",
+    site: "https://kalshi.com/markets/kxbtcd",
     blurb: "BTC, ETH, SOL, XRP and other crypto price and milestone contracts.",
   },
   {
@@ -73,7 +85,9 @@ export const TOPICS = [
     label: "Golf",
     category: "Sports",
     tags: ["Golf"],
-    site: "https://kalshi.com/category/sports/golf",
+    extraCategories: [],
+    apiQuery: "series?category=Sports&tags=Golf",
+    site: "https://kalshi.com/markets/kxpgatour",
     blurb: "PGA/LPGA/team golf contracts, settled from tour and broadcast sources.",
   },
 ];
@@ -304,14 +318,20 @@ export async function discoverTopicSeries(verified) {
     const set = new Map();
     for (const s of (verified?.[topic.id]?.series || [])) set.set(s.ticker, { ticker: s.ticker, title: s.title });
     const tags = topic.tags.length ? topic.tags : [null];
+    // GET /series has no documented limit/cursor parameters (only category, tags,
+    // include_product_metadata, include_volume, min_updated_ts), so `limit` is ignored by
+    // the exchange — unknown query params are dropped silently, not rejected. We page
+    // nothing and read the array it returns. See docs/methodology.html#series-params.
+    for (const cat of [topic.category, ...(topic.extraCategories || [])]) {
     for (const tag of tags) {
-      const params = { limit: 200, category: topic.category };
-      if (tag) params.tags = tag;
+      const params = { category: cat };
+      if (tag && cat === topic.category) params.tags = tag;   // extras are category-only
       try {
         const data = await apiGet("/series", params);
         for (const s of data.series || []) {
           const cats = s.categories || [s.category];
-          if (!cats.includes(topic.category)) continue;   // keep the topic honest
+          if (!cats.includes(cat)) continue;   // keep the topic honest
+          if (cat !== topic.category && topic.tags.length) continue; // extras must not dodge the tag filter
           // A topic narrowed by tags only accepts series carrying one of those tags
           // ("Oil & Gas" / "Oil and energy" both normalise to "oil and gas").
           if (topic.tags.length) {
@@ -319,9 +339,10 @@ export async function discoverTopicSeries(verified) {
             const wanted = topic.tags.map(normTag);
             if (!seriesTags.some((t) => wanted.includes(t))) continue;
           }
-          if (!set.has(s.ticker)) set.set(s.ticker, { ticker: s.ticker, title: s.title });
+          if (!set.has(s.ticker)) set.set(s.ticker, { ticker: s.ticker, title: s.title, via: cat });
         }
       } catch { /* keep whatever we already have; surfaced in the status bar */ }
+    }
     }
     out[topic.id] = set;
   }
@@ -348,13 +369,23 @@ export function classify(markets, events, topicSeries) {
   for (const m of markets) {
     const meta = eventMeta.get(m.event_ticker);
     if (!meta) continue;
-    const topic = TOPICS.find((t) => t.category === meta.category
-      && topicSeries[t.id]?.has(meta.series));
+    // A topic accepts its own category and any *declared* superset category (culture is the
+    // only one today: Kalshi's Culture category is real but empty of open markets). The
+    // superset is remembered on the row so the UI can label it instead of hiding it.
+    let hit = null, viaSuperset = false;
+    for (const t of TOPICS) {
+      const cats = [t.category, ...(t.extraCategories || [])];
+      if (!cats.includes(meta.category)) continue;
+      if (!topicSeries[t.id]?.has(meta.series)) continue;
+      hit = t; viaSuperset = meta.category !== t.category; break;
+    }
+    const topic = hit;
     if (!topic) continue;
     out.push({
       ...m,
       _topic: topic.id,
       _category: meta.category,
+      _viaSuperset: viaSuperset,
       _series: meta.series,
       _eventTitle: meta.title,
       _eventSub: meta.sub,
@@ -429,6 +460,53 @@ export function depthWithin(ob, cents = 0.03, side = "yes") {
 // ---------------------------------------------------------------------------
 // Formatting
 // ---------------------------------------------------------------------------
+/**
+ * Kalshi puts markdown emphasis inside some titles, e.g. "Will average **gas prices** be
+ * above $5.00?" (live GET /markets?series_ticker=KXAAAGASM, 2026-11-20). The API is the
+ * source of truth for wording, so we only strip the emphasis markers — never the words.
+ */
+export function cleanTitle(t) {
+  return String(t == null ? "" : t)
+    .replace(/\*\*(.+?)\*\*/g, "$1")
+    .replace(/\*([^*]+)\*/g, "$1")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * GET /markets/trades — the documented filters are `ticker`, `limit`, `cursor`, `min_ts`,
+ * `max_ts`, `is_block_trade` (docs.kalshi.com/api-reference/market/get-trades). There is no
+ * `market_ticker` filter, and unrecognised query params are ignored by the exchange rather
+ * than rejected, so we ALSO filter client-side: a mistyped filter would otherwise return
+ * the whole tape and look like it belonged to the market.
+ * min_ts / max_ts are Unix SECONDS (millisecond values are answered with 400 bad_request).
+ */
+export async function fetchTrades(ticker, { fromTs, toTs, limit = 100 } = {}) {
+  const params = { ticker, limit };
+  if (fromTs != null) params.min_ts = Math.floor(fromTs / 1000);
+  if (toTs != null) params.max_ts = Math.ceil(toTs / 1000);
+  const data = await apiGet("/markets/trades", params);
+  const all = data.trades || [];
+  const mine = all.filter((t) => t.ticker === ticker);
+  return { trades: mine, fetched: all.length, filteredOut: all.length - mine.length };
+}
+
+/** Official settlement-source links for a series record, deduped, blanks dropped. */
+export function sourceLinks(rec) {
+  const out = [];
+  const seen = new Set();
+  for (const src of (rec && rec.settlement_sources) || []) {
+    const url = (src && src.url || "").trim();
+    const name = (src && src.name || "").trim();
+    if (!url || !/^https?:\/\//i.test(url) || seen.has(url)) continue;
+    if (/\/\/kalshi\.com\/?$/i.test(url)) continue;  // placeholder self-links carry no information
+    seen.add(url);
+    out.push({ name: cleanTitle(name) || url.replace(/^https?:\/\//, "").split("/")[0], url });
+  }
+  return out;
+}
+
 export function fmtPx(p) { return p == null ? "—" : "$" + Number(p).toFixed(2); }
 export function fmtPct(p) { return p == null ? "—" : Math.round(p * 100) + "¢"; }
 export function fmt$(n) {

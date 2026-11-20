@@ -14,6 +14,7 @@
     ['requirements.html', 'Requirements'],
     ['flagged.html', 'Flagged for Review'],
     ['sources.html', 'Sources'],
+    ['../index.html', 'Dashboard edition (A)'],
   ];
 
   function header() {

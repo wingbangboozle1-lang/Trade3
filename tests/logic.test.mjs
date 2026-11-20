@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import {
   TOPICS, ALERT_THRESHOLD, ROI, bookSummary, bookDepth, candlePlan, classify,
   depthWithin, dollarVolume, fmt$, lastPrice, roiCheck, normTag, until, kalshiSeriesUrl,
+  cleanTitle, sourceLinks,
 } from "../docs/assets/app.js";
 
 // --- price/volume helpers --------------------------------------------------
@@ -66,8 +67,57 @@ assert.equal(fmt$(null), "—");
 assert.equal(fmt$(1520), "$1.5k");
 assert.equal(fmt$(2_400_000), "$2.40M");
 assert.equal(until(null), "—");
-assert.match(until(new Date(Date.now() + 3600_000).toISOString()), /^\d+h/);
+// +2h of slack: the formatter is exact-to-the-second, so an input placed exactly on the hour
+// boundary can land at 3599 s and legitimately render as "59m".
+assert.match(until(new Date(Date.now() + 2 * 3600_000).toISOString()), /^\d+h/);
 assert.match(kalshiSeriesUrl("KXAAAGASM"), /^https:\/\/kalshi\.com\/markets\/kxaaagasm$/);
 assert.equal(kalshiSeriesUrl(""), null);
+
+// --- titles: Kalshi ships markdown inside some titles (live demo, 2026-11-20) ---
+// GET /markets?series_ticker=KXAAAGASM returned  title: "Will average **gas prices** be above $5.00?"
+assert.equal(cleanTitle("Will average **gas prices** be above $5.00?"), "Will average gas prices be above $5.00?");
+assert.equal(cleanTitle("*italics* and `code`"), "italics and code");
+assert.equal(cleanTitle(null), "", "null title becomes empty, never \"null\"");
+assert.equal(cleanTitle("  spaced   out  "), "spaced out", "only whitespace is normalised, words are never edited");
+assert.equal(cleanTitle("above $5.00?"), "above $5.00?", "plain titles pass through untouched");
+
+// --- the culture mapping is Kalshi's real category, with Entertainment as a declared superset ---
+// Live evidence 2026-11-20: GET /series?category=Culture -> 2 series with "category":"Culture";
+// GET /markets?series_ticker=KXXBANNEDGROK&status=open -> {"markets":[]}; no Gas/Golf category exists.
+const culture = TOPICS.find((t) => t.id === "culture");
+assert.equal(culture.category, "Culture", "Kalshi does have a Culture category — do not map the topic away from it");
+assert.deepEqual(culture.extraCategories, ["Entertainment"], "Entertainment is allowed only as a labelled superset");
+for (const t of TOPICS) {
+  assert.notEqual(t.category, "Gas", "GET /series?category=Gas returns {\"series\":null} — never filter on it");
+  assert.notEqual(t.category, "Golf", "GET /series?category=Golf returns {\"series\":null} — never filter on it");
+  assert.ok(t.apiQuery, `every topic must carry the official discovery query it is built from (${t.id})`);
+}
+const supTopics = Object.fromEntries(TOPICS.map((t) => [t.id, new Set()]));
+supTopics.culture.add("KXTOPARTIST");            // an Entertainment series, listed in the superset
+supTopics.culture.add("KXXBANNEDGROK");          // a real Culture series
+const supEvents = [
+  { event_ticker: "EC1", category: "Entertainment", series_ticker: "KXTOPARTIST", title: "Top artist" },
+  { event_ticker: "EC2", category: "Culture", series_ticker: "KXXBANNEDGROK", title: "Grok banned" },
+];
+const supOut = classify(
+  [{ ticker: "M1", event_ticker: "EC1" }, { ticker: "M2", event_ticker: "EC2" }], supEvents, supTopics);
+assert.equal(supOut.length, 2, "both the category row and the superset row are kept");
+assert.equal(supOut.find((r) => r.ticker === "M1")._viaSuperset, true, "the superset row says so");
+assert.equal(supOut.find((r) => r.ticker === "M2")._viaSuperset, false, "the real Culture row is not marked");
+
+// --- settlement-source links: only what the API publishes, placeholders dropped ---
+const links = sourceLinks({
+  settlement_sources: [
+    { name: "AAA", url: "https://gasprices.aaa.com/" },
+    { name: "duplicate", url: "https://gasprices.aaa.com/" },
+    { name: "The Source Agencies are", url: "https://kalshi.com/" },   // placeholder, carries no source
+    { name: "empty", url: "" },
+    null,
+  ],
+});
+assert.equal(links.length, 1, "one real source: deduped, blanks and kalshi.com placeholders dropped");
+assert.equal(links[0].name, "AAA");
+assert.deepEqual(sourceLinks({}), [], "no record, no links — never a guess");
+assert.deepEqual(sourceLinks(null), [], "null record tolerated");
 
 console.log("logic tests passed");

@@ -19,6 +19,7 @@
     <a href="methodology.html">Method</a>
     <a href="verification.html">Verification</a>
     <a href="flagged.html">Flagged</a>
+    <a href="dashboard-site/index.html">Audit edition</a>
   </nav>
 </header>
 
@@ -66,8 +67,14 @@
           <td>Full bid ladder per side with counts, cumulative depth bars, and implied asks derived as $1.00 − opposing bid.</td>
           <td>Kalshi returns bids only by design; true resting asks are shown as their implied equivalents.</td></tr>
         <tr><td>Links for what may have caused a jump</td>
-          <td>Each alert links the contract's API record, its Kalshi page, and the series' official settlement source (e.g. AAA for gas, CF Benchmarks for crypto).</td>
-          <td>The API carries no news feed. Causation is never asserted — that gap is flagged rather than filled with guesses (<a href="flagged.html">F2</a>).</td></tr>
+          <td>Every alert carries its API record link and a <b>“what moved it”</b> panel: the executed prints for that
+          contract within ±10 minutes of the move (<code>GET /markets/trades?ticker=…</code>, with the taker side,
+          size, price and block flag of each), next to the series' own official settlement sources
+          (<code>series.settlement_sources</code> — AAA for gas, EIA for natural gas, CF Benchmarks for crypto).</td>
+          <td>The API carries no news feed, so this is <b>correlation evidence, never a cause</b>. The panel says so on
+          screen, prints how many prints it discarded as belonging to other markets (F11), and leaves the source list
+          blank for the series where Kalshi publishes none (F9). A third-party news feed would still be needed for
+          actual attribution (<a href="flagged.html">F2</a>).</td></tr>
       </tbody>
     </table></div>
   </section>
@@ -81,15 +88,15 @@
           (<a href="https://docs.kalshi.com/getting_started/api_environments" target="_blank" rel="noopener">source</a>).</li>
         <li>WebSocket: <code>wss://external-api-ws.demo.kalshi.co/trade-api/ws/v2</code> — documented, but key-gated as a
           handshake requirement, so the static site polls instead.</li>
-        <li>37 series across the five topics, each re-verified individually against <code>GET /series/{ticker}</code>.</li>
+        <li>39 series across the five topics, each re-verified individually against <code>GET /series/{ticker}</code> (37 by session <code>4f9f13c8</code> at 13:20Z; 6 re-read by the integration session at 20:0x UTC, including both real <code>Culture</code> series).</li>
         <li>Full row-level evidence: <a href="verification.html">Verification log</a>.</li>
       </ul>
     </div>
     <div class="card">
       <h2>Open items for you</h2>
       <ul class="muted">
-        <li><b>F1</b> — is Entertainment the right stand-in for "culture"?</li>
-        <li><b>F2</b> — do you want news attribution, which needs a third-party feed?</li>
+        <li><b>F1</b> — <i>answered by re-check:</i> Kalshi does have a Culture category (2 series, 0 open markets); Entertainment is now a labelled superset. Say the word to drop it.</li>
+        <li><b>F2</b> — the trade tape + settlement-source panel is built; a real news feed (and the key for it) is still yours to choose.</li>
         <li><b>F3</b> — real demo execution and WebSocket streaming need your demo API key.</li>
         <li><b>F4</b> — confirm the dollars-traded approximation matches your intent.</li>
         <li><b>F5</b> — tune the high-ROI thresholds with you before treating them as a signal.</li>
@@ -109,6 +116,40 @@
       <li><b>Then, and only then,</b> wire real demo orders through <code>kalshi_client.py</code> and compare fills
         against the simulated ones.</li>
     </ol>
+  </section>
+
+
+  <section class="card" id="integration-pass">
+    <h2>What the final integration changed, and why</h2>
+    <p class="muted">Three branches held work that never reached <code>main</code>. The integration session merged the
+    parts that did not overlap, re-read live data where two builds disagreed, and published the disagreement instead of
+    picking a winner silently. Every line below is checkable at the link given.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Change</th><th>Reason</th><th>Evidence</th></tr></thead>
+      <tbody>
+        <tr><td>Culture topic remapped from the Entertainment proxy to Kalshi's real <code>Culture</code> category, with Entertainment kept as a labelled superset (2 new rows)</td>
+          <td>Build A claimed no such category existed; Build B claimed it did. Build B was right.</td>
+          <td><a href="https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture" target="_blank" rel="noopener">GET /series?category=Culture</a> → 2 series with <code>"category":"Culture"</code></td></tr>
+        <tr><td>Merged session <code>4f9f13c8</code>: its row-by-row re-verification of all 37 published series rows, its rebuilt dashboard/portfolio/topics, and its V2 order-body fix</td>
+          <td>Those fixes corrected real defects in the merged build (a gas tag filter that returned nothing, an order payload that did not match the documented V2 contract, a base-URL bug that dropped the API path after the first call)</td>
+          <td>branch <a href="https://github.com/wingbangboozle1-lang/Trade3/tree/arena/4f9f13c8-trade3" target="_blank" rel="noopener">arena/4f9f13c8-trade3</a> · its record in <code>COORDINATION.md</code></td></tr>
+        <tr><td>Added the “what may have moved it” panel (trade tape ±10 min around each ≥ $0.10 alert, plus the series' official settlement sources)</td>
+          <td>Closes the “links that may have caused a sharp jump” requirement with exchange-published data only</td>
+          <td><a href="https://docs.kalshi.com/api-reference/market/get-trades" target="_blank" rel="noopener">GET /markets/trades</a> contract</td></tr>
+        <tr><td>Titles are now rendered through <code>cleanTitle()</code></td>
+          <td>Kalshi ships markdown inside some titles (<code>Will average **gas prices** be above $5.00?</code>); data files keep the raw wording</td>
+          <td><a href="https://external-api.demo.kalshi.co/trade-api/v2/markets?series_ticker=KXAAAGASM&amp;status=open" target="_blank" rel="noopener">live gas markets</a></td></tr>
+        <tr><td>New flags F11–F14 (ignored query params, unverifiable kalshi.com links, empty demo books, Pages enablement)</td>
+          <td>Each was met while building and cannot be resolved from inside the sandbox</td>
+          <td><a href="flagged.html">Flagged for review</a></td></tr>
+        <tr><td>Scheduled workflow that re-verifies all 39 rows against the live API every 6 hours</td>
+          <td>The build sandbox had no route to Kalshi from the shell; GitHub runners do, so the check now runs continuously instead of once</td>
+          <td><code>.github/workflows/verify-live.yml</code></td></tr>
+      </tbody>
+    </table></div>
+    <p class="dim">Not merged: session <code>d9376510</code>’s parallel <code>site/</code> and <code>app/</code> (its
+    <code>research/</code> and <code>requirements/</code> registers <i>were</i> brought in), and the claim-only branches
+    <code>486ef55c</code> / <code>8b24d31f</code>. Reasons are recorded in <code>COORDINATION.md</code>.</p>
   </section>
 
 </main>

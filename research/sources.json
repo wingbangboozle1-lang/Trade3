@@ -1,0 +1,313 @@
+{
+  "schema": "Every claim in this repo's docs and site must point at one of these entries.",
+  "retrieved": "2026-11-20",
+  "retrieval_method": "fetch_page (docs.kalshi.com markdown endpoints) and PDF text extraction. Sandbox egress is limited to GitHub/PyPI/npm, so api.kalshi.com could not be called; every URL below is the official Kalshi documentation page or file that the claim was read from.",
+  "sources": {
+    "K1": {
+      "title": "API Environments and Endpoints",
+      "url": "https://docs.kalshi.com/getting_started/api_environments.md",
+      "html": "https://docs.kalshi.com/getting_started/api_environments",
+      "publisher": "Kalshi",
+      "claims_supported": [
+        "REST production recommended base URL is https://external-api.kalshi.com/trade-api/v2",
+        "REST production also supported: https://api.elections.kalshi.com/trade-api/v2",
+        "REST demo recommended base URL is https://external-api.demo.kalshi.co/trade-api/v2",
+        "REST demo also supported: https://demo-api.kalshi.co/trade-api/v2",
+        "WebSocket production recommended: wss://external-api-ws.kalshi.com/trade-api/ws/v2",
+        "WebSocket production also supported: wss://api.elections.kalshi.com/trade-api/ws/v2",
+        "WebSocket demo recommended: wss://external-api-ws.demo.kalshi.co/trade-api/ws/v2",
+        "WebSocket demo also supported: wss://demo-api.kalshi.co/trade-api/ws/v2",
+        "Credentials are not shared between demo and production",
+        "Signature covers timestamp + method + path without query string; hosts do not change the signed payload"
+      ]
+    },
+    "K2": {
+      "title": "Test In The Demo Environment",
+      "url": "https://docs.kalshi.com/getting_started/demo_env.md",
+      "html": "https://docs.kalshi.com/getting_started/demo_env",
+      "publisher": "Kalshi",
+      "claims_supported": [
+        "Demo environment offers mock funds",
+        "Demo web UI is https://demo.kalshi.co/",
+        "Demo credentials are not shared with production",
+        "WARNING: price and behavior of markets in the demo environment may not be reflective of real markets",
+        "Demo REST root https://external-api.demo.kalshi.co/trade-api/v2, WS wss://external-api-ws.demo.kalshi.co/trade-api/ws/v2"
+      ]
+    },
+    "K3": {
+      "title": "API Keys",
+      "url": "https://docs.kalshi.com/getting_started/api_keys.md",
+      "html": "https://docs.kalshi.com/getting_started/api_keys",
+      "publisher": "Kalshi",
+      "claims_supported": [
+        "API keys are asymmetric key pairs; private key signs, registered public key verifies",
+        "Ed25519 (recommended, RFC 8032, 64-byte signature) and RSA 2048-bit (RSA-PSS, SHA-256, MGF1-SHA256, salt length = digest length) are supported",
+        "Headers: KALSHI-ACCESS-KEY, KALSHI-ACCESS-TIMESTAMP (ms), KALSHI-ACCESS-SIGNATURE (base64)",
+        "Signature = base64(sign(timestamp + METHOD + path_without_query))",
+        "Timestamp must be within 30 seconds of Kalshi's clock or the request returns 401 header_timestamp_expired",
+        "Private key cannot be retrieved again after the key is created"
+      ]
+    },
+    "K4": {
+      "title": "Rate Limits and Tiers",
+      "url": "https://docs.kalshi.com/getting_started/rate_limits.md",
+      "html": "https://docs.kalshi.com/getting_started/rate_limits",
+      "publisher": "Kalshi",
+      "claims_supported": [
+        "Token-bucket limits; most requests cost 10 tokens",
+        "Separate Read and Write buckets",
+        "429 returns error code too_many_requests; back off exponentially",
+        "GET /portfolio/balance uses its own bucket: 1/sec on Basic/Advanced, 5/sec above",
+        "Balance only changes on fills, settlements and transfers; prefer the fills WebSocket channel over polling"
+      ]
+    },
+    "K5": {
+      "title": "Orderbook Responses",
+      "url": "https://docs.kalshi.com/getting_started/orderbook_responses.md",
+      "html": "https://docs.kalshi.com/getting_started/orderbook_responses",
+      "publisher": "Kalshi",
+      "claims_supported": [
+        "GET /markets/{ticker}/orderbook returns orderbook_fp with yes_dollars and no_dollars arrays",
+        "Each level is [price_dollars, count_fp]; arrays are ascending, so the best bid is the last element",
+        "Order counts per level are not returned (one entry per price level, aggregated size)",
+        "Only bids are returned; YES bid at X equals NO ask at 1-X",
+        "Best YES ask = 1 - best NO bid; best NO ask = 1 - best YES bid",
+        "Unknown ticker returns 200 with empty arrays, not 404"
+      ]
+    },
+    "K6": {
+      "title": "Kalshi Fee Schedule (PDF, effective July 7, 2026)",
+      "url": "https://kalshi.com/docs/kalshi-fee-schedule.pdf",
+      "html": "https://kalshi.com/fee-schedule",
+      "publisher": "Kalshi",
+      "claims_supported": [
+        "General trading (taker) fee: fees = roundup(M * 0.07 * C * P * (1-P))",
+        "Maker fee: fees = roundup(M * 0.0175 * C * P * (1-P)); maker multiplier M defaults to 0 for the general schedule",
+        "Trading fees are only charged for orders immediately matched against resting orders, unless the series has maker fees",
+        "round up means the fee plus position cost is rounded up to a centicent ($0.0001)",
+        "There is no settlement fee",
+        "Per-series taker/maker multipliers are listed in the Non-Standard Fees table; 1 means one times the general formula"
+      ]
+    },
+    "K7": {
+      "title": "Fee Rounding",
+      "url": "https://docs.kalshi.com/getting_started/fee_rounding.md",
+      "html": "https://docs.kalshi.com/getting_started/fee_rounding",
+      "publisher": "Kalshi",
+      "claims_supported": [
+        "Trade fee is rounded up to the nearest $0.000001 (six decimals)",
+        "Direct-member balances are aligned to $0.0001; non-direct to $0.01",
+        "Net fee = trade fee + rounding fee - rebate, always >= $0"
+      ]
+    },
+    "K8": {
+      "title": "Quick Start: WebSockets",
+      "url": "https://docs.kalshi.com/getting_started/quick_start_websockets.md",
+      "html": "https://docs.kalshi.com/getting_started/quick_start_websockets",
+      "publisher": "Kalshi",
+      "claims_supported": [
+        "WebSocket connections are authenticated during the handshake with the same three headers",
+        "WS signature pre-sign text is timestamp + GET + /trade-api/ws/v2",
+        "Subscribe with {\"id\":N,\"cmd\":\"subscribe\",\"params\":{\"channels\":[...],\"market_tickers\":[...]}}",
+        "Private channels: orderbook_delta, fill, market_positions, communications, order_group_updates; public market-data channels: ticker, trade, market_lifecycle_v2, multivariate_market_lifecycle",
+        "429 too_many_requests on handshake = connection limit or opening too fast; use exponential backoff",
+        "Kalshi pings after 10s without a data message; a missing ping is not a dead connection"
+      ]
+    },
+    "K9": {
+      "title": "Get Markets",
+      "url": "https://docs.kalshi.com/api-reference/market/get-markets.md",
+      "html": "https://docs.kalshi.com/api-reference/market/get-markets",
+      "publisher": "Kalshi",
+      "claims_supported": [
+        "GET /markets with limit (max 1000), cursor, event_ticker, series_ticker, status, min_close_ts, max_close_ts",
+        "status filter accepts unopened, open, closed, settled",
+        "Market fields include ticker, event_ticker, title, subtitle, yes_bid_dollars, yes_ask_dollars, last_price_dollars, volume_fp, volume_24h_fp, open_interest_fp, liquidity_dollars, result ('yes'/'no'/''), close_time, settlement_ts, settlement_value_dollars, rules_primary, notional_value_dollars",
+        "Fixed-point strings: *_fp counts have 2 decimals; *_dollars prices are dollar strings"
+      ]
+    },
+    "K10": {
+      "title": "Get Market Orderbook",
+      "url": "https://docs.kalshi.com/api-reference/market/get-market-orderbook.md",
+      "html": "https://docs.kalshi.com/api-reference/market/get-market-orderbook",
+      "publisher": "Kalshi",
+      "claims_supported": [
+        "GET /markets/{ticker}/orderbook?depth=N returns orderbook_fp with aggregated sizes per price level",
+        "Response is bids only for both sides"
+      ]
+    },
+    "K11": {
+      "title": "Get Events",
+      "url": "https://docs.kalshi.com/api-reference/events/get-events.md",
+      "html": "https://docs.kalshi.com/api-reference/events/get-events",
+      "publisher": "Kalshi",
+      "claims_supported": [
+        "GET /events?limit=200&status=open&with_nested_markets=true&min_close_ts=...",
+        "Event fields: event_ticker, series_ticker, title, sub_title, mutually_exclusive, strike_date, strike_period, markets[], settlement_sources[]",
+        "status filter accepts unopened, open, closed, settled",
+        "category is deprecated on events; category lives on the series"
+      ]
+    },
+    "K12": {
+      "title": "Get Series List",
+      "url": "https://docs.kalshi.com/api-reference/market/get-series-list.md",
+      "html": "https://docs.kalshi.com/api-reference/market/get-series-list",
+      "publisher": "Kalshi",
+      "claims_supported": [
+        "GET /series?category=...&include_volume=true",
+        "Series fields: ticker, frequency, title, category, categories[], tags[], settlement_sources[], contract_url, contract_terms_url, fee_type, fee_multiplier",
+        "A series is a template for recurring events (e.g. daily weather in NYC)",
+        "Category filter matches any entry in categories[], case-sensitive, and the returned primary category may differ"
+      ]
+    },
+    "K13": {
+      "title": "Create Order (V2)",
+      "url": "https://docs.kalshi.com/api-reference/orders/create-order-v2.md",
+      "html": "https://docs.kalshi.com/api-reference/orders/create-order-v2",
+      "publisher": "Kalshi",
+      "claims_supported": [
+        "POST /portfolio/events/orders is the V2 order create endpoint",
+        "Legacy /portfolio/orders write endpoints were removed and return 410 Gone with code deprecated_v1_order_endpoint",
+        "Required body: ticker, side (bid|ask), count (fixed-point string), price (fixed-point dollars), time_in_force (fill_or_kill|good_till_canceled|immediate_or_cancel), self_trade_prevention_type (taker_at_cross|maker)",
+        "bid = buy YES, ask = sell YES (economically buy NO)",
+        "201 response: order_id, client_order_id, fill_count, remaining_count, ts_ms; 201 means accepted, not resting",
+        "reduce_only orders are rejected unless time_in_force is immediate_or_cancel",
+        "expiration_time (unix seconds) only with good_till_canceled; GTT is not a valid API value"
+      ]
+    },
+    "K14": {
+      "title": "Cancel Order (V2)",
+      "url": "https://docs.kalshi.com/api-reference/orders/cancel-order-v2.md",
+      "html": "https://docs.kalshi.com/api-reference/orders/cancel-order-v2",
+      "publisher": "Kalshi",
+      "claims_supported": [
+        "DELETE /portfolio/events/orders/{order_id}; provide market_ticker to auto-route",
+        "Returns {order_id, client_order_id, reduced_by}"
+      ]
+    },
+    "K15": {
+      "title": "Get Balance",
+      "url": "https://docs.kalshi.com/api-reference/portfolio/get-balance.md",
+      "html": "https://docs.kalshi.com/api-reference/portfolio/get-balance",
+      "publisher": "Kalshi",
+      "claims_supported": [
+        "GET /portfolio/balance returns balance (cents), balance_dollars, portfolio_value (cents), updated_ts, balance_breakdown[]",
+        "The response has no explicit total-equity field; balance + portfolio_value are the two components"
+      ]
+    },
+    "K16": {
+      "title": "Get Positions",
+      "url": "https://docs.kalshi.com/api-reference/portfolio/get-positions.md",
+      "html": "https://docs.kalshi.com/api-reference/portfolio/get-positions",
+      "publisher": "Kalshi",
+      "claims_supported": [
+        "GET /portfolio/positions?count_filter=position&settlement_status=all",
+        "market_positions[] fields: ticker, position_fp (signed: positive YES, negative NO), market_exposure_dollars, realized_pnl_dollars, fees_paid_dollars, total_traded_dollars, last_updated_ts",
+        "settlement_status accepts unsettled (default), settled, all"
+      ]
+    },
+    "K17": {
+      "title": "Get Fills",
+      "url": "https://docs.kalshi.com/api-reference/portfolio/get-fills.md",
+      "html": "https://docs.kalshi.com/api-reference/portfolio/get-fills",
+      "publisher": "Kalshi",
+      "claims_supported": [
+        "GET /portfolio/fills returns fills[] with order_id, ticker, outcome_side (yes|no), book_side (bid|ask), count_fp, yes_price_dollars, no_price_dollars, is_taker, created_time, fee_cost, ts",
+        "outcome_side describes directional exposure: buy-yes and sell-no produce 'yes'; buy-no and sell-yes produce 'no'",
+        "Both parties trade at the same price; a fill at p with outcome_side=no is matched against an order at the same p with outcome_side=yes"
+      ]
+    },
+    "K18": {
+      "title": "WebSocket: Market Ticker",
+      "url": "https://docs.kalshi.com/websockets/market-ticker.md",
+      "html": "https://docs.kalshi.com/websockets/market-ticker",
+      "publisher": "Kalshi",
+      "claims_supported": [
+        "ticker channel: combined and flushed once per second, one message per changed market",
+        "msg fields: market_id, market_ticker, price_dollars, yes_bid_dollars, yes_ask_dollars, volume_fp, open_interest_fp, dollar_volume, dollar_open_interest, yes_bid_size_fp, yes_ask_size_fp, last_trade_size_fp, ts (deprecated), ts_ms",
+        "Interpolation caveat: intermediate values are not sent; use trade or orderbook_delta for every change",
+        "A subscription created without a market filter cannot be changed later (error 13); unsubscribe and resubscribe to filter"
+      ]
+    },
+    "K19": {
+      "title": "WebSocket: Public Trades",
+      "url": "https://docs.kalshi.com/websockets/public-trades.md",
+      "html": "https://docs.kalshi.com/websockets/public-trades",
+      "publisher": "Kalshi",
+      "claims_supported": [
+        "trade channel sends every trade immediately; market specification optional",
+        "msg fields: trade_id, market_ticker, yes_price_dollars, no_price_dollars, count_fp, taker_side, taker_outcome_side, taker_book_side, is_block_trade, ts, ts_ms"
+      ]
+    },
+    "K20": {
+      "title": "WebSocket: Orderbook Updates",
+      "url": "https://docs.kalshi.com/websockets/orderbook-updates.md",
+      "html": "https://docs.kalshi.com/websockets/orderbook-updates",
+      "publisher": "Kalshi",
+      "claims_supported": [
+        "orderbook_delta requires market_ticker/market_tickers and sends orderbook_snapshot first, then deltas",
+        "delta msg: market_ticker, price (dollars), delta (signed contracts), side (yes|no), ts, ts_ms",
+        "When a market is determined the server sends an empty orderbook_snapshot and removes it",
+        "Conflation is opt-in via update_interval_ms 100 or 1000; default 0 is real-time",
+        "A subscription holds at most 500,000 markets"
+      ]
+    },
+    "K21": {
+      "title": "WebSocket: Market & Event Lifecycle",
+      "url": "https://docs.kalshi.com/websockets/market-and-event-lifecycle.md",
+      "html": "https://docs.kalshi.com/websockets/market-and-event-lifecycle",
+      "publisher": "Kalshi",
+      "claims_supported": [
+        "market_lifecycle_v2 msg: market_ticker, event_type in {created, activated, deactivated, close_date_updated, determined, settled, price_level_structure_updated}",
+        "determined carries result and settlement_value; settled carries settled_ts",
+        "close_ts is present on created and close_date_updated events",
+        "This is how a market's YES/NO resolution is observed live"
+      ]
+    },
+    "K22": {
+      "title": "Kalshi SDKs",
+      "url": "https://docs.kalshi.com/sdks/overview.md",
+      "html": "https://docs.kalshi.com/sdks/overview",
+      "publisher": "Kalshi",
+      "claims_supported": [
+        "Official SDKs: kalshi_python_sync, kalshi_python_async (PyPI) and kalshi-typescript (npm)",
+        "The old kalshi-python package is deprecated",
+        "REST OpenAPI spec at https://docs.kalshi.com/openapi.yaml and WebSocket AsyncAPI at https://docs.kalshi.com/asyncapi.yaml are the source of truth",
+        "Ed25519 keys need SDK 3.31.0 or later"
+      ]
+    },
+    "K23": {
+      "title": "Get Exchange Status",
+      "url": "https://docs.kalshi.com/api-reference/exchange/get-exchange-status.md",
+      "html": "https://docs.kalshi.com/api-reference/exchange/get-exchange-status",
+      "publisher": "Kalshi",
+      "claims_supported": [
+        "GET /exchange/status is unauthenticated and returns exchange_active, trading_active and estimated resume times"
+      ]
+    },
+    "K24": {
+      "title": "Kalshi starter code (official GitHub repo)",
+      "url": "https://github.com/Kalshi/kalshi-starter-code-python",
+      "html": "https://github.com/Kalshi/kalshi-starter-code-python",
+      "publisher": "Kalshi",
+      "claims_supported": [
+        "Official Python starter code; the README says it is example code, not an SDK",
+        "Its demo base URL constant is https://demo-api.kalshi.co (the 'also supported' demo host, not the recommended external-api host)",
+        "Its rate limiter sleeps 100 ms between calls",
+        "Source inspected at commit 6a2b0e6 (main) on 2026-11-20"
+      ],
+      "irregularity": "Starter code targets the older demo host and does not include the V2 order path or the removed-endpoint warning, so its order examples are stale."
+    },
+    "K25": {
+      "title": "Get Market Candlesticks",
+      "url": "https://docs.kalshi.com/api-reference/market/get-market-candlesticks.md",
+      "html": "https://docs.kalshi.com/api-reference/market/get-market-candlesticks",
+      "publisher": "Kalshi",
+      "claims_supported": [
+        "GET /series/{series_ticker}/markets/{ticker}/candlesticks?start_ts&end_ts&period_interval",
+        "period_interval valid values 1 (1 minute), 60 (1 hour), 1440 (1 day)",
+        "Candles carry yes_bid/yes_ask/trade price open/high/low/close plus volume"
+      ]
+    }
+  }
+}

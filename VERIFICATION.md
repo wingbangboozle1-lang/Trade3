@@ -7,7 +7,7 @@ Verified 2026-11-20 against the Kalshi **demo** Trade API
 (`https://external-api.demo.kalshi.co/trade-api/v2`). Re-run everything with:
 
 ```bash
-python scripts/verify_series.py      # re-fetches all 37 series rows and diffs the published fields
+python scripts/verify_series.py      # re-fetches all 39 series rows and diffs the published fields
 python scripts/check_site.py         # links, JS syntax, data integrity
 node tests/logic.test.mjs            # dashboard maths against the documented examples
 ```
@@ -72,13 +72,54 @@ Per-row links live in `docs/data/series.json` (`source` field, rendered on every
    listed source (Deadline) is the one shown.
 4. **Multivariate combos** (`KXMVECROSS…`) dominate unfiltered market listings and have no place in
    a topic list; every request now sets `mve_filter=exclude`.
-5. **No `Culture` category exists.** Entertainment is used as the proxy and labelled as such (F1).
+5. **`Culture` DOES exist as a category** — the earlier claim in this file was wrong and is corrected here.
+   `GET /series?category=Culture` returns 2 series (`KXXBANNEDGROK`, `KXXBANNEDMURRAYHILLGUY1`), each with
+   `"category":"Culture"` and `"categories":["Culture"]`; neither has open markets
+   (`GET /markets?series_ticker=KXXBANNEDGROK&status=open` → `{"markets":[]}`). The site now maps the topic to the
+   real category and lists Entertainment as a *labelled superset* so the page is not empty (flag F1, corrected).
 6. **`KXPGAR1T5` had no open events** when queried directly; only series that actually return open
    markets appear in live tables, while the verified static rows remain for reference.
+
+## 4b. Integration re-check (session `arena/ec2f5c59-trade3`, 2026-11-20T20:0xZ)
+
+Six rows and five discovery queries were re-read from the live demo API, then put through this repository's own
+row verifier rather than checked by eye:
+
+```
+$ python3 scripts/verify_series.py --from-cache docs/data/live-verification-2026-11-20.json \
+      --only KXAAAGASM,KXNGASMAX,KXXBANNEDGROK,KXXBANNEDMURRAYHILLGUY1
+OK   KXAAAGASM              gas        US gas price
+OK   KXNGASMAX              gas        Natural gas price peak
+OK   KXXBANNEDGROK          culture    Will Grok be banned this year
+OK   KXXBANNEDMURRAYHILLGUY1 culture    Will @MurrayHillGuy1 get banned from X this year?
+
+4/4 rows verified against https://external-api.demo.kalshi.co/trade-api/v2      (exit 0)
+```
+
+| Live call | Answer | Effect |
+|---|---|---|
+| `GET /exchange/status` | `exchange_active: true`, `trading_active: true`, shards 0–3 | status pill on the dashboard |
+| `GET /series?category=Gas` | `{"series":null}` | no query filters on a Gas category (flag F1 in the other build agrees) |
+| `GET /series?category=Golf` | `{"series":null}` | golf is found by `Sports` + tag `Golf` |
+| `GET /series?category=Culture` | 2 series | **corrects** this file’s earlier finding 5 |
+| `GET /markets?series_ticker=KXXBANNEDGROK&status=open` | `{"markets":[]}` | Culture row is reported with 0 open markets, not padded |
+| `GET /markets?series_ticker=KXAAAGASM&status=open` | 4 strikes; `-4.80` at `volume_fp 55571.52`, `$0.03`; titles contain `**gas prices**` | dollars ranking input; `cleanTitle()` added for display |
+| `GET /markets?series_ticker=KXBTCD&status=open&limit=3` | 3 strikes all `$0.0000`, `volume_fp 0.00`; no `liquidity` field anywhere | liquidity must come from the book (V7/V8), not the market record |
+| `GET /markets/trades?market_ticker=…` | 200 with prints from *other* markets | unknown params are ignored, not rejected → client-side re-filter added (flag F11) |
+| `GET /series?category=Entertainment&limit=3` | 8+ series returned | `/series` has no `limit`/`cursor`; requests must not assume paging |
+
+Docs read for the same pass:
+[demo environment](https://docs.kalshi.com/getting_started/demo_env) ·
+[Get Series List (OpenAPI)](https://docs.kalshi.com/api-reference/market/get-series-list) ·
+[Get Trades (OpenAPI)](https://docs.kalshi.com/api-reference/market/get-trades) ·
+[Quick start: WebSockets](https://docs.kalshi.com/getting_started/quick_start_websockets).
+
+Raw records behind the table: [`docs/data/live-verification-2026-11-20.json`](docs/data/live-verification-2026-11-20.json).
 
 ## 5. Environment note
 
 The sandbox this was built in permitted outbound HTTPS only to a small allowlist, so Kalshi
 responses were read through an official-endpoint page fetch rather than `curl`. Every value was
 copied from a real response body. `scripts/verify_series.py` reproduces the entire check from any
-unrestricted machine, and CI runs it on every push.
+unrestricted machine, and `.github/workflows/verify-live.yml` runs it on a 6-hour schedule, on every change to
+`docs/data/series.json`, and on demand — from a runner that does have a route to Kalshi.
