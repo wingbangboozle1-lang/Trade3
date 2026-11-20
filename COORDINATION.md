@@ -112,3 +112,38 @@ this token. The other session's seven flags are reproduced on the same page, wit
 - Integration approach: `git merge origin/main` on `integrate`; this build's site moved under `docs/dashboard-site/`
   so the existing `docs/*` pages, `docs/assets/*`, `docs/topics/*` and the Python tooling are preserved untouched.
 - Cross-links added both ways so neither build is orphaned.
+
+---
+
+# Session `arena/11365581-trade3` — re-verification and publish attempt
+
+**Scope claimed:** `COORDINATION.md` only (log entry). No site data, app code, or docs were changed.
+**Branch note:** this session works only on `arena/11365581-trade3` (branched from `main` at `e5c92fa`).
+The `session-<id>/<task>` naming in the board's instructions is not used here, because the session branch is fixed.
+
+## Verification performed (2026-11-20)
+
+| Check | Result |
+|---|---|
+| `node scripts/check-links.js` | 0 broken links / anchors / imports / DOM targets. One warning, `assets/pages/common.js` "not loaded by any HTML page": **false positive**. All 12 page modules import it (`executive.js`, `topic.js`, `markets.js`, `flagged.js`, etc.). |
+| `node tests/site-render-test.js` | 13/13 |
+| `node tests/smoke-test.js` | 13/13 |
+| GitHub Pages status (`gh api repos/wingbangboozle1-lang/Trade3/pages`) | **404 — Pages not enabled** |
+| `gh api -X POST .../pages -f build_type=workflow` | **403 "Resource not accessible by integration"** — token lacks Pages admin scope |
+| Deploy workflow runs `44742765873`, `44742903755`, `44744733941`, `44744922676` | All **failure** at "Setup Pages" (`configure-pages` enablement) |
+| Kalshi demo API from sandbox (`external-api.demo.kalshi.co`) | **Unreachable** — `SSL_ERROR_SYSCALL` on TLS. No new live values could be pulled in this session. |
+| GitHub Pages site URL | `wingbangboozle1-lang.github.io/Trade3/` — **not live** (no Pages site exists) |
+
+## Status
+
+- Site code and tests: green, verified in repo.
+- Publish: **blocked on owner action**. Repo → Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save. Then rerun Actions → "Deploy site to GitHub Pages" → Run workflow. This token cannot enable Pages.
+- Live Kalshi values: **not re-verified** this session (sandbox egress). All values carried in the tables are from earlier sessions' captures and remain subject to re-check from a network that can reach Kalshi.
+- Open PR #5 (`arena/b28d6df0-trade3`, "Coordination: re-verification and Pages enablement blocker") belongs to another session. Not touched by this session.
+- Merge: **not performed**. The board's merge gate requires a confirmed Pages deploy, which is not possible until the owner enables Pages.
+
+## Irregularities logged
+
+1. Pages not enabled; every deploy run since PR #1 has failed at "Setup Pages" (403 on enablement). Same root cause as the earlier Merge record.
+2. Kalshi REST unreachable from the build sandbox (TLS reset). Live verification must run from a network with access.
+3. Link checker's "unused module" warning for `common.js` is a false positive. Consider making the checker resolve transitive imports.
