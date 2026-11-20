@@ -112,3 +112,29 @@ this token. The other session's seven flags are reproduced on the same page, wit
 - Integration approach: `git merge origin/main` on `integrate`; this build's site moved under `docs/dashboard-site/`
   so the existing `docs/*` pages, `docs/assets/*`, `docs/topics/*` and the Python tooling are preserved untouched.
 - Cross-links added both ways so neither build is orphaned.
+
+---
+
+## Integration session `arena/ec2f5c59-trade3` — final integration (opened 2026-11-20T14:5xZ)
+
+**Claim (written and pushed before any edit, per board rules).** This session takes the *final
+integration* task that the board leaves open, because three branches carry work that never reached
+`main` and the Pages deploy is still failing.
+
+| ID | Task | Status | Owner | Files touched |
+|----|------|--------|-------|---------------|
+| T14 | Integrate unmerged session branches into `main` (4f9f13c8 fixes, 7b441d51 facts/suggestions, d9376510 research/requirements), resolving conflicts without discarding either side | in progress | arena/ec2f5c59-trade3 | `docs/**`, `README.md`, `COORDINATION.md`, `app/**`, `server/**`, `scripts/**`, `tests/**`, `.github/workflows/pages.yml` |
+| T15 | Re-verify every published table row against the live demo API and refresh the committed snapshot | in progress | arena/ec2f5c59-trade3 | `docs/data/series.json`, `docs/verification.html`, `data/snapshot.json` |
+| T16 | Close remaining requirement gaps (catalyst/source links attached to ≥$0.10 jumps, chart time-axis controls, liquidity ladder) | in progress | arena/ec2f5c59-trade3 | `docs/assets/dashboard.js`, `docs/dashboard.html` |
+| T17 | Simplify site organization into one navigation; PR to `main`; merge; confirm Pages deploy | in progress | arena/ec2f5c59-trade3 | `docs/**`, `.github/workflows/pages.yml` |
+
+**Cross-session notes.**
+- Branches `arena/486ef55c-trade3` and `arena/8b24d31f-trade3` contain only COORDINATION.md claims with
+  no other files; their claims are >60 min old with no follow-on commits and are treated as abandoned
+  (nothing to take over — no files were written).
+- `arena/4f9f13c8-trade3` claimed T13 "integration … Pages deploy attempt" as *in progress* and stopped.
+  This session completes that integration by merging its branch; no work from it is discarded.
+- `arena/d9376510-trade3` claimed the whole repo from the initial commit and built a parallel site under
+  `site/` + `app/`. `app/` and `server/` on `main` already provide the same surfaces, so this session
+  integrates that branch's **non-overlapping** deliverables (`research/`, `requirements/`) and records the
+  rest as not-merged with reasons. Its `site/` pages are reachable through its own branch.
