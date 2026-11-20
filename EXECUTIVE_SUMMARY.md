@@ -60,7 +60,7 @@ required for market data.
 
 ## Irregularities / flags (non-blocking)
 
-- **F1 Culture mapping:** Kalshi has no “Culture” category; Entertainment is the proxy. Needs review.
+- **F1 Culture mapping (corrected):** An earlier build incorrectly said Kalshi had no Culture category. The official demo API query returned two series with `category: Culture`; routing now uses Culture directly. The checked `KXXBANNEDGROK` series had no open markets at verification time. See [Flagged for Review](docs/flagged.html) and [the official query](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture).
 - **F2 News attribution:** no news API → settlement-source links only.
 - **F3 Live execution/WS:** needs user demo keys (by design, never in repo).
 - **F4 $ volume definition:** volume × price approximation; confirm intent.

@@ -15,7 +15,7 @@ async function load() {
     (t.flag ? `<br><span class="pill warn">Flagged</span> ${esc(t.flag)}` : "");
   document.getElementById("series-body").innerHTML = t.series.map((s) =>
     `<tr><td><code>${esc(s.ticker)}</code></td><td>${esc(s.title)}</td><td>${esc(s.frequency)}</td>
-     <td>${esc(s.settlement)}</td>
+     <td>${s.settlement ? esc(s.settlement) : '<span class="muted">— unverified</span>'}</td>
      <td><a href="https://external-api.demo.kalshi.co/trade-api/v2/series/${esc(s.ticker)}" target="_blank" rel="noopener">API</a></td></tr>`
   ).join("");
   // Live markets for the first few series (keeps request count low)
