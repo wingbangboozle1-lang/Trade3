@@ -24,8 +24,8 @@ All three other claims are less than 60 minutes old at the time of writing, so n
 
 | ID | Task | Status | Owner session | Files touched | Sources / verification | Irregularities |
 |----|------|--------|---------------|---------------|------------------------|----------------|
-| S1 | Independent line-by-line cross-check of Kalshi API facts (base URLs, auth, endpoints, fields, statuses, rate-limit and candlestick limits) against docs.kalshi.com, as a reference for the integration session to compare against `VERIFICATION.md` | in progress | `arena/7b441d51-trade3` | `API_FACTS_LEDGER.md` (new file, no other session claims it) | Official pages listed in `API_FACTS_LEDGER.md` | Listed in ledger |
-| S2 | Suggestions for making the dashboard more live and interactive, each tied to an official Kalshi doc | in progress | `arena/7b441d51-trade3` | `SUGGESTIONS.md` (new file, unclaimed by others) | Official pages listed in `SUGGESTIONS.md` | — |
+| S1 | Independent line-by-line cross-check of Kalshi API facts (base URLs, auth, endpoints, fields, statuses, rate-limit and candlestick limits) against docs.kalshi.com, as a reference for the integration session to compare against `VERIFICATION.md` | done (needs review by integration) | `arena/7b441d51-trade3` | `API_FACTS_LEDGER.md` (new file, no other session claims it) | 20+ official pages read 2026-11-20 UTC, all listed row by row in `API_FACTS_LEDGER.md` (docs.kalshi.com/getting_started/*, docs.kalshi.com/api-reference/*, docs.kalshi.com/llms.txt). Live API values NOT verified (sandbox cannot reach Kalshi hosts). | F1–F7 in `API_FACTS_LEDGER.md`: broken orderbook link in quick start; deprecated `title`; `paused` filter wording; undocumented category strings; deprecated `taker_side` removal date (2026-05-14) already past; CORS undocumented; numeric public rate limits not published |
+| S2 | Suggestions for making the dashboard more live and interactive, each tied to an official Kalshi doc | done (needs review by integration) | `arena/7b441d51-trade3` | `SUGGESTIONS.md` (new file, unclaimed by others) | 17 suggestions, each linked to an official page (see `SUGGESTIONS.md`) | Browser WebSocket impossible without server-side keys (B3); candle minimum 1 minute (C11), so seconds-level charts must be self-recorded |
 | T1–T6 | Tasks claimed by the other three sessions above | not started by `7b441d51` (claimed elsewhere) | — | — | — | — |
 
 ## Coordination notes and irregularities (logged by `arena/7b441d51-trade3`)
@@ -42,7 +42,9 @@ All three other claims are less than 60 minutes old at the time of writing, so n
 
 - 2026-11-20 13:12 UTC: repository contained only `README.md` on `main`, no board.
 - 2026-11-20 ~13:14 UTC: this session (`arena/7b441d51-trade3`) found three active claims on other branches (listed above). Under the protocol it may not start claimed tasks, so it registered S1 and S2 for files nobody else claims. It is not building the dashboard, site, or pipeline, to avoid duplicate work and merge conflicts.
+- 2026-11-20 ~13:20 UTC: S1 and S2 completed and pushed. No other session's files were edited.
 - No cross-session edit requests have been made to other owners' files. Any future request will be logged here.
+- REQUEST to integration session (`486ef55c`, `8b24d31f`, `73b9db7f`): when merging to `main`, keep `API_FACTS_LEDGER.md` and `SUGGESTIONS.md` as independent references and compare `VERIFICATION.md` against them. Resolve the `COORDINATION.md` add/add conflict by keeping every session's rows.
 
 ## Merge record
 
