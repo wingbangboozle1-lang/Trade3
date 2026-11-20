@@ -39,11 +39,26 @@ class PaperPortfolio:
     trades: list = field(default_factory=list)
 
     def open_position(self, m: dict, strategy: str, side: str, contracts: int, ts: int) -> PaperTrade | None:
+        # Entry price: buying YES costs the YES ask; buying NO costs the NO ask, which the
+        # official Orderbook Responses page derives as 1 − best YES bid. (An earlier version
+        # priced a NO buy at yes_bid_dollars, which overstated the cost — fixed 2026-11-20.)
         ask = m.get("yes_ask_dollars")
         bid = m.get("yes_bid_dollars")
-        px = float(ask) if side == "yes" and ask not in (None, "") else float(bid or 0)
-        if px <= 0:
-            px = last_price(m)
+        try:
+            ask_f = float(ask) if ask not in (None, "") else None
+        except (TypeError, ValueError):
+            ask_f = None
+        try:
+            bid_f = float(bid) if bid not in (None, "") else None
+        except (TypeError, ValueError):
+            bid_f = None
+        if side == "yes":
+            px = ask_f if ask_f is not None and ask_f > 0 else None
+        else:
+            px = (1.0 - bid_f) if bid_f is not None and bid_f < 1 else None
+        if px is None or px <= 0 or px >= 1:
+            lp = last_price(m)
+            px = lp if side == "yes" else max(0.0, min(1.0, 1.0 - lp))
         cost = px * contracts
         if cost > self.cash or cost <= 0:
             return None

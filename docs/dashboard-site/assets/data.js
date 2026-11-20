@@ -732,4 +732,14 @@ export const FLAGS = [
     sourceUrl: `${DEMO_REST}/series/KXBTCD`,
     status: 'Informational.',
   },
+  {
+    id: 'F21',
+    severity: 'Low',
+    item: 'Demo web-UI market URL pattern is unverified — API record used instead',
+    detail:
+      'The convenience links to "demo.kalshi.co/markets/{ticker}" could not be verified against an official source: the demo site is a client-side application and did not respond to automated fetches, and no Kalshi documentation states that URL pattern. As of the 2026-11-20 review, every market link in this app points to the verified API record (GET /markets/{ticker}) instead, and the demo-UI pattern is only exposed separately as an explicitly unverified convenience.',
+    evidence: 'Automated fetch of demo.kalshi.co/markets/KXAAAGASM-26NOV30-4.80 failed; no official documentation of the pattern found.',
+    sourceUrl: 'https://docs.kalshi.com/api-reference/market/get-market',
+    status: 'Handled: verified API-record URLs are the primary links; UI pattern flagged for human confirmation.',
+  },
 ];

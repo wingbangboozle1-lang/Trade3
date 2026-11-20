@@ -4,8 +4,13 @@
 import { apiGet, dollarVolume, lastPrice, fmt$, fmtPx, esc, TOPICS } from "./app.js";
 
 const $ = (id) => document.getElementById(id);
+// Threshold comparisons in integer 1/10000-dollar space so an exactly-$0.10 move always
+// fires (floating-point subtraction can produce 0.09999…).
+const ticks = (x) => Math.round(Number(x) * 10000);
 const STRATEGIES = {
-  momentum: (p, prev) => (prev == null ? null : p - prev >= 0.10 ? "yes" : p - prev <= -0.10 ? "no" : null),
+  momentum: (p, prev) => (prev == null ? null
+    : ticks(p) - ticks(prev) >= 1000 ? "yes"
+    : ticks(p) - ticks(prev) <= -1000 ? "no" : null),
   mean_reversion: (p) => (p <= 0.15 ? "yes" : p >= 0.85 ? "no" : null),
   favorite_longshot: (p) => (p >= 0.65 ? "yes" : p <= 0.35 ? "no" : null),
 };
@@ -13,17 +18,21 @@ const STRATEGIES = {
 async function fetchAllTopics() {
   const out = [];
   for (const t of TOPICS) {
+    // A topic may span two Kalshi categories (Culture + Entertainment supplement — verified 2026-11-20).
+    const categories = t.categories || [t.category];
     const tags = t.tags.length ? t.tags : [null];
     const seenS = new Set();
-    for (const tag of tags) {
-      const params = { limit: 100, category: t.category };
-      if (tag) params.tags = tag;
-      const sdata = await apiGet("/series", params);
-      for (const s of sdata.series || []) {
-        if (seenS.has(s.ticker)) continue;
-        seenS.add(s.ticker);
-        const mdata = await apiGet("/markets", { series_ticker: s.ticker, status: "open", limit: 50 });
-        for (const m of mdata.markets || []) { m._topic = t.id; out.push(m); }
+    for (const category of categories) {
+      for (const tag of tags) {
+        const params = { limit: 100, category };
+        if (tag) params.tags = tag;
+        const sdata = await apiGet("/series", params);
+        for (const s of sdata.series || []) {
+          if (seenS.has(s.ticker)) continue;
+          seenS.add(s.ticker);
+          const mdata = await apiGet("/markets", { series_ticker: s.ticker, status: "open", limit: 50 });
+          for (const m of mdata.markets || []) { m._topic = t.id; out.push(m); }
+        }
       }
     }
   }
@@ -39,7 +48,15 @@ function simulate(markets, strategy, contracts = 10, cash = 1000) {
     const side = fn(p, p); // single-snapshot strategies; momentum needs history -> use bid/ask drift proxy
     const s = strategy === "momentum" ? (p >= 0.5 ? "yes" : "no") : side;
     if (!s) continue;
-    const px = s === "yes" ? parseFloat(m.yes_ask_dollars || p) : parseFloat(m.yes_bid_dollars || 1 - p);
+    // Entry price: buying YES costs the YES ask. Buying NO costs the NO ask, which the
+    // official Orderbook Responses page derives as 1 − best YES bid. (An earlier version
+    // priced a NO buy at yes_bid_dollars, which overstated the cost — fixed.)
+    const bid = parseFloat(m.yes_bid_dollars);
+    const ask = parseFloat(m.yes_ask_dollars);
+    let px;
+    if (s === "yes") px = !isNaN(ask) && ask > 0 ? ask : p;
+    else px = !isNaN(bid) && bid < 1 ? 1 - bid : 1 - p;
+    px = Math.min(0.9999, Math.max(0.0001, px));
     const cost = px * contracts;
     if (cost > c || cost <= 0) continue;
     c -= cost;

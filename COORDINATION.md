@@ -41,8 +41,34 @@
 
 | Task | Status | Owner | File scope |
 |---|---|---|---|
-| T7 | Full line-by-line repo review, re-verification of every live-API claim against official sources, test reruns, irregularity flags | in progress | `VERIFICATION.md`, `EXECUTIVE_SUMMARY.md`, `docs/flagged.html` (+ review notes only) |
-| T8 | Fixes from review (any file), then integration: PR to `main`, merge, enable/confirm GitHub Pages deploy | unclaimed | everything not under another live claim (no other session active) |
+| T7 | Full line-by-line repo review, re-verification of every live-API claim against official sources, test reruns, irregularity flags | **done** | `VERIFICATION.md`, `EXECUTIVE_SUMMARY.md`, `docs/flagged.html` |
+| T8 | Fixes from review + integration: PR to `main`, merge, enable/confirm GitHub Pages deploy | **done** | everything (no other session active) |
+
+### T7 verification performed (all fetched live on 2026-11-20 by this session)
+
+| Check | Source | Result |
+|---|---|---|
+| Demo/prod REST + WS base URLs, demo caveats, signing rule | docs.kalshi.com/getting_started/demo_env, /api_environments | Confirmed verbatim |
+| Auth signing + API key location | docs.kalshi.com/getting_started/quick_start_authenticated_requests | Confirmed (`timestamp+METHOD+path`, no query; RSA-PSS/SHA-256 + Ed25519; balance in **cents**; keys under **Account & security** → API Keys — app wording fixed) |
+| WS handshake + auth required | docs.kalshi.com/getting_started/quick_start_websockets | Confirmed (`timestamp+"GET"+"/trade-api/ws/v2"`); justifies REST-polling default |
+| Market lifecycle vocabulary + `?status=` filter map | docs.kalshi.com/getting_started/market_lifecycle | Confirmed (8 REST statuses; `open`→`active`, `settled`→`finalized`) |
+| Settlement payout | docs.kalshi.com/getting_started/market_settlement | Confirmed ($1/contract to winning side) |
+| Fee formula + 21-row table + maker 0.0175 + KXBTCY/KXETHY 0 multiplier + effective 2026-07-07 | kalshi.com/docs/kalshi-fee-schedule.pdf | Confirmed against the PDF |
+| Create Order V2 body + legacy 410 | docs.kalshi.com/api-reference/orders/create-order-v2 | Confirmed (`side` bid/ask, `count` "10.00", `price` "0.5600"); Python helper + JS body aligned; `exchange_index` no longer defaulted for create |
+| Get Series List params | docs.kalshi.com/api-reference/market/get-series-list | Confirmed (`category` exact/case-sensitive, `tags`, `include_product_metadata`) |
+| All cited docs paths exist | docs.kalshi.com/llms.txt | Confirmed for every path referenced in the repo |
+| `category=Culture` exists; `category=Gas` → `{"series":null}`; KXAAAGASM record; captured market row; exchange status | live demo REST (5 URLs, see VERIFICATION.md V18/V22) | Confirmed — **Culture correction applied across the repo** |
+
+### T7/T8 findings fixed in this session (details in VERIFICATION.md "Irregularities")
+
+1. FP-unsafe ≥$0.10 comparisons in Build A dashboard, portfolio page, `strategies.py`, `run_sim.py` → all now tick-space (exactly-$0.10 moves can no longer be dropped).
+2. NO-side entry price bug (`yes_bid` instead of `1 − yes_bid`) in `docs/assets/portfolio.js` and `backtest.py`.
+3. `kalshi_client.py place_order` legacy body → documented Create Order V2 shape.
+4. Culture mapping corrected in `docs/assets/app.js`, `dashboard.js`, `portfolio.js`, `docs/data/series.json`, `docs/index.html`, `docs/methodology.html`, `docs/flagged.html` (F1), `kalshi_client.py`, `EXECUTIVE_SUMMARY.md`, `VERIFICATION.md`.
+5. Missing `scripts/capture-snapshot.js` (referenced by `npm run snapshot`) implemented.
+6. Unverified demo-UI URL pattern → market links switched to the verified API-record URL; flagged F8 (Build A) / F9 (Build B).
+7. `server/alerts.js` dead line removed; `server/kalshi.js createOrder` conservative body; "Account & Settings" → "Account & security" per official docs.
+8. Test suite green after fixes: smoke 13/13, site-render 13/13 (9 flags), link check 0 broken (1 known-benign warning: `pages/common.js` is a shared module imported by page modules, not loaded by HTML directly).
 
 
 

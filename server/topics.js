@@ -51,7 +51,7 @@ export const TOPICS = Object.freeze([
     id: 'culture',
     label: 'Culture',
     color: '#a855f7',
-    blurb: 'Entertainment, awards, music, film, celebrity and viral-moment markets.',
+    blurb: 'Kalshi Culture category (verified: GET /series?category=Culture returns series), plus Entertainment — awards, music, film, celebrity and viral-moment markets.',
     seriesTags: ['ai', 'entertainment', 'pop culture', 'awards', 'music', 'movies', 'tv'],
     seriesScopes: [],
     keywords: ['oscar', 'grammy', 'emmy', 'box office', 'best picture', 'album', 'celebrity', 'banned from x'],
@@ -161,8 +161,23 @@ export function seriesMeta(series) {
   };
 }
 
-/** Kalshi UI link for a market. */
+/**
+ * Official Kalshi link for a market. The verified, stable URL is the API record:
+ * GET /markets/{ticker} (https://docs.kalshi.com/api-reference/market/get-market).
+ * The demo web-UI pattern (https://demo.kalshi.co/markets/{ticker}) could not be
+ * verified from an official source (the demo site is a client-side app), so it is
+ * exposed separately as kalshiDemoUiUrl() and flagged as unverified — see F8/F9 on
+ * the Flagged for Review pages.
+ */
 export function kalshiMarketUrl(ticker, env = 'demo') {
+  const base = env === 'demo'
+    ? 'https://external-api.demo.kalshi.co/trade-api/v2'
+    : 'https://external-api.kalshi.com/trade-api/v2';
+  return `${base}/markets/${encodeURIComponent(ticker)}`;
+}
+
+/** Convenience link to the demo web UI. UNVERIFIED URL pattern — flagged, not used as a primary source link. */
+export function kalshiDemoUiUrl(ticker, env = 'demo') {
   return env === 'demo'
     ? `https://demo.kalshi.co/markets/${encodeURIComponent(ticker)}`
     : `https://kalshi.com/markets/${encodeURIComponent(ticker)}`;

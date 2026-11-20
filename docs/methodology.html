@@ -64,7 +64,7 @@
       <tbody>
         <tr><td>Gas prices</td><td>Economics</td><td>Oil &amp; Gas, Oil and energy</td><td><a href="https://external-api.demo.kalshi.co/trade-api/v2/series?category=Economics&tags=Oil%20%26%20Gas&limit=20" target="_blank" rel="noopener">Live query</a> · <a href="https://docs.kalshi.com/getting_started/terms" target="_blank" rel="noopener">Glossary (KXAAAGASM example)</a></td></tr>
         <tr><td>Elections</td><td>Elections</td><td>—</td><td><a href="https://external-api.demo.kalshi.co/trade-api/v2/series?category=Elections&limit=20" target="_blank" rel="noopener">Live query</a></td></tr>
-        <tr><td>Culture</td><td>Culture</td><td>AI (for KXXBANNEDGROK)</td><td><a href="https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture" target="_blank" rel="noopener">Official series query (two series returned)</a> · <a href="https://external-api.demo.kalshi.co/trade-api/v2/markets?series_ticker=KXXBANNEDGROK&amp;status=open" target="_blank" rel="noopener">KXXBANNEDGROK open markets (empty at verification)</a></td></tr>
+        <tr><td>Culture</td><td>Culture</td><td>AI (for KXXBANNEDGROK)</td><td><a href="https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture" target="_blank" rel="noopener">Official series query (two series returned)</a> · note: /search/tags_by_categories omits Culture from its list even though the series API recognizes it (flag F12) · <a href="https://external-api.demo.kalshi.co/trade-api/v2/markets?series_ticker=KXXBANNEDGROK&amp;status=open" target="_blank" rel="noopener">KXXBANNEDGROK open markets (empty at verification)</a></td></tr>
         <tr><td>Crypto</td><td>Crypto</td><td>—</td><td><a href="https://external-api.demo.kalshi.co/trade-api/v2/series?category=Crypto&limit=20" target="_blank" rel="noopener">Live query</a></td></tr>
         <tr><td>Golf</td><td>Sports</td><td>Golf</td><td><a href="https://external-api.demo.kalshi.co/trade-api/v2/series?category=Sports&tags=Golf&limit=20" target="_blank" rel="noopener">Live query</a></td></tr>
       </tbody>
@@ -75,7 +75,7 @@
     <h2>Definitions &amp; heuristics (explicit, auditable)</h2>
     <ul>
       <li><b>$ volume</b> = <code>volume_fp × last_price_dollars</code>. Kalshi exposes contract counts and prices separately; this is the documented ranking approximation. Raw <code>volume_fp</code> is shown alongside.</li>
-      <li><b>Alert</b>: |current − previous poll price| ≥ $0.10 for the same ticker.</li>
+      <li><b>Alert</b>: |current − previous poll price| ≥ $0.10 for the same ticker. Comparisons are made in integer 1/10,000-dollar space so a move of exactly $0.10 always fires (floating-point subtraction alone can produce 0.09999…).</li>
       <li><b>High-ROI filter</b>: price ∈ [$0.15, $0.85], $ volume ≥ topic median, spread ≤ $0.10, |move| ≥ $0.05. Research heuristic only — not a model, not advice.</li>
       <li><b>Strategies</b>: momentum / mean-reversion / favorite-longshot / volume-breakout (see <code>strategies.py</code>). Paper fills at quoted ask; settlement at $1/$0 via Kalshi <code>result</code>.</li>
       <li><b>Charts</b>: x = time, y = contract price ($0–$1). Windows: 60s / 5m / 1h / 24h. Candlesticks: <code>period_interval</code> 1 (min), 60 (hour), 1440 (day).</li>
