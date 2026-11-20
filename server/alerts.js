@@ -170,7 +170,6 @@ export function roiScore({
     return { score: 0, factors: { reason: 'price at boundary; no edge modelled' } };
   }
 
-  const mid = Number.isFinite(spread) && spread !== null ? null : null;
   const spreadCost = Number.isFinite(spread) ? Math.max(0, spread) / 2 : 0.01;
   const drift = Number(toPrice) - Number(fromPrice);
 

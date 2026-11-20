@@ -29,11 +29,14 @@ PROD_WS = "wss://external-api-ws.kalshi.com/trade-api/ws/v2"
 
 # Topic -> (category, tags) discovery filters, verified via
 # GET /search/tags_by_categories on 2026-11-20 (see VERIFICATION.md).
-# "Culture" is a Kalshi series category (verified 2026-11-20: GET /series?category=Culture). It has no markets at capture.
+# "Culture" is a Kalshi series category (verified 2026-11-20: GET /series?category=Culture).
+# It has no markets at capture, so Entertainment is queried as a supplementary category
+# ("extra_categories", consumed by fetch_topic_markets); note /search/tags_by_categories
+# omits Culture from its map even though the series API recognizes it.
 TOPIC_FILTERS = {
     "gas": {"category": "Economics", "tags": ["Oil & Gas", "Oil and energy"]},
     "elections": {"category": "Elections", "tags": []},
-    "culture": {"category": "Culture", "tags": []},
+    "culture": {"category": "Culture", "tags": [], "extra_categories": ["Entertainment"]},
     "crypto": {"category": "Crypto", "tags": []},
     "golf": {"category": "Sports", "tags": ["Golf"]},
 }
@@ -149,18 +152,27 @@ class KalshiClient:
     def positions(self) -> list:
         return self.get("/portfolio/positions").get("market_positions", [])
 
-    def place_order(self, ticker: str, side: str, count: int, price_cents: int,
-                    action: str = "buy") -> dict:
-        """Place a limit order via the V2 endpoint.
+    def place_order(self, ticker: str, side: str, count: int, price_dollars: float,
+                    time_in_force: str = "good_till_canceled") -> dict:
+        """Place a limit order via Create Order (V2).
 
-        NOTE: Kalshi migrated orders to /portfolio/events/orders (V2).
-        This helper uses the legacy-shaped body for clarity; verify the
-        current V2 body shape in the OpenAPI spec before live use:
-        https://docs.kalshi.com/openapi.yaml
+        Body shape verified 2026-11-20 against
+        https://docs.kalshi.com/api-reference/orders/create-order-v2 :
+          POST /portfolio/events/orders with a single-book `side` of "bid" (buy YES)
+          or "ask" (sell YES / buy NO at 1 - price) and fixed-point dollar `price`
+          strings (4 decimals). `count` is sent as a fixed-point string.
+        The legacy /portfolio/orders write endpoints return 410 Gone
+        (code deprecated_v1_order_endpoint) and are NOT used here.
+        NOTE: a "buy NO" order is expressed as side="ask" with price = 1 - yes_price
+        on the single book; this helper always quotes the YES side.
         """
         return self.post("/portfolio/events/orders", {
-            "ticker": ticker, "action": action, "side": side,
-            "type": "limit", "count": count, "yes_price": price_cents,
+            "ticker": ticker,
+            "side": side,  # "bid" or "ask"
+            "count": f"{count:.2f}",
+            "price": f"{price_dollars:.4f}",
+            "time_in_force": time_in_force,
+            "self_trade_prevention_type": "taker_at_cross",
         })
 
 
@@ -186,13 +198,15 @@ def fetch_topic_markets(client: KalshiClient, topic: str, per_series: int = 100)
     """Fetch open markets for a topic via its verified series filters."""
     f = TOPIC_FILTERS[topic]
     out: list = []
-    for tag in (f["tags"] or [None]):
-        for s in client.series_list(category=f["category"], tags=tag, limit=100):
-            data = client.markets(series_ticker=s["ticker"], status="open", limit=per_series)
-            for m in data.get("markets", []):
-                m["_series_title"] = s.get("title", "")
-                m["_topic"] = topic
-                out.append(m)
+    categories = [f["category"]] + (f.get("extra_categories") or [])
+    for category in categories:
+        for tag in (f["tags"] or [None]):
+            for s in client.series_list(category=category, tags=tag, limit=100):
+                data = client.markets(series_ticker=s["ticker"], status="open", limit=per_series)
+                for m in data.get("markets", []):
+                    m["_series_title"] = s.get("title", "")
+                    m["_topic"] = topic
+                    out.append(m)
     # de-dupe by ticker (a series can appear under two tags)
     seen: dict = {}
     for m in out:

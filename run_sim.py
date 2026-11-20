@@ -23,6 +23,11 @@ from strategies import STRATEGIES, is_high_roi, last_price
 
 TOPICS = ["gas", "elections", "culture", "crypto", "golf"]
 
+# Threshold comparison in integer 1/10000-dollar space: floating-point subtraction can
+# turn an exactly-$0.10 move into 0.09999..., which would silently drop the alert.
+def _moved_at_least_dime(old: float, new: float) -> bool:
+    return abs(round(new * 10000) - round(old * 10000)) >= 1000
+
 
 def main() -> None:
     ap = argparse.ArgumentParser()
@@ -54,7 +59,7 @@ def main() -> None:
         for m in all_markets:
             p = last_price(m)
             old = prev.get(m["ticker"])
-            if old is not None and abs(p - old) >= 0.10:
+            if old is not None and _moved_at_least_dime(old, p):
                 alert = {"ts": ts, "ticker": m["ticker"], "topic": m.get("_topic"),
                          "from": old, "to": p, "delta": round(p - old, 4),
                          "high_roi": is_high_roi(m, old, med)}

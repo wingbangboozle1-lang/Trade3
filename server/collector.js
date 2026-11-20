@@ -21,8 +21,10 @@ import { syntheticMarkets, syntheticBook, SYNTHETIC_SERIES, DEMO_MODE_NOTICE } f
 
 // Categories that actually exist on Kalshi (verified against GET /series?category=...).
 // "Gas" and "Golf" are NOT categories: gas lives in Economics with an "Oil & Gas" tag,
-// golf lives in Sports with a "Golf" tag. Both are recorded on the Flagged page.
-const SERIES_CATEGORIES = ['Crypto', 'Elections', 'Culture', 'Sports', 'Economics', 'Politics', 'Entertainment', 'Financials'];
+// golf lives in Sports with a "Golf" tag. "Culture" IS a category (verified 2026-11-20:
+// GET /series?category=Culture returns series), even though /search/tags_by_categories
+// omits it. Both findings are recorded on the Flagged for Review pages.
+export const SERIES_CATEGORIES = ['Crypto', 'Elections', 'Culture', 'Sports', 'Economics', 'Politics', 'Entertainment', 'Financials'];
 
 export class Collector extends EventEmitter {
   constructor({

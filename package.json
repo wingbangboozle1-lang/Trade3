@@ -13,7 +13,8 @@
     "check:links": "node scripts/check-links.js",
     "test:engine": "node tests/smoke-test.js",
     "test:site": "node tests/site-render-test.js",
-    "test": "node tests/smoke-test.js && node tests/site-render-test.js"
+    "test": "node tests/smoke-test.js && node tests/site-render-test.js",
+    "snapshot": "node scripts/capture-snapshot.js"
   },
   "license": "MIT"
 }

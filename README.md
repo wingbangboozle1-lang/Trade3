@@ -58,7 +58,7 @@ npm start
 ```
 
 Demo keys only work against demo hosts and production keys only against production hosts. Create the key in the
-[demo UI](https://demo.kalshi.co/) under Account & Settings → API Keys. This project signs requests locally; the
+[demo UI](https://demo.kalshi.co/) under Account & security → API Keys. This project signs requests locally; the
 private key is never sent anywhere except as a signature to Kalshi.
 
 ## What it does

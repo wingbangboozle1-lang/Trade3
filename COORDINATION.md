@@ -32,6 +32,46 @@
 - Merge result: MERGED 2026-11-20T13:15:43Z (merge commit `4e12443`).
 - PR #7 link: https://github.com/wingbangboozle1-lang/Trade3/pull/7
 - PR #7 merge result: MERGED 2026-11-20T20:10:38Z (merge commit `2524516f`). Merged session `arena/62559215-trade3` independent verification record (`COORDINATION.md`) into `main`.
+
+---
+
+# Session `arena/2100849c-trade3` — full line-by-line repo review + re-verification + final integration
+
+**Claimed (2026-11-20, committed immediately on branch `arena/2100849c-trade3`; rebased onto `main` after PRs #6–#10 landed from parallel sessions — see handoff note below):**
+
+| Task | Status | Owner | File scope |
+|---|---|---|---|
+| T7 | Full line-by-line repo review, re-verification of every live-API claim against official sources, test reruns, irregularity flags | **done** | `VERIFICATION.md`, `EXECUTIVE_SUMMARY.md`, `docs/flagged.html` |
+| T8 | Fixes from review + integration: PR to `main`, merge, enable/confirm GitHub Pages deploy | **done** | everything (no other session active) |
+
+### T7 verification performed (all fetched live on 2026-11-20 by this session)
+
+| Check | Source | Result |
+|---|---|---|
+| Demo/prod REST + WS base URLs, demo caveats, signing rule | docs.kalshi.com/getting_started/demo_env, /api_environments | Confirmed verbatim |
+| Auth signing + API key location | docs.kalshi.com/getting_started/quick_start_authenticated_requests | Confirmed (`timestamp+METHOD+path`, no query; RSA-PSS/SHA-256 + Ed25519; balance in **cents**; keys under **Account & security** → API Keys — app wording fixed) |
+| WS handshake + auth required | docs.kalshi.com/getting_started/quick_start_websockets | Confirmed (`timestamp+"GET"+"/trade-api/ws/v2"`); justifies REST-polling default |
+| Market lifecycle vocabulary + `?status=` filter map | docs.kalshi.com/getting_started/market_lifecycle | Confirmed (8 REST statuses; `open`→`active`, `settled`→`finalized`) |
+| Settlement payout | docs.kalshi.com/getting_started/market_settlement | Confirmed ($1/contract to winning side) |
+| Fee formula + 21-row table + maker 0.0175 + KXBTCY/KXETHY 0 multiplier + effective 2026-07-07 | kalshi.com/docs/kalshi-fee-schedule.pdf | Confirmed against the PDF |
+| Create Order V2 body + legacy 410 | docs.kalshi.com/api-reference/orders/create-order-v2 | Confirmed (`side` bid/ask, `count` "10.00", `price` "0.5600"); Python helper + JS body aligned; `exchange_index` no longer defaulted for create |
+| Get Series List params | docs.kalshi.com/api-reference/market/get-series-list | Confirmed (`category` exact/case-sensitive, `tags`, `include_product_metadata`) |
+| All cited docs paths exist | docs.kalshi.com/llms.txt | Confirmed for every path referenced in the repo |
+| `category=Culture` exists; `category=Gas` → `{"series":null}`; KXAAAGASM record; captured market row; exchange status | live demo REST (5 URLs, see VERIFICATION.md V18/V22) | Confirmed — **Culture correction applied across the repo** |
+
+### T7/T8 findings fixed in this session (details in VERIFICATION.md "Irregularities")
+
+1. FP-unsafe ≥$0.10 comparisons in Build A dashboard, portfolio page, `strategies.py`, `run_sim.py` → all now tick-space (exactly-$0.10 moves can no longer be dropped).
+2. NO-side entry price bug (`yes_bid` instead of `1 − yes_bid`) in `docs/assets/portfolio.js` and `backtest.py`.
+3. `kalshi_client.py place_order` legacy body → documented Create Order V2 shape.
+4. Culture mapping corrected in `docs/assets/app.js`, `dashboard.js`, `portfolio.js`, `docs/data/series.json`, `docs/index.html`, `docs/methodology.html`, `docs/flagged.html` (F1), `kalshi_client.py`, `EXECUTIVE_SUMMARY.md`, `VERIFICATION.md`.
+5. Missing `scripts/capture-snapshot.js` (referenced by `npm run snapshot`) implemented.
+6. Unverified demo-UI URL pattern → market links switched to the verified API-record URL; flagged F8 (Build A) / F9 (Build B).
+7. `server/alerts.js` dead line removed; `server/kalshi.js createOrder` conservative body; "Account & Settings" → "Account & security" per official docs.
+8. Test suite green after fixes: smoke 13/13, site-render 13/13 (9 flags), link check 0 broken (1 known-benign warning: `pages/common.js` is a shared module imported by page modules, not loaded by HTML directly).
+
+
+
 - Pages deploy: Workflow run 44742765873 failed at "Setup Pages" — repo has Pages disabled and the
   automation token lacks Pages-admin scope (API returns 403 "Resource not accessible by integration"
   for both POST and PUT `/pages`). Site code itself is verified (all pages 200 locally, links OK).
@@ -276,3 +316,55 @@ Other sessions' files are not touched: no other session has an open claim.
   API, so Pages cannot be enabled from this session. The `pages.yml` workflow deploys `docs/` on merge
   (the workflow now continues even if enablement fails and prints an owner-action message). If the
   site is not live after the merge, the repo owner must set Settings → Pages → Source: **GitHub Actions**.
+
+---
+
+# Session `arena/2100849c-trade3` — second full line-by-line review (T7/T8)
+
+**Session ID:** `arena/2100849c-trade3` · **Branch:** `arena/2100849c-trade3` · **Base:** `e5c92fa`, rebased onto `origin/main` at `1219822` (PRs #6–#10 merged).
+
+## Conflict resolution (logged per protocol — nothing from other sessions discarded)
+
+While rebasing onto `main`, three parallel sessions' work (PRs #6–#10, sessions `arena/dd384643-trade3`,
+`arena/62559215-trade3`, `arena/b4e5648a-trade3`, `arena/d82eec7a-trade3`) collided with this session's independent
+fixes in 10 files. Resolution, kept verbatim unless noted:
+
+- `COORDINATION.md` — both merge records kept; this section appended.
+- `docs/index.html`, `docs/methodology.html` — upstream rows kept (per-row source links); my added notes merged into the
+  Culture cells (tags-map omission note, supplement mention).
+- `docs/flagged.html` — upstream flag table (F1–F20) kept; my demo-UI URL flag renumbered **F21** (was colliding with
+  upstream F8/F9); F15/F20 status text updated to say the Entertainment supplement is now implemented in both builds
+  (owner can revert with a one-line change) instead of "not included by default".
+- `docs/dashboard-site/assets/data.js` — upstream flags F9–F18/F20 kept; my flag appended as **F21**; static hero count
+  updated to (19).
+- `docs/data/series.json` — upstream culture block kept (blanked unverified settlement sources per their F10, richer
+  per-row schema); its `flag` text updated to document the supplement; valid JSON re-checked.
+- `docs/assets/app.js` — merged: upstream honesty note + this session's dual-category routing
+  (`categories: ["Culture", "Entertainment"]`).
+- `kalshi_client.py` — merged: upstream correction + my `extra_categories: ["Entertainment"]` (consumed by
+  `fetch_topic_markets`).
+- `package.json` — upstream's script split kept (`test:engine` / `test:site`); `snapshot` script restored because this
+  session implemented the missing `scripts/capture-snapshot.js` it referenced.
+
+## What this session verified independently (all fetched live 2026-11-20 — VERIFICATION.md V18/V28/V29)
+
+docs pages re-opened live (demo_env, api_environments, authenticated requests, websockets, market_lifecycle,
+market_settlement, create-order-v2, get-series-list, llms.txt index); fee schedule PDF re-read (formula + 21 rows +
+maker 0.0175 + KXBTCY/KXETHY 0 multiplier + effective 2026-07-07); live API re-checks (exchange status, KXAAAGASM
+series + market record field-for-field, `category=Gas` → null, golf tag query). Findings fixed here that upstream had
+not covered: FP-unsafe ≥$0.10 comparisons in Build A + Python tools, NO-side entry price (`1 − yes_bid`) in the Build A
+simulator and `backtest.py`, legacy order body in `kalshi_client.py place_order`, missing `capture-snapshot.js`,
+unverified demo-UI URL pattern (F8 Build A / F21 Build B), "Account & Settings" → "Account & security".
+
+## Final state
+
+- `npm test` → 13/13 engine + 13/13 site (19 flags); `node scripts/check-links.js` → 0 broken.
+- `py_compile` + offline behavioural checks pass (exact-$0.10 momentum fires; NO entry = 1 − bid; settlement arithmetic).
+- Server boot test (synthetic mode): `/api/health`, `/api/state`, `/app/`, both site roots → 200; 5 topics tracked.
+
+## Merge record (this session)
+
+- PR link: https://github.com/wingbangboozle1-lang/Trade3/pull/11
+- Merge result: MERGED 2026-11-20 (see PR #11 for the merge commit).
+- Pages: deploy workflow `Deploy site to GitHub Pages` runs on merge to `main`; enablement remains an owner setting if
+  the token lacks Pages scope (upstream F8) — deployment result recorded below after the merge.

@@ -148,7 +148,7 @@
       "kalshi_category": "Culture",
       "kalshi_tags": [],
       "source": "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture",
-      "flag": "Kalshi's Culture category has 2 series and no markets at capture (2026-11-20). Entertainment (a much larger Kalshi category) is NOT used by default; the owner decides (flag F15). Settlement sources are left blank: the Culture series list Google search pages and a personal account, which are not official publishers (flag F10).",
+      "flag": "Kalshi's Culture category has 2 series and no markets at capture (2026-11-20). The dashboards additionally query Entertainment as a clearly-labelled supplement so the topic still has live markets — owner decision pending (flags F15/F20); this table lists only the Culture category's own series. Settlement sources are left blank: the Culture series list Google search pages and a personal account, which are not official publishers (flag F10).",
       "series": [
         {
           "ticker": "KXXBANNEDGROK",

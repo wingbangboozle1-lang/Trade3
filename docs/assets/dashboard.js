@@ -30,28 +30,45 @@ function median(arr) {
   return s[Math.floor(s.length / 2)];
 }
 
+// Threshold comparisons are done in integer 1/10000-dollar space (Kalshi prices have
+// 4 decimals) so a move of exactly $0.10 always fires: floating-point subtraction can
+// turn 0.42 - 0.32 into 0.09999..., which would silently drop a qualifying alert.
+const THRESH_TICKS = Math.round(ALERT_THRESHOLD * 10000);
+function meetsThreshold(a, b) {
+  const ta = Math.round(Number(a) * 10000), tb = Math.round(Number(b) * 10000);
+  if (!Number.isFinite(ta) || !Number.isFinite(tb)) return false;
+  return Math.abs(tb - ta) >= THRESH_TICKS;
+}
+
 function isHighRoi(m, prevPrice) {
   const p = lastPrice(m);
   if (p < 0.15 || p > 0.85) return false;
   if (dollarVolume(m) < state.medianVol) return false;
   const bid = parseFloat(m.yes_bid_dollars), ask = parseFloat(m.yes_ask_dollars);
   if (!isNaN(bid) && !isNaN(ask) && ask - bid > 0.10) return false;
-  if (prevPrice != null && Math.abs(p - prevPrice) < 0.05) return false;
+  // |move| >= $0.05, compared in tick space (1/10000-dollar units)
+  if (prevPrice != null && Math.abs(Math.round(p * 10000) - Math.round(prevPrice * 10000)) < 500) return false;
   return true;
 }
 
 async function discoverTopic(topicId) {
   const t = TOPICS.find((x) => x.id === topicId);
+  // A topic may span two Kalshi categories (verified 2026-11-20: "Culture" IS a Kalshi
+  // category — GET /series?category=Culture returns series — and Entertainment is kept as a
+  // supplementary proxy because Culture series are often closed on the demo environment).
+  const categories = t.categories || (t.category ? [t.category] : [null]);
   const tags = t.tags.length ? t.tags : [null];
   const series = [];
   const seenSeries = new Set();
-  for (const tag of tags) {
-    const params = { limit: 100 };
-    if (t.category) params.category = t.category;
-    if (tag) params.tags = tag;
-    const data = await apiGet("/series", params);
-    for (const s of data.series || []) {
-      if (!seenSeries.has(s.ticker)) { seenSeries.add(s.ticker); series.push(s); }
+  for (const category of categories) {
+    for (const tag of tags) {
+      const params = { limit: 100 };
+      if (category) params.category = category;
+      if (tag) params.tags = tag;
+      const data = await apiGet("/series", params);
+      for (const s of data.series || []) {
+        if (!seenSeries.has(s.ticker)) { seenSeries.add(s.ticker); series.push(s); }
+      }
     }
   }
   const markets = [];
@@ -100,7 +117,7 @@ function renderMarkets() {
     const p = lastPrice(m);
     const old = state.prev.get(m.ticker);
     const d = old != null ? p - old : 0;
-    const cls = d >= ALERT_THRESHOLD ? "up" : d <= -ALERT_THRESHOLD ? "down" : "";
+    const cls = meetsThreshold(p, old) && d > 0 ? "up" : meetsThreshold(p, old) && d < 0 ? "down" : "";
     const sel = m.ticker === state.selected ? " style='background:#1a2c4d'" : "";
     return `<tr${sel} data-ticker="${esc(m.ticker)}" style="cursor:pointer">
       <td><code>${esc(m.ticker)}</code></td>
@@ -121,7 +138,7 @@ function pushAlert(m, oldPrice) {
   const delta = p - oldPrice;
   const roi = isHighRoi(m, oldPrice);
   const alert = { ts: Date.now(), ticker: m.ticker, title: m.title || "", topic: m._topic,
-    from: oldPrice, to: p, delta, roi };
+    from: oldPrice, to: p, delta, roi, url: kalshiMarketUrl(m.ticker) };
   state.alerts.unshift(alert);
   if (roi) state.roiAlerts.unshift(alert);
   state.alerts = state.alerts.slice(0, 200);
@@ -141,7 +158,7 @@ function renderChat(el, list) {
   if (!el) return;
   el.innerHTML = list.map((a) =>
     `<div class="msg ${a.roi ? "roi" : ""}"><span class="t">${timeStr(a.ts)} · ${esc(a.topic)}</span><br>
-     <b>${esc(a.ticker)}</b> ${esc(a.title)}<br>
+     <b><a href="${esc(a.url || "#")}" target="_blank" rel="noopener">${esc(a.ticker)}</a></b> ${esc(a.title)}<br>
      <span class="${a.delta >= 0 ? "up" : "down"}">${fmtPx(a.from)} → ${fmtPx(a.to)} (${a.delta >= 0 ? "+" : ""}${a.delta.toFixed(2)})</span>
      ${a.roi ? ' <span class="pill live">HIGH-ROI</span>' : ""}</div>`
   ).join("") || `<div class="msg muted">No ≥ $0.10 swings yet this session. Polling every ${state.pollMs / 1000}s…</div>`;
@@ -187,10 +204,10 @@ function drawChart() {
   ctx.strokeStyle = "#00dd94"; ctx.lineWidth = 2 * devicePixelRatio; ctx.beginPath();
   hist.forEach((h, i) => { const px = x(h.ts), py = y(h.price); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); });
   ctx.stroke();
-  // alert markers (>= $0.10 steps)
+  // alert markers (>= $0.10 steps, compared in tick space)
   ctx.fillStyle = "#ffb454";
   for (let i = 1; i < hist.length; i++) {
-    if (Math.abs(hist[i].price - hist[i - 1].price) >= ALERT_THRESHOLD) {
+    if (meetsThreshold(hist[i - 1].price, hist[i].price)) {
       ctx.beginPath(); ctx.arc(x(hist[i].ts), y(hist[i].price), 4 * devicePixelRatio, 0, 7); ctx.fill();
     }
   }
@@ -243,7 +260,7 @@ async function poll() {
     for (const m of markets) {
       const p = lastPrice(m);
       const old = state.prev.get(m.ticker);
-      if (old != null && Math.abs(p - old) >= ALERT_THRESHOLD) pushAlert(m, old);
+      if (old != null && meetsThreshold(old, p)) pushAlert(m, old);
       state.prev.set(m.ticker, p);
       const h = state.history.get(m.ticker) || [];
       h.push({ ts: now, price: p });

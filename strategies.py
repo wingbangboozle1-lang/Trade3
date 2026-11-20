@@ -3,11 +3,16 @@
 These are *research heuristics*, not financial advice and not a prediction
 model. Every rule is explicit so results can be reproduced and audited.
 
-Strategies (each returns side in {"yes", "no", None} given a snapshot):
+Strategies (each returns side in {"yes", "no", None} given a snapshot) — the
+three registered in the STRATEGIES dict below are the ones run_sim.py and
+backtest.py can route through:
 - momentum: follow a >= $0.10 move in the same direction.
 - mean_reversion: fade an extreme price (<=0.15 or >=0.85) toward 0.50.
 - favorite_longshot: buy the favorite (price >= 0.65) for small edge.
-- volume_breakout: trade with volume in the top quartile for that topic.
+
+`volume_breakout` is a helper, not an auto-traded strategy: its cutoff depends
+on the topic's dollar-volume distribution, so it is applied through the
+high-ROI filter (`is_high_roi`) instead of the STRATEGIES registry.
 
 High-ROI filter (for the selective alert chat): price in [0.15, 0.85],
 dollar volume above the topic median, spread <= $0.10 when quotes exist,
@@ -29,6 +34,14 @@ def _f(x, default=0.0):
         return default
 
 
+def _ticks(x) -> int | None:
+    """Price in integer 1/10000-dollar units so threshold comparisons are exact.
+    Floating-point subtraction (e.g. 0.42 - 0.32) can yield 0.09999..., which would
+    silently drop an exactly-$0.10 move."""
+    v = _f(x, float("nan"))
+    return round(v * 10000) if v == v else None
+
+
 def last_price(m: dict) -> float:
     return _f(m.get("last_price_dollars"), _f(m.get("yes_bid_dollars")))
 
@@ -43,10 +56,12 @@ def spread(m: dict) -> float | None:
 def momentum(m: dict, prev_price: float | None) -> str | None:
     if prev_price is None:
         return None
-    d = last_price(m) - prev_price
-    if d >= ALERT_THRESHOLD:
+    d = _ticks(last_price(m)) - _ticks(prev_price)
+    if d is None:
+        return None
+    if d >= _ticks(ALERT_THRESHOLD):
         return "yes"
-    if d <= -ALERT_THRESHOLD:
+    if d <= -_ticks(ALERT_THRESHOLD):
         return "no"
     return None
 
@@ -89,8 +104,10 @@ def is_high_roi(m: dict, prev_price: float | None, median_dollar_vol: float) -> 
     s = spread(m)
     if s is not None and s > ROI_MAX_SPREAD:
         return False
-    if prev_price is not None and abs(p - prev_price) < ROI_MIN_MOVE:
-        return False
+    if prev_price is not None:
+        move = _ticks(p) - _ticks(prev_price)
+        if move is not None and abs(move) < _ticks(ROI_MIN_MOVE):
+            return False
     return True
 
 

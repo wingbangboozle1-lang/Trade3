@@ -74,12 +74,30 @@ Full list with source links: [Flagged for Review](docs/flagged.html).
 
 ## Irregularities / flags (non-blocking)
 
-- **F1 Culture mapping (corrected 2026-11-20):** Kalshi **does** have a Culture category (2 series, no markets at capture). The Culture topic now uses it. Whether to add Kalshi’s broader Entertainment category is an owner decision (F15).
+- **F1 Culture mapping (corrected 2026-11-20):** Kalshi **does** have a Culture category (2 series, no markets at capture). The Culture topic uses it, with Entertainment queried as a clearly-labelled supplement (owner decision pending, F15/F20). Re-verified independently by a second session via a live fetch — see VERIFICATION.md V18/V28.
 - **F2 News attribution:** no news API → settlement-source links only.
 - **F3 Live execution/WS:** needs user demo keys (by design, never in repo).
 - **F4 $ volume definition:** volume × price approximation; confirm intent.
 - **F5 High-ROI thresholds:** unvalidated heuristic; tune via backtest.
 - **F6 CORS:** verify live fetch on GitHub Pages HTTPS (Kalshi docs show browser fetch examples).
+- **F8 Demo-UI URL pattern:** `demo.kalshi.co/markets/{ticker}` could not be verified from an
+  official source; market links now use the verified API-record URL instead (flagged, needs
+  human confirmation in a browser).
+
+## Second line-by-line review (2026-11-20, session `arena/2100849c-trade3`)
+
+A second session re-reviewed the repository line by line and re-verified every load-bearing
+claim against official sources fetched live that day (docs.kalshi.com pages, the fee-schedule
+PDF, and the demo REST API itself). Results: endpoints, signing, lifecycle, settlement, fee
+formula (all 21 published table rows), Create Order V2 shape, and the captured market rows all
+matched. Issues found were fixed in place and are logged in
+[VERIFICATION.md](VERIFICATION.md): floating-point threshold comparisons that could drop
+exactly-$0.10 alerts (fixed in both builds and the Python tools), NO-side entry pricing in the
+simulators (now `1 − yes_bid` per the official orderbook derivation), the legacy order body in
+`kalshi_client.py` (rewritten to the verified V2 shape), the Culture mapping (corrected above),
+a missing `scripts/capture-snapshot.js` (implemented), and unverified demo-UI link patterns
+(flagged). Full test suite rerun and green: `tests/smoke-test.js` 13/13,
+`tests/site-render-test.js` 13/13, `scripts/check-links.js` 0 broken links.
 - **Sandbox note:** this build sandbox cannot reach Kalshi REST directly (egress allowlist);
   verification used official docs + live API JSON fetched through the docs proxy. The site itself
   fetches from the user's browser; whether the browser is allowed to read those responses from a
