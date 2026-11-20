@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portfolio &amp; Strategies — Trade3 Kalshi</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">Trade3 <span>· Portfolio &amp; Strategies</span></div>
+  <nav class="main">
+    <a href="index.html">Home</a>
+    <a href="dashboard.html">Live Dashboard</a>
+    <a href="portfolio.html" class="active">Portfolio &amp; Strategies</a>
+    <a href="topics/gas.html">Gas</a>
+    <a href="topics/elections.html">Elections</a>
+    <a href="topics/culture.html">Culture</a>
+    <a href="topics/crypto.html">Crypto</a>
+    <a href="topics/golf.html">Golf</a>
+    <a href="methodology.html">Methodology</a>
+    <a href="flagged.html">Flagged for Review</a>
+  </nav>
+</header>
+<main>
+  <div class="card">
+    <h1>Simulated portfolio — strategy testing &amp; trade analysis</h1>
+    <p class="muted">All fills on this page are <b>simulated</b> at quoted prices against live demo market data. No real orders are placed. To execute on your Kalshi demo account, use the Python client with your own demo keys (see Methodology). Demo prices may not reflect real markets.</p>
+    <div class="controls">
+      <label>Strategy
+        <select id="strategy-select">
+          <option value="momentum">Momentum (follow ≥ $0.10 move)</option>
+          <option value="mean_reversion">Mean reversion (fade ≤$0.15 / ≥$0.85)</option>
+          <option value="favorite_longshot">Favorite / longshot (≥$0.65 / ≤$0.35)</option>
+        </select>
+      </label>
+      <label>Contracts per trade <input id="contracts-input" type="number" value="10" min="1" max="1000" style="width:80px"></label>
+      <button id="run-btn">Run simulation</button>
+      <span id="pf-status" class="pill live">Ready</span>
+    </div>
+  </div>
+
+  <div class="grid cols-3" style="margin-top:16px">
+    <div class="card"><div class="muted">Cash after entries</div><div class="kpi" id="pf-cash">—</div></div>
+    <div class="card"><div class="muted">Open (unsettled) trades</div><div class="kpi" id="pf-open">—</div></div>
+    <div class="card"><div class="muted">Realized PnL (settled)</div><div class="kpi" id="pf-pnl">—</div></div>
+    <div class="card"><div class="muted">Win rate (settled)</div><div class="kpi" id="pf-win">—</div></div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h2>Simulated trades</h2>
+    <table>
+      <thead><tr><th>Ticker</th><th>Topic</th><th>Strategy</th><th>Side</th><th>Entry</th><th>Result</th><th>PnL</th></tr></thead>
+      <tbody id="pf-body"></tbody>
+    </table>
+  </div>
+
+  <div class="grid cols-2" style="margin-top:16px">
+    <div class="card">
+      <h2>Strategy comparison (same snapshot)</h2>
+      <table>
+        <thead><tr><th>Strategy</th><th>Trades</th><th>Cash left</th></tr></thead>
+        <tbody id="cmp-body"></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h2>Results by topic (settled trades)</h2>
+      <table>
+        <thead><tr><th>Topic</th><th>Settled</th><th>PnL</th></tr></thead>
+        <tbody id="cat-body"></tbody>
+      </table>
+      <p class="muted">Trades settle when their markets resolve (yes → $1.00, no → $0.00). Until then PnL is blank — never estimated as realized.</p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h2>How to run the full backtest locally (Python)</h2>
+    <p class="muted">The repo includes <code>kalshi_client.py</code>, <code>strategies.py</code>, <code>backtest.py</code> and <code>run_sim.py</code>. The Python backtest replays price snapshots and settles against Kalshi <code>result</code> fields, categorizing every trade by topic and strategy.</p>
+    <pre>pip install -r requirements.txt
+python run_sim.py --base demo --polls 12 --interval 30 --strategy momentum
+# writes sim_output.json (alerts + portfolio + trades)</pre>
+    <p class="muted">Live demo execution (real demo orders) requires <code>KALSHI_API_KEY_ID</code> + <code>KALSHI_PRIVATE_KEY_PATH</code> from <a href="https://demo.kalshi.co/" target="_blank" rel="noopener">demo.kalshi.co</a> → Account &amp; security → API Keys. Signing follows <a href="https://docs.kalshi.com/getting_started/quick_start_authenticated_requests" target="_blank" rel="noopener">Kalshi's authenticated-requests guide</a>. Keys are never committed or sent anywhere except Kalshi.</p>
+  </div>
+</main>
+<footer><a href="dashboard.html">← Live Dashboard</a> · <a href="methodology.html">Methodology</a></footer>
+<script type="module" src="assets/portfolio.js"></script>
+</body>
+</html>
