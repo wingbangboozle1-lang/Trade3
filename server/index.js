@@ -43,6 +43,9 @@ export function createServer({
   collector,
   staticRoots = [
     { prefix: '/app', dir: path.join(ROOT, 'app') },
+    // This build's published site: /site/
+    { prefix: '/site', dir: path.join(ROOT, 'docs', 'dashboard-site') },
+    // The rest of the repository's site (Build A)
     { prefix: '/', dir: path.join(ROOT, 'docs') },
   ],
   logger = console,
@@ -318,8 +321,9 @@ if (isMain) {
 
   const server = createServer({ collector });
   server.listen(PORT, HOST, () => {
-    console.log(`Kalshi dashboard: http://${HOST}:${PORT}/app/  (env=${ENV}, poll=${POLL_MS}ms, dataMode=${DATA_MODE})`);
-    console.log(`Docs site:        http://${HOST}:${PORT}/`);
+    console.log(`Kalshi dashboard: http://${HOST}:${PORT}/app/   (env=${ENV}, poll=${POLL_MS}ms, dataMode=${DATA_MODE})`);
+    console.log(`This build's site: http://${HOST}:${PORT}/site/`);
+    console.log(`Repository site:   http://${HOST}:${PORT}/`);
   });
 
   let running = false;

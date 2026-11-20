@@ -456,7 +456,7 @@ function renderHelp() {
     <p>The fee formula is quoted from Kalshi's official fee schedule (effective 2026-07-07). What is <em>not</em> verified is each individual
     series' multiplier, which the pages checked do not enumerate for every series; the app uses the <code>fee_multiplier</code> the series object returns.
     Anything the API does not return is shown as an em dash rather than guessed.
-    See the <a href="/flagged.html">Flagged for Review</a> page on the published site for the full list.</p>
+    See the <a href="/site/flagged.html">Flagged for Review</a> page on the published site for the full list.</p>
 
     <h3>Official references</h3>
     <ul class="refs">

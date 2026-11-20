@@ -231,6 +231,13 @@ await test('every HTTP route answers', async () => {
     assert.equal(chart.body.window, w);
   }
 
+  // Static routes: both builds must be reachable from the same server.
+  assert.equal((await get('/app/')).status, 200, '/app/ must serve the dashboard');
+  assert.equal((await get('/site/')).status, 200, "the /site/ prefix must serve this build's site");
+  assert.equal((await get('/site/flagged.html')).status, 200);
+  assert.equal((await get('/site/assets/site.css')).status, 200);
+  assert.equal((await get('/index.html')).status, 200, 'repository site root must still serve');
+
   assert.equal((await get('/api/market/NOPE')).status, 404);
   assert.equal((await get('/api/does-not-exist')).status, 404);
 
