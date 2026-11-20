@@ -37,6 +37,48 @@
   automatically on the next push (or via Actions → "Deploy GitHub Pages" → Run workflow).
   Expected URL: https://wingbangboozle1-lang.github.io/Trade3/
 
+---
+
+# Session `arena/62559215-trade3` — independent re-verification + finalization
+
+**Branch:** `arena/62559215-trade3` (currently identical to `main` @ `e5c92fa`; no unclaimed work remains in the tree)
+**Session date:** 2026-11-20
+**Scope:** line-by-line verification of every published fact against official Kalshi sources; confirmation of tests, links, and Pages-readiness; GitHub Pages enablement + deploy attempt; PR/merge of this branch to `main`.
+
+## Verification performed this session (each checked live against the official API or docs)
+
+| # | Claim | Official source | Result |
+|---|-------|-----------------|--------|
+| R1 | Demo REST base `https://external-api.demo.kalshi.co/trade-api/v2` (recommended); alt `https://demo-api.kalshi.co/trade-api/v2` | [Demo Environment](https://docs.kalshi.com/getting_started/demo_env) | Confirmed — matches the user brief exactly |
+| R2 | Demo WS `wss://external-api-ws.demo.kalshi.co/trade-api/ws/v2` | [Demo Environment](https://docs.kalshi.com/getting_started/demo_env) | Confirmed |
+| R3 | Public market data needs no auth (`/series`, `/markets`, `/orderbook`) | [Quick Start: Market Data](https://docs.kalshi.com/getting_started/quick_start_market_data) | Confirmed |
+| R4 | `GET /exchange/status` → `exchange_active: true, trading_active: true` | [Live API](https://external-api.demo.kalshi.co/trade-api/v2/exchange/status) | Confirmed (live JSON fetched; shards 0–3 active) |
+| R5 | `GET /series/KXAAAGASM` → category `Economics`, tags `["Oil & Gas","Oil and energy"]`, scope `Gasoline`, fee_multiplier 1, settlement source AAA | [Live API](https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASM) | Confirmed — drives the Gas topic routing in `server/topics.js` |
+| R6 | `GET /markets?series_ticker=KXAAAGASM&status=open` returns markets with `yes_bid_dollars`, `no_bid_dollars`, `yes_ask_dollars`, `last_price_dollars`, `previous_price_dollars`, `volume_fp`, `open_interest_fp` | [Live API](https://external-api.demo.kalshi.co/trade-api/v2/markets?series_ticker=KXAAAGASM&status=open&limit=5) | Confirmed — all fields consumed by `server/kalshi.js` and `server/collector.js` exist |
+| R7 | No `Gas` / `Golf` Kalshi category; Gas = Economics + Oil & Gas tag; Golf = Sports + Golf tag | [Live API](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Gas) → `{"series":null}` | Confirmed — flagged F1 |
+| R8 | Fee formula `round up(M × 0.07 × C × P × (1 − P))` | [Fee schedule PDF](https://kalshi.com/docs/kalshi-fee-schedule.pdf) | Confirmed against all 21 published rows (max residual 1.75¢) |
+| R9 | Settlement: winning side receives $1/contract; no settlement fee | [Market Settlement](https://docs.kalshi.com/getting_started/market_settlement) | Confirmed |
+| R10 | Legacy `/portfolio/orders` write → 410; orders use `/portfolio/events/orders` | [Create Order V2](https://docs.kalshi.com/api-reference/orders/create-order-v2) | Confirmed — implemented in `kalshi.js` |
+
+## Test results this session
+
+- `node --test tests/*.js` — **26/26 passing** (13/13 smoke-test + 13/13 site-render). Covers the inclusive $0.10 threshold both directions, five-topic routing, official-metadata precedence, fee formula vs the published table, settlement arithmetic, all three chart windows, every HTTP route, and all three data modes (live/snapshot/demo).
+- `node scripts/check-links.js` — **0 broken local links, anchors, imports or DOM targets** across 26 HTML pages and 18 JS files. One benign warning: `dashboard-site/assets/pages/common.js` is a shared ES module imported by page scripts, not loaded directly by HTML (not a dead file).
+
+## Sandbox constraint (recorded, not worked around silently)
+
+Direct `curl` to Kalshi hosts from this sandbox's shell fails (`SSL_ERROR_SYSCALL`); egress is allowlisted to github.com/api.github.com/pypi.org/registry.npmjs.org. All live values above were read through `fetch_page`, which can reach `external-api.demo.kalshi.co`. The shipped site reads Kalshi from the visitor's browser (unrestricted) and labels every value with its `dataMode` (live / snapshot / demo) so synthetic data is never mistaken for market data.
+
+## GitHub Pages status
+
+- `pages.yml` exists and deploys `docs/` on push to `main` (and `workflow_dispatch`). Verify + deploy jobs are wired.
+- `GET /repos/wingbangboozle1-lang/Trade3/pages` → 404: **Pages is not enabled**. Enabling requires the `pages` site-creation permission, which the automation token does not have (403 on POST/PUT `/pages`).
+- **Owner action:** Repo → Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save. Then the next push to `main` (or "Deploy GitHub Pages" → Run workflow) publishes `docs/` at https://wingbangboozle1-lang.github.io/Trade3/.
+
+## Handoff note
+
+No other sessions are active on this repo. All tasks T1–T6 in the board are complete and verified; nothing is claimed by another session. This session's only change to the tree is this COORDINATION.md record (verification + Pages status). Because `arena/62559215-trade3` is currently identical to `main`, a PR/merge requires at least one commit on this branch — this record is that commit.
+
 
 ---
 
