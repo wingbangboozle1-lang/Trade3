@@ -1,54 +1,508 @@
-// Shared site config + helpers. No external dependencies.
-export const DEMO_BASE = "https://external-api.demo.kalshi.co/trade-api/v2";
-export const PROD_BASE = "https://external-api.kalshi.com/trade-api/v2";
-export const DEMO_WS = "wss://external-api-ws.demo.kalshi.co/trade-api/ws/v2";
-export const PROD_WS = "wss://external-api-ws.kalshi.com/trade-api/ws/v2";
-export const ALERT_THRESHOLD = 0.10; // $ swing that triggers an alert
+// ============================================================================
+// Trade3 shared core: Kalshi endpoint config, paced fetching, topic mapping.
+// No build step, no dependencies, plain ES modules.
+//
+// Every endpoint and query shape used here is taken from Kalshi's official docs:
+//   https://docs.kalshi.com/getting_started/api_environments
+//   https://docs.kalshi.com/getting_started/quick_start_market_data
+//   https://docs.kalshi.com/api-reference/market/get-markets
+//   https://docs.kalshi.com/api-reference/events/get-events
+//   https://docs.kalshi.com/api-reference/market/get-series-list
+//   https://docs.kalshi.com/api-reference/market/get-market-orderbook
+//   https://docs.kalshi.com/api-reference/market/get-market-candlesticks
+// ============================================================================
 
+export const DEMO_PRIMARY = "https://external-api.demo.kalshi.co/trade-api/v2";
+export const DEMO_FALLBACK = "https://demo-api.kalshi.co/trade-api/v2"; // "also supported" per docs
+export const PROD_PRIMARY = "https://external-api.kalshi.com/trade-api/v2";
+export const PROD_FALLBACK = "https://api.elections.kalshi.com/trade-api/v2";
+
+// Swing size that raises an alert (either direction), in dollars per contract.
+export const ALERT_THRESHOLD = 0.10;
+
+// High-ROI screen. These are *disclosed heuristics*, not a model and not advice.
+// Each constant is shown on the Method page next to its rationale.
+export const ROI = {
+  minPrice: 0.15,      // skip near-certain / near-dead contracts
+  maxPrice: 0.85,
+  minMove: 0.05,       // needs a real move, not noise
+  maxSpread: 0.10,     // must be tradeable
+  minDollarVol: 250,   // must have real money behind it
+  minDepth: 50,        // contracts resting within 3c of best bid
+};
+
+// The five topics the brief asks for, with the exact Kalshi filters that define
+// them. `series` lists verified tickers (see docs/data/series.json); live
+// discovery via GET /series?category=&tags= is merged on top at runtime.
 export const TOPICS = [
-  { id: "gas", label: "Gas prices", category: "Economics", tags: ["Oil & Gas", "Oil and energy"] },
-  { id: "elections", label: "Elections", category: "Elections", tags: [] },
-  { id: "culture", label: "Culture", category: "Entertainment", tags: [], note: "Kalshi has no 'Culture' category; Entertainment is the proxy (flagged)." },
-  { id: "crypto", label: "Crypto", category: "Crypto", tags: [] },
-  { id: "golf", label: "Golf", category: "Sports", tags: ["Golf"] },
+  {
+    id: "gas",
+    label: "Gas prices",
+    category: "Economics",
+    tags: ["Oil and Gas", "Oil and energy"],   // matches both "Oil & Gas" and "Oil and energy"
+    site: "https://kalshi.com/markets/kxaaagasm",
+    blurb: "Retail gasoline via AAA and natural gas via EIA.",
+  },
+  {
+    id: "elections",
+    label: "Elections",
+    category: "Elections",
+    tags: [],
+    site: "https://kalshi.com/category/elections",
+    blurb: "US and international elections, nominations and control of office.",
+  },
+  {
+    id: "culture",
+    label: "Culture",
+    category: "Entertainment",                 // Kalshi has no "Culture" category; see F1
+    tags: [],
+    site: "https://kalshi.com/category/entertainment",
+    blurb: "Entertainment is Kalshi's closest category to culture (music, awards, film, TV, games).",
+    flag: "F1: Kalshi has no Culture category. Entertainment is used as the proxy.",
+  },
+  {
+    id: "crypto",
+    label: "Crypto",
+    category: "Crypto",
+    tags: [],
+    site: "https://kalshi.com/category/crypto",
+    blurb: "BTC, ETH, SOL, XRP and other crypto price and milestone contracts.",
+  },
+  {
+    id: "golf",
+    label: "Golf",
+    category: "Sports",
+    tags: ["Golf"],
+    site: "https://kalshi.com/category/sports/golf",
+    blurb: "PGA/LPGA/team golf contracts, settled from tour and broadcast sources.",
+  },
 ];
 
-export function getBase() {
-  return localStorage.getItem("kalshi-base") || DEMO_BASE;
-}
-export function setBase(b) { localStorage.setItem("kalshi-base", b); }
+export const TOPIC_BY_ID = Object.fromEntries(TOPICS.map((t) => [t.id, t]));
+export const TOPIC_IDS = TOPICS.map((t) => t.id);
 
-export async function apiGet(path, params = {}) {
-  const qs = new URLSearchParams(params).toString();
-  const url = `${getBase()}${path}${qs ? "?" + qs : ""}`;
-  const r = await fetch(url);
-  if (!r.ok) throw new Error(`HTTP ${r.status} for ${url}`);
-  return r.json();
+// ---------------------------------------------------------------------------
+// Settings (persisted per browser; nothing is sent anywhere but Kalshi)
+// ---------------------------------------------------------------------------
+const LS = {
+  env: "t3.env",
+  proxy: "t3.proxy",
+  poll: "t3.poll",
+  paper: "t3.paper",
+  alerts: "t3.alerts",
+  roi: "t3.roi",
+  series: "t3.seriesCache",
+  sound: "t3.sound",
+};
+
+export const store = {
+  get(key, fallback) {
+    try {
+      const raw = localStorage.getItem(LS[key]);
+      return raw == null ? fallback : JSON.parse(raw);
+    } catch { return fallback; }
+  },
+  set(key, value) {
+    try { localStorage.setItem(LS[key], JSON.stringify(value)); } catch { /* quota */ }
+  },
+};
+
+export function getEnv() { return store.get("env", "demo"); }
+export function setEnv(v) { store.set("env", v); }
+export function getProxy() { return store.get("proxy", ""); }
+export function setProxy(v) { store.set("proxy", (v || "").trim()); }
+export function getPollMs() { return store.get("poll", 15000); }
+export function setPollMs(v) { store.set("poll", v); }
+
+/** Base URLs to try, in order. Public market data needs no API key. */
+export function baseUrls() {
+  return getEnv() === "prod" ? [PROD_PRIMARY, PROD_FALLBACK] : [DEMO_PRIMARY, DEMO_FALLBACK];
 }
 
+// ---------------------------------------------------------------------------
+// HTTP: paced, retried, with host fallback and an optional user-supplied proxy.
+// Kalshi's rate limits are token buckets (docs.kalshi.com/getting_started/rate_limits);
+// we stay far under them by serialising requests and spacing them out.
+// ---------------------------------------------------------------------------
+const net = {
+  active: 0,
+  maxConcurrent: 3,
+  minGapMs: 90,
+  lastStart: 0,
+  queue: [],
+  okHost: null,
+  stats: { requests: 0, errors: 0, lastError: null, lastOkAt: null, proxyUsed: false },
+};
+
+function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
+
+function pump() {
+  if (net.active >= net.maxConcurrent || !net.queue.length) return;
+  const job = net.queue.shift();
+  net.active++;
+  job.run().finally(() => { net.active--; pump(); });
+}
+
+function enqueue(fn) {
+  return new Promise((resolve, reject) => {
+    net.queue.push({ run: () => fn().then(resolve, reject) });
+    pump();
+  });
+}
+
+/** Build the URL. A proxy, if configured, is applied as `<proxy><full-url>`. */
+function buildUrl(path, params) {
+  const host = net.okHost || baseUrls()[0];
+  const qs = new URLSearchParams(params || {}).toString();
+  const url = `${host}${path}${qs ? "?" + qs : ""}`;
+  const proxy = getProxy();
+  if (!proxy) return url;
+  const joiner = proxy.includes("%s") ? proxy.replace("%s", encodeURIComponent(url))
+    : proxy + (proxy.endsWith("/") ? "" : "/") + url;
+  net.stats.proxyUsed = Boolean(proxy);
+  return joiner;
+}
+
+/**
+ * GET a public endpoint.
+ * @param {string} path e.g. "/markets"
+ * @param {object} params query params (strings/numbers only)
+ * @param {object} opts { retries, signal, raw }
+ */
+export function apiGet(path, params = {}, opts = {}) {
+  const retries = opts.retries ?? 2;
+  return enqueue(async () => {
+    let attempt = 0;
+    let lastErr = null;
+    while (attempt <= retries) {
+      const gap = Math.max(0, net.minGapMs - (Date.now() - net.lastStart));
+      if (gap) await sleep(gap);
+      net.lastStart = Date.now();
+      const url = buildUrl(path, params);
+      try {
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), opts.timeout ?? 12000);
+        const r = await fetch(url, { signal: ctrl.signal, headers: { Accept: "application/json" } });
+        clearTimeout(timer);
+        net.stats.requests++;
+        if (r.status === 429) {                       // rate limited: back off per docs
+          await sleep(400 * Math.pow(2, attempt));
+          lastErr = new Error(`HTTP 429 from ${hostOf(url)}`);
+          attempt++; continue;
+        }
+        if (!r.ok) throw new Error(`HTTP ${r.status} from ${hostOf(url)}`);
+        net.okHost = hostOf(url);
+        net.stats.lastOkAt = Date.now();
+        net.stats.lastError = null;
+        return await r.json();
+      } catch (e) {
+        lastErr = e;
+        net.stats.errors++;
+        net.stats.lastError = String(e && e.message || e);
+        // Try the alternate documented host on the first failure.
+        if (!net.okHost && attempt === 0) {
+          const alt = baseUrls()[1];
+          if (alt && !net.okHost) { net.okHost = alt; attempt++; continue; }
+        }
+        await sleep(300 * Math.pow(2, attempt));
+        attempt++;
+      }
+    }
+    throw lastErr || new Error("request failed");
+  });
+}
+
+function hostOf(url) {
+  try { return new URL(url).host; } catch { return url.slice(0, 40); }
+}
+
+export function netStats() {
+  return { ...net.stats, host: net.okHost || baseUrls()[0], queued: net.queue.length };
+}
+
+// ---------------------------------------------------------------------------
+// Data access
+// ---------------------------------------------------------------------------
+
+/** Open events, paged. Used for the event→category map that drives topic grouping. */
+export async function fetchOpenEvents({ maxPages = 3, onPage } = {}) {
+  const out = [];
+  let cursor = "";
+  for (let i = 0; i < maxPages; i++) {
+    const data = await apiGet("/events", { status: "open", limit: 200, ...(cursor ? { cursor } : {}) });
+    for (const e of data.events || []) out.push(e);
+    if (onPage) onPage(out.length);
+    cursor = data.cursor || "";
+    if (!cursor) break;
+  }
+  return out;
+}
+
+/** Open markets, paged. Excludes multivariate combos so topics stay clean. */
+export async function fetchOpenMarkets({ maxPages = 4, onPage } = {}) {
+  const out = [];
+  let cursor = "";
+  for (let i = 0; i < maxPages; i++) {
+    const data = await apiGet("/markets", {
+      status: "open", limit: 1000, mve_filter: "exclude", ...(cursor ? { cursor } : {}),
+    });
+    for (const m of data.markets || []) out.push(m);
+    if (onPage) onPage(out.length);
+    cursor = data.cursor || "";
+    if (!cursor) break;
+  }
+  return out;
+}
+
+/** Settled markets for one series (used for resolution tracking). */
+export async function fetchSettled(seriesTicker, limit = 12) {
+  const data = await apiGet("/markets", { series_ticker: seriesTicker, status: "settled", limit });
+  return data.markets || [];
+}
+
+/** Markets for one series (live prices, any status filter). */
+export async function fetchSeriesMarkets(seriesTicker, status = "open", limit = 100) {
+  const data = await apiGet("/markets", { series_ticker: seriesTicker, status, limit });
+  return data.markets || [];
+}
+
+export async function fetchOrderbook(ticker, depth = 12) {
+  const data = await apiGet(`/markets/${encodeURIComponent(ticker)}/orderbook`, { depth });
+  return data.orderbook_fp || { yes_dollars: [], no_dollars: [] };
+}
+
+/**
+ * Candlesticks. period_interval is minutes and must be 1, 60 or 1440, and one
+ * request may span at most 5,000 periods (docs). We pick a legal interval per window.
+ */
+export async function fetchCandles(seriesTicker, ticker, startTs, endTs, periodInterval) {
+  const data = await apiGet(
+    `/series/${encodeURIComponent(seriesTicker)}/markets/${encodeURIComponent(ticker)}/candlesticks`,
+    { start_ts: Math.floor(startTs), end_ts: Math.floor(endTs), period_interval: periodInterval },
+  );
+  return data.candlesticks || [];
+}
+
+/** Legal (interval, span) pair for a length of time, honouring the 5,000-period cap. */
+export function candlePlan(windowSeconds) {
+  if (windowSeconds <= 86400) return { interval: 1, seconds: 60 };     // 1-min bars
+  if (windowSeconds <= 7 * 86400) return { interval: 60, seconds: 3600 };
+  return { interval: 1440, seconds: 86400 };
+}
+
+/** Discover the series belonging to a topic (cached ~10 min), merged with verified rows. */
+const seriesCache = { at: 0, data: null };
+
+export async function discoverTopicSeries(verified) {
+  const fresh = seriesCache.data && Date.now() - seriesCache.at < 10 * 60 * 1000;
+  if (fresh) return seriesCache.data;
+  const out = {};
+  for (const topic of TOPICS) {
+    const set = new Map();
+    for (const s of (verified?.[topic.id]?.series || [])) set.set(s.ticker, { ticker: s.ticker, title: s.title });
+    const tags = topic.tags.length ? topic.tags : [null];
+    for (const tag of tags) {
+      const params = { limit: 200, category: topic.category };
+      if (tag) params.tags = tag;
+      try {
+        const data = await apiGet("/series", params);
+        for (const s of data.series || []) {
+          const cats = s.categories || [s.category];
+          if (!cats.includes(topic.category)) continue;   // keep the topic honest
+          // A topic narrowed by tags only accepts series carrying one of those tags
+          // ("Oil & Gas" / "Oil and energy" both normalise to "oil and gas").
+          if (topic.tags.length) {
+            const seriesTags = (s.tags || []).map(normTag);
+            const wanted = topic.tags.map(normTag);
+            if (!seriesTags.some((t) => wanted.includes(t))) continue;
+          }
+          if (!set.has(s.ticker)) set.set(s.ticker, { ticker: s.ticker, title: s.title });
+        }
+      } catch { /* keep whatever we already have; surfaced in the status bar */ }
+    }
+    out[topic.id] = set;
+  }
+  seriesCache.at = Date.now();
+  seriesCache.data = out;
+  return out;
+}
+
+export function normTag(t) {
+  return String(t || "").toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+/**
+ * Assign every open market to one of the five topics, or to null.
+ * Markets do not carry a category, but their event does, and the event also
+ * gives us the series ticker — so classification is exact, not guessed.
+ */
+export function classify(markets, events, topicSeries) {
+  const eventMeta = new Map();
+  for (const e of events) {
+    eventMeta.set(e.event_ticker, { category: e.category, series: e.series_ticker, title: e.title, sub: e.sub_title });
+  }
+  const out = [];
+  for (const m of markets) {
+    const meta = eventMeta.get(m.event_ticker);
+    if (!meta) continue;
+    const topic = TOPICS.find((t) => t.category === meta.category
+      && topicSeries[t.id]?.has(meta.series));
+    if (!topic) continue;
+    out.push({
+      ...m,
+      _topic: topic.id,
+      _category: meta.category,
+      _series: meta.series,
+      _eventTitle: meta.title,
+      _eventSub: meta.sub,
+    });
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------------------
+// Numbers. Kalshi returns fixed-point **strings** in dollars ("0.4200").
+// ---------------------------------------------------------------------------
+
+/** Best YES bid, or null when the book side is empty. */
+export function yesBid(m) { return num(m?.yes_bid_dollars); }
+/** Best YES ask, or null. */
+export function yesAsk(m) { return num(m?.yes_ask_dollars); }
+export function lastPrice(m) {
+  const p = num(m?.last_price_dollars);
+  if (p != null) return p;
+  const b = yesBid(m);
+  return b == null ? null : b;
+}
+
+export function num(v) {
+  if (v == null || v === "") return null;
+  const f = typeof v === "number" ? v : parseFloat(v);
+  return Number.isFinite(f) ? f : null;
+}
+
+/**
+ * Traded dollars = contracts × price, per contract side.
+ * Kalshi exposes volume as a contract count and prices separately, and has no
+ * dollar-volume field, so this is a *disclosed approximation* (flagged F4).
+ */
 export function dollarVolume(m) {
-  const vol = parseFloat(m.volume_fp || "0") || 0;
-  const px = parseFloat(m.last_price_dollars || "0") || 0;
+  const vol = num(m?.volume_fp) ?? num(m?.volume_24h_fp) ?? 0;
+  const px = lastPrice(m) ?? 0;
   return vol * px;
 }
-export function lastPrice(m) {
-  const p = parseFloat(m.last_price_dollars);
-  if (!isNaN(p)) return p;
-  const b = parseFloat(m.yes_bid_dollars);
-  return isNaN(b) ? 0 : b;
+
+/** Contracts still resting on the book, both sides. */
+export function bookDepth(ob) {
+  const sum = (arr) => (arr || []).reduce((a, [, q]) => a + (num(q) || 0), 0);
+  return { yes: sum(ob?.yes_dollars), no: sum(ob?.no_dollars), total: sum(ob?.yes_dollars) + sum(ob?.no_dollars) };
 }
+
+/** Best bid/ask plus implied asks, per the reciprocal rule in Kalshi's docs. */
+export function bookSummary(ob) {
+  const best = (arr) => {
+    const rows = (arr || []).filter(([p]) => num(p) != null);
+    return rows.length ? num(rows[rows.length - 1][0]) : null;   // arrays are ascending
+  };
+  const yb = best(ob?.yes_dollars);
+  const nb = best(ob?.no_dollars);
+  const yesBidPx = yb;
+  const yesAskPx = nb == null ? null : 1 - nb;   // NO bid at Y == YES ask at 1-Y
+  const noBidPx = nb;
+  const noAskPx = yb == null ? null : 1 - yb;
+  const spread = yesBidPx != null && yesAskPx != null ? yesAskPx - yesBidPx : null;
+  return { yesBid: yesBidPx, yesAsk: yesAskPx, noBid: noBidPx, noAsk: noAskPx, spread };
+}
+
+/** Contracts within `cents` of the best bid on the YES side. */
+export function depthWithin(ob, cents = 0.03, side = "yes") {
+  const arr = (side === "yes" ? ob?.yes_dollars : ob?.no_dollars) || [];
+  if (!arr.length) return 0;
+  const bestPx = num(arr[arr.length - 1][0]);
+  return arr.filter(([p]) => num(p) != null && bestPx - num(p) <= cents)
+    .reduce((a, [, q]) => a + (num(q) || 0), 0);
+}
+
+// ---------------------------------------------------------------------------
+// Formatting
+// ---------------------------------------------------------------------------
+export function fmtPx(p) { return p == null ? "—" : "$" + Number(p).toFixed(2); }
+export function fmtPct(p) { return p == null ? "—" : Math.round(p * 100) + "¢"; }
 export function fmt$(n) {
-  if (n == null || isNaN(n)) return "—";
-  return "$" + Number(n).toLocaleString("en-US", { maximumFractionDigits: 0 });
+  if (n == null || !Number.isFinite(n)) return "—";
+  const abs = Math.abs(n);
+  if (abs >= 1e9) return "$" + (n / 1e9).toFixed(2) + "B";
+  if (abs >= 1e6) return "$" + (n / 1e6).toFixed(2) + "M";
+  if (abs >= 1e3) return "$" + (n / 1e3).toFixed(1) + "k";
+  return "$" + n.toFixed(abs < 10 ? 2 : 0);
 }
-export function fmtPx(p) { return p == null || isNaN(p) ? "—" : "$" + Number(p).toFixed(2); }
+export function fmtDelta(n) { return n == null ? "—" : (n >= 0 ? "+" : "−") + Math.abs(n * 100).toFixed(0) + "¢"; }
+export function fmtNum(n) { return n == null ? "—" : Number(n).toLocaleString("en-US", { maximumFractionDigits: 2 }); }
+
 export function esc(s) {
   return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
-export function kalshiMarketUrl(ticker) {
-  // Kalshi market pages are keyed by series slug; link to the market ticker search.
-  // The canonical per-market URL is https://kalshi.com/markets/<series-slug>/<event-slug>
-  // which requires series/event slugs, so we link to the API record instead (verified).
-  return `${getBase()}/markets/${encodeURIComponent(ticker)}`;
+
+export function timeStr(ts, seconds = true) {
+  if (ts == null) return "—";
+  return new Date(ts).toLocaleTimeString("en-US", {
+    hour: "2-digit", minute: "2-digit", ...(seconds ? { second: "2-digit" } : {}),
+  });
 }
-export function timeStr(ts) { return new Date(ts).toLocaleTimeString(); }
+
+export function clockStr(ts) {
+  if (ts == null) return "—";
+  return new Date(ts).toLocaleString("en-US", {
+    month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
+  });
+}
+
+/** "3d 4h", "12m", "45s" — how long until a market closes. */
+export function until(iso) {
+  if (!iso) return "—";
+  const ms = new Date(iso).getTime() - Date.now();
+  if (!Number.isFinite(ms)) return "—";
+  if (ms <= 0) return "closed";
+  const s = Math.floor(ms / 1000);
+  if (s < 60) return s + "s";
+  if (s < 3600) return Math.floor(s / 60) + "m";
+  if (s < 86400) return Math.floor(s / 3600) + "h " + (Math.floor(s / 60) % 60) + "m";
+  return Math.floor(s / 86400) + "d " + (Math.floor(s / 3600) % 24) + "h";
+}
+
+/**
+ * Public Kalshi page for a series. Kalshi's web URLs are /markets/<lowercased
+ * series ticker> (verified for KXAAAGASM, KXETHD, KXPGATOUR, KXPRESNOMD).
+ * Returns null when we cannot be sure the page exists, so callers can fall back
+ * to the API record instead of shipping a dead link.
+ */
+export function kalshiSeriesUrl(seriesTicker) {
+  if (!seriesTicker) return null;
+  return `https://kalshi.com/markets/${String(seriesTicker).toLowerCase()}`;
+}
+
+export function apiSeriesUrl(ticker) {
+  return `${(net.okHost || baseUrls()[0])}/series/${encodeURIComponent(ticker)}`;
+}
+
+export function apiMarketUrl(ticker) {
+  return `${(net.okHost || baseUrls()[0])}/markets/${encodeURIComponent(ticker)}`;
+}
+
+export function apiEventUrl(ticker) {
+  return `${(net.okHost || baseUrls()[0])}/events/${encodeURIComponent(ticker)}`;
+}
+
+// ---------------------------------------------------------------------------
+// High-ROI screen (explicit, auditable)
+// ---------------------------------------------------------------------------
+export function roiCheck({ price, delta, spread, dollarVol, depth }) {
+  const reasons = [];
+  if (price == null) reasons.push("no price");
+  else if (price < ROI.minPrice || price > ROI.maxPrice) reasons.push(`price outside $${ROI.minPrice.toFixed(2)}–$${ROI.maxPrice.toFixed(2)}`);
+  if (delta == null || Math.abs(delta) < ROI.minMove) reasons.push(`move < $${ROI.minMove.toFixed(2)}`);
+  if (spread != null && spread > ROI.maxSpread) reasons.push(`spread > $${ROI.maxSpread.toFixed(2)}`);
+  if ((dollarVol ?? 0) < ROI.minDollarVol) reasons.push(`$ volume < $${ROI.minDollarVol}`);
+  if (depth != null && depth < ROI.minDepth) reasons.push(`depth < ${ROI.minDepth} contracts`);
+  return { pass: reasons.length === 0, reasons };
+}

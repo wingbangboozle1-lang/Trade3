@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Executive summary — Trade3 · Kalshi</title>
+<meta name="description" content="Executive summary of the Trade3 Kalshi demo dashboard: scope, data sources, what was verified, what is heuristic, and what remains flagged.">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">Trade3 <span>· Summary</span></div>
+  <nav class="main">
+    <a href="index.html">Home</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="index.html#topics">Topics</a>
+    <a href="portfolio.html">Portfolio</a>
+    <a href="methodology.html">Method</a>
+    <a href="verification.html">Verification</a>
+    <a href="flagged.html">Flagged</a>
+  </nav>
+</header>
+
+<main class="stack">
+
+  <section class="card">
+    <h1>Executive summary</h1>
+    <p class="muted">Kalshi demo environment · public Trade API v2 · built and verified 2026-11-20.</p>
+  </section>
+
+  <section class="card">
+    <h2>The one-paragraph version</h2>
+    <p>
+      Trade3 is a static, keyless dashboard over Kalshi's public Trade API v2 covering exactly five
+      topics — gas prices, elections, culture, crypto and golf. It ranks live events by dollars traded,
+      streams two alert feeds for any contract swinging $0.10 or more, charts price against time across
+      seconds-to-days windows, shows order-book depth per price level, tracks each contract until Kalshi
+      publishes a yes/no result, and simulates four fixed trading strategies whose outcomes are
+      categorised by topic and strategy. Every published figure traces to an official Kalshi document or
+      API record; anything unverifiable is blanked and listed for review.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2>Scope decisions, stated plainly</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Requirement</th><th>How it is met</th><th>Honest caveat</th></tr></thead>
+      <tbody>
+        <tr><td>Highest-dollar live events, five topics only</td>
+          <td>Events ranked per topic by <code>Σ contracts × last price</code>; markets are classified by their event's <code>category</code> plus the series map, so nothing outside the five topics appears.</td>
+          <td>Kalshi publishes no dollar-volume field; the multiplication is a disclosed approximation (<a href="flagged.html">F4</a>).</td></tr>
+        <tr><td>Alerts on ≥ $0.10 swings, as scrolling chat</td>
+          <td>Two autoscrolling feeds: all swings, and a subset that passes the high-ROI screen. Each message shows the from/to prices, delta, spread and depth.</td>
+          <td>Swing detection needs two observations, so the first refresh of a session never alerts; latency equals the refresh interval (5–60 s).</td></tr>
+        <tr><td>Track events until resolution (yes/no)</td>
+          <td>Settled markets are polled per series and displayed with the exchange's <code>result</code>; simulated trades settle on that same field.</td>
+          <td>Demo markets often resolve slowly or not at all; an empty table reflects the exchange, not a bug.</td></tr>
+        <tr><td>Automated simulated trading + strategy analysis</td>
+          <td>Four explicit strategies, fills at quoted ask, P&amp;L by topic and by strategy, CSV/JSON export, plus a Python backtester in the repo.</td>
+          <td>Single-snapshot runs test plumbing, not edge. Demo prices are synthetic by Kalshi's own warning.</td></tr>
+        <tr><td>Live charts, x = time, y = price, seconds-to-hours</td>
+          <td>Seven windows (60 s → 7 d) with Kalshi's legal candle intervals (1/60/1440 min) chosen automatically, live poll points merged in, ≥ $0.10 steps marked.</td>
+          <td>Kalshi candles lag a few seconds and are capped at 5,000 periods per request — stated in the method page.</td></tr>
+        <tr><td>Liquidity: contracts available at a price</td>
+          <td>Full bid ladder per side with counts, cumulative depth bars, and implied asks derived as $1.00 − opposing bid.</td>
+          <td>Kalshi returns bids only by design; true resting asks are shown as their implied equivalents.</td></tr>
+        <tr><td>Links for what may have caused a jump</td>
+          <td>Each alert links the contract's API record, its Kalshi page, and the series' official settlement source (e.g. AAA for gas, CF Benchmarks for crypto).</td>
+          <td>The API carries no news feed. Causation is never asserted — that gap is flagged rather than filled with guesses (<a href="flagged.html">F2</a>).</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section class="grid cols-2">
+    <div class="card">
+      <h2>Data provenance</h2>
+      <ul class="muted">
+        <li>REST base: <code>https://external-api.demo.kalshi.co/trade-api/v2</code>, with
+          <code>https://demo-api.kalshi.co/trade-api/v2</code> as the documented fallback
+          (<a href="https://docs.kalshi.com/getting_started/api_environments" target="_blank" rel="noopener">source</a>).</li>
+        <li>WebSocket: <code>wss://external-api-ws.demo.kalshi.co/trade-api/ws/v2</code> — documented, but key-gated as a
+          handshake requirement, so the static site polls instead.</li>
+        <li>37 series across the five topics, each re-verified individually against <code>GET /series/{ticker}</code>.</li>
+        <li>Full row-level evidence: <a href="verification.html">Verification log</a>.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Open items for you</h2>
+      <ul class="muted">
+        <li><b>F1</b> — is Entertainment the right stand-in for "culture"?</li>
+        <li><b>F2</b> — do you want news attribution, which needs a third-party feed?</li>
+        <li><b>F3</b> — real demo execution and WebSocket streaming need your demo API key.</li>
+        <li><b>F4</b> — confirm the dollars-traded approximation matches your intent.</li>
+        <li><b>F5</b> — tune the high-ROI thresholds with you before treating them as a signal.</li>
+      </ul>
+      <p class="dim">All eight items are published with links on <a href="flagged.html">Flagged for review</a>.</p>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>What I would do next, in order</h2>
+    <ol class="muted">
+      <li><b>Add a tiny relay</b> (a few dozen lines) holding your demo key, so the browser can consume the
+        <code>ticker</code> WebSocket instead of polling. That alone takes alert latency from ~15 s to sub-second.</li>
+      <li><b>Log alerts server-side</b> from day one — the cheapest way to evaluate whether the high-ROI screen
+        beats the raw tape is a history of both.</li>
+      <li><b>Backtest with <code>run_sim.py</code> over several days</b> of demo candles before changing any strategy rule.</li>
+      <li><b>Then, and only then,</b> wire real demo orders through <code>kalshi_client.py</code> and compare fills
+        against the simulated ones.</li>
+    </ol>
+  </section>
+
+</main>
+<footer>
+  Trade3 · <a href="index.html">Home</a> · <a href="methodology.html">Methodology</a> ·
+  <a href="verification.html">Verification</a> · <a href="flagged.html">Flagged for review</a><br>
+  Not financial advice. Kalshi demo funds are mock funds.
+</footer>
+</body>
+</html>
