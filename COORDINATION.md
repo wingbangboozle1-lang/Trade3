@@ -316,3 +316,55 @@ Other sessions' files are not touched: no other session has an open claim.
   API, so Pages cannot be enabled from this session. The `pages.yml` workflow deploys `docs/` on merge
   (the workflow now continues even if enablement fails and prints an owner-action message). If the
   site is not live after the merge, the repo owner must set Settings → Pages → Source: **GitHub Actions**.
+
+---
+
+# Session `arena/2100849c-trade3` — second full line-by-line review (T7/T8)
+
+**Session ID:** `arena/2100849c-trade3` · **Branch:** `arena/2100849c-trade3` · **Base:** `e5c92fa`, rebased onto `origin/main` at `1219822` (PRs #6–#10 merged).
+
+## Conflict resolution (logged per protocol — nothing from other sessions discarded)
+
+While rebasing onto `main`, three parallel sessions' work (PRs #6–#10, sessions `arena/dd384643-trade3`,
+`arena/62559215-trade3`, `arena/b4e5648a-trade3`, `arena/d82eec7a-trade3`) collided with this session's independent
+fixes in 10 files. Resolution, kept verbatim unless noted:
+
+- `COORDINATION.md` — both merge records kept; this section appended.
+- `docs/index.html`, `docs/methodology.html` — upstream rows kept (per-row source links); my added notes merged into the
+  Culture cells (tags-map omission note, supplement mention).
+- `docs/flagged.html` — upstream flag table (F1–F20) kept; my demo-UI URL flag renumbered **F21** (was colliding with
+  upstream F8/F9); F15/F20 status text updated to say the Entertainment supplement is now implemented in both builds
+  (owner can revert with a one-line change) instead of "not included by default".
+- `docs/dashboard-site/assets/data.js` — upstream flags F9–F18/F20 kept; my flag appended as **F21**; static hero count
+  updated to (19).
+- `docs/data/series.json` — upstream culture block kept (blanked unverified settlement sources per their F10, richer
+  per-row schema); its `flag` text updated to document the supplement; valid JSON re-checked.
+- `docs/assets/app.js` — merged: upstream honesty note + this session's dual-category routing
+  (`categories: ["Culture", "Entertainment"]`).
+- `kalshi_client.py` — merged: upstream correction + my `extra_categories: ["Entertainment"]` (consumed by
+  `fetch_topic_markets`).
+- `package.json` — upstream's script split kept (`test:engine` / `test:site`); `snapshot` script restored because this
+  session implemented the missing `scripts/capture-snapshot.js` it referenced.
+
+## What this session verified independently (all fetched live 2026-11-20 — VERIFICATION.md V18/V28/V29)
+
+docs pages re-opened live (demo_env, api_environments, authenticated requests, websockets, market_lifecycle,
+market_settlement, create-order-v2, get-series-list, llms.txt index); fee schedule PDF re-read (formula + 21 rows +
+maker 0.0175 + KXBTCY/KXETHY 0 multiplier + effective 2026-07-07); live API re-checks (exchange status, KXAAAGASM
+series + market record field-for-field, `category=Gas` → null, golf tag query). Findings fixed here that upstream had
+not covered: FP-unsafe ≥$0.10 comparisons in Build A + Python tools, NO-side entry price (`1 − yes_bid`) in the Build A
+simulator and `backtest.py`, legacy order body in `kalshi_client.py place_order`, missing `capture-snapshot.js`,
+unverified demo-UI URL pattern (F8 Build A / F21 Build B), "Account & Settings" → "Account & security".
+
+## Final state
+
+- `npm test` → 13/13 engine + 13/13 site (19 flags); `node scripts/check-links.js` → 0 broken.
+- `py_compile` + offline behavioural checks pass (exact-$0.10 momentum fires; NO entry = 1 − bid; settlement arithmetic).
+- Server boot test (synthetic mode): `/api/health`, `/api/state`, `/app/`, both site roots → 200; 5 topics tracked.
+
+## Merge record (this session)
+
+- PR link: https://github.com/wingbangboozle1-lang/Trade3/pull/11
+- Merge result: MERGED 2026-11-20 (see PR #11 for the merge commit).
+- Pages: deploy workflow `Deploy site to GitHub Pages` runs on merge to `main`; enablement remains an owner setting if
+  the token lacks Pages scope (upstream F8) — deployment result recorded below after the merge.
