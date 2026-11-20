@@ -8,6 +8,7 @@ data/paper-state.json
 data/resolutions.json
 data/series-categories.json
 
-# Python cache from local page generation
-docs/__pycache__/
+# Python
 __pycache__/
+*.pyc
+.venv/

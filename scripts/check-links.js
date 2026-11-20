@@ -84,7 +84,16 @@ for (const script of pageScripts) {
   const wanted = new Set([...src.matchAll(idLookups)].map((m) => m[1]));
   // The HTML file that imports this script must contain those ids.
   const normalized = script.split(path.sep).join('/');
-  const host = htmlFiles.find((f) => fs.readFileSync(f, 'utf8').includes(normalized.replace(/^.*docs\//, '')));
+  const relToDocs = path.relative(DOCS, script).split(path.sep).join('/');
+  // Pages reference modules by a path relative to that page, e.g. "assets/pages/x.js",
+  // so match on the suffix rather than a repo-root-relative path.
+  const host = htmlFiles.find((f) => {
+    const html = fs.readFileSync(f, 'utf8');
+    const refs = [...html.matchAll(/src="([^"]+)"|import[^;]*from\s*['"]([^'"]+)['"]/g)]
+      .map((m) => m[1] || m[2])
+      .filter(Boolean);
+    return refs.some((ref) => ref.split('/').slice(-3).join('/') === relToDocs.split('/').slice(-3).join('/'));
+  });
   if (!host) {
     warnings.push(`${normalized}: no HTML page appears to load this script`);
     continue;

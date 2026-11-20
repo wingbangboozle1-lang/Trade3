@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Live Dashboard — Trade3 Kalshi</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">Trade3 <span>· Live Dashboard</span></div>
+  <nav class="main">
+    <a href="index.html">Home</a>
+    <a href="dashboard.html" class="active">Live Dashboard</a>
+    <a href="portfolio.html">Portfolio &amp; Strategies</a>
+    <a href="topics/gas.html">Gas</a>
+    <a href="topics/elections.html">Elections</a>
+    <a href="topics/culture.html">Culture</a>
+    <a href="topics/crypto.html">Crypto</a>
+    <a href="topics/golf.html">Golf</a>
+    <a href="methodology.html">Methodology</a>
+    <a href="flagged.html">Flagged for Review</a>
+  </nav>
+</header>
+<main>
+  <div class="card">
+    <h1>Live dashboard <span id="status" class="pill live">Connecting…</span></h1>
+    <div class="controls">
+      <label>Environment
+        <select id="base-toggle">
+          <option value="https://external-api.demo.kalshi.co/trade-api/v2">Demo (recommended)</option>
+          <option value="https://external-api.kalshi.com/trade-api/v2">Production</option>
+        </select>
+      </label>
+      <label>Topic <span id="topic-tabs"></span></label>
+      <label>Poll every
+        <select id="poll-select">
+          <option value="5000">5s</option>
+          <option value="10000" selected>10s</option>
+          <option value="30000">30s</option>
+        </select>
+      </label>
+      <button id="refresh-btn">Refresh now</button>
+    </div>
+    <p class="muted">Public market data needs no API key. If fetches fail with a CORS/network error, open this page over HTTPS (GitHub Pages) and check your connection — the API is reached directly from your browser.</p>
+  </div>
+
+  <div class="grid cols-3" style="margin-top:16px">
+    <div class="card"><div class="muted">Open markets (topic)</div><div class="kpi" id="kpi-markets">—</div></div>
+    <div class="card"><div class="muted">Open events</div><div class="kpi" id="kpi-events">—</div></div>
+    <div class="card"><div class="muted">Top market $ volume (vol × price)</div><div class="kpi" id="kpi-top">—</div></div>
+    <div class="card"><div class="muted">≥ $0.10 alerts this session</div><div class="kpi" id="kpi-alerts">0</div></div>
+  </div>
+
+  <div class="grid cols-2" style="margin-top:16px">
+    <div class="card">
+      <h2>Alert chat — all events (≥ $0.10 swings)</h2>
+      <div class="chat" id="chat-all"></div>
+    </div>
+    <div class="card">
+      <h2>Alert chat — high-ROI filter only</h2>
+      <p class="muted">Price $0.15–$0.85 · $ volume above topic median · spread ≤ $0.10 · |move| ≥ $0.05. Heuristic, not advice.</p>
+      <div class="chat" id="chat-roi"></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h2>Highest-dollar events (this topic)</h2>
+    <table>
+      <thead><tr><th>#</th><th>Event ticker</th><th>Markets</th><th>$ volume</th><th>Top market</th><th>Link</th></tr></thead>
+      <tbody id="events-body"></tbody>
+    </table>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h2>Markets — click a row to chart it</h2>
+    <table>
+      <thead><tr><th>Ticker</th><th>Title / series</th><th>Last price</th><th>Bid / Ask</th><th>$ volume</th><th>Contracts</th><th>Close</th></tr></thead>
+      <tbody id="markets-body"></tbody>
+    </table>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h2>Price chart — time (x) vs contract price (y)</h2>
+    <div class="controls">
+      <label>Window
+        <select id="window-select">
+          <option value="60">Last 60 seconds</option>
+          <option value="300">Last 5 minutes</option>
+          <option value="3600" selected>Last 1 hour</option>
+          <option value="86400">Last 24 hours</option>
+        </select>
+      </label>
+      <span id="chart-info" class="muted"></span>
+    </div>
+    <canvas class="chart" id="chart"></canvas>
+    <p class="muted">History = Kalshi 1-minute candlesticks + live poll points. Amber dots mark ≥ $0.10 steps. For “what caused the jump”, use the market's settlement source + API record links (the API provides no news feed — causes are never invented here).</p>
+  </div>
+
+  <div class="grid cols-2" style="margin-top:16px">
+    <div class="card">
+      <h2>Liquidity — order book (contracts at each price)</h2>
+      <table>
+        <thead><tr><th>Side</th><th>Price</th><th>Contracts</th></tr></thead>
+        <tbody id="book-body"></tbody>
+      </table>
+      <p class="muted">Kalshi books show bids only (YES bids + NO bids); a YES bid at X equals a NO ask at 1−X. Source: <a href="https://docs.kalshi.com/api-reference/market/get-market-orderbook" target="_blank" rel="noopener">Get Market Orderbook</a>.</p>
+    </div>
+    <div class="card">
+      <h2>Paper trades (auto on high-ROI alerts)</h2>
+      <table>
+        <thead><tr><th>Ticker</th><th>Topic</th><th>Strategy</th><th>Side</th><th>Entry</th><th>Exit</th><th>PnL</th></tr></thead>
+        <tbody id="paper-body"></tbody>
+      </table>
+      <div class="controls"><button id="clear-btn">Clear paper trades</button>
+      <span class="muted">Simulated only. Full analysis: <a href="portfolio.html">Portfolio page</a>.</span></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h2>Resolutions — tracked until settled (yes / no)</h2>
+    <table>
+      <thead><tr><th>Ticker</th><th>Title</th><th>Result</th><th>Settled / close</th></tr></thead>
+      <tbody id="resolved-body"></tbody>
+    </table>
+  </div>
+<p style="margin:10px 0 0"><a href="dashboard-site/index.html">Source-audited build: executive summary, per-topic findings, requirements traceability and flagged review →</a></p>
+</main>
+<footer>Live data: Kalshi Trade API v2 (demo default). <a href="methodology.html">Methodology &amp; sources</a> · <a href="flagged.html">Flagged for Review</a></footer>
+<script type="module" src="assets/dashboard.js"></script>
+</body>
+</html>

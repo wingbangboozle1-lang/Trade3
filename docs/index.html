@@ -1,125 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Kalshi Demo Dashboard — Executive Summary &amp; Findings</title>
-<meta name="description" content="Source-audited Kalshi demo dashboard: live event tracking across gas prices, elections, culture, crypto and golf, with $0.10 swing alerts, charts, liquidity, resolutions and simulated strategies." />
-<link rel="stylesheet" href="assets/site.css" />
-<script src="assets/shell.js" defer></script>
-<script type="module" src="assets/pages/overview.js" defer></script>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📈</text></svg>" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trade3 — Kalshi Live Dashboard (Demo)</title>
+<meta name="description" content="Live Kalshi demo dashboard tracking gas prices, elections, culture, crypto and golf. Price-swing alerts, charts, liquidity and simulated trading.">
+<link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
-<a class="skip" href="#main">Skip to content</a>
-<main id="main">
-
-  <section class="hero">
-    <p class="eyebrow">Kalshi demo environment · captured 2026-11-20</p>
-    <h1>Live Kalshi event tracking, with every number traced to an official source.</h1>
-    <p class="lede">
-      A dashboard that watches the five topics you asked for — gas prices, elections, culture, crypto and golf —
-      flags any contract that moves <strong>$0.10 or more</strong> in either direction, tracks those events until
-      Kalshi resolves them yes or no, and tests simulated strategies on the demo account so the results can be
-      compared by trade type.
-    </p>
-    <div class="btnrow">
-      <a class="btn primary" href="#summary">Read the executive summary</a>
-      <a class="btn" href="executive-summary.html">Full summary document</a>
-      <a class="btn" href="flagged.html">Flagged for review (8)</a>
-    </div>
-  </section>
-
-  <div id="liveKpis" class="grid four" aria-live="polite"></div>
-
-  <h2 id="summary">Executive summary</h2>
+<header class="top">
+  <div class="brand">Trade3 <span>· Kalshi Demo Dashboard</span></div>
+  <nav class="main">
+    <a href="index.html" class="active">Home</a>
+    <a href="dashboard.html">Live Dashboard</a>
+    <a href="portfolio.html">Portfolio &amp; Strategies</a>
+    <a href="topics/gas.html">Gas</a>
+    <a href="topics/elections.html">Elections</a>
+    <a href="topics/culture.html">Culture</a>
+    <a href="topics/crypto.html">Crypto</a>
+    <a href="topics/golf.html">Golf</a>
+    <a href="methodology.html">Methodology</a>
+    <a href="flagged.html">Flagged for Review</a>
+  </nav>
+</header>
+<main>
   <div class="card">
-    <div id="summaryBody"></div>
+    <h1>Kalshi live dashboard — highest-dollar events, swing alerts, charts &amp; simulated trading</h1>
+    <p>Tracks <b>gas prices, elections, culture, crypto and golf only</b> on the
+    <a href="https://docs.kalshi.com/getting_started/demo_env" target="_blank" rel="noopener">Kalshi demo environment</a>.
+    Live prices come from the public Kalshi Trade API (no key needed for market data).
+    Alerts fire on any contract-price swing <b>≥ $0.10 in either direction</b>.</p>
+    <p><span class="pill live">LIVE</span> <span class="pill">Demo: external-api.demo.kalshi.co</span>
+    <span class="pill">No manual input required</span></p>
+    <p><a href="dashboard.html"><button>Open the live dashboard →</button></a>
+    <a href="portfolio.html"><button>Simulated portfolio &amp; strategies</button></a></p>
   </div>
 
-  <h2 id="findings">The five findings that mattered most</h2>
-  <div id="keyFindings" class="grid two"></div>
-
-  <h2 id="live">Live markets, by topic</h2>
-  <p>
-    Each row is a real market read from the demo Trade API. The <em>source</em> column links to the exact
-    endpoint that returned it. Values the API did not return are blank and marked
-    <span class="unverified">— unverified</span> rather than filled in.
-  </p>
-  <div class="grid two" style="margin-bottom:8px">
-    <label class="muted" style="font-size:13px">Filter by topic
-      <select id="topicFilter" style="margin-left:8px;background:#0d141d;color:#e6edf6;border:1px solid #1e2a3a;border-radius:6px;padding:5px 8px">
-        <option value="">all topics</option>
-      </select>
-    </label>
-  </div>
-  <div id="marketTable"></div>
-  <p class="source-note" id="marketNote"></p>
-
-  <h2 id="topics">Topics</h2>
-  <p>Topics are kept separate, and markets inside a topic are grouped together. Each topic page explains exactly
-  how markets are routed into it, using Kalshi's own metadata rather than guesswork.</p>
-  <div id="topicCards" class="grid three"></div>
-
-  <h2 id="how">How the dashboard behaves</h2>
-  <div class="grid two">
-    <div class="card tight">
-      <h3 style="margin-top:0">Swing alerts (≥ $0.10)</h3>
-      <p>
-        A move counts when the absolute price change is <strong>greater than or equal to $0.10</strong>, in either
-        direction. Comparisons happen in integer 1/10,000-dollar units, so a move of exactly ten cents can never
-        fail to fire through floating-point rounding. Two bases are reported separately:
-        <code>tick</code> (change since the previous poll) and <code>day</code> (change against Kalshi's own
-        <code>previous_price_dollars</code>, documented as the last traded YES price a day ago).
-      </p>
-    </div>
-    <div class="card tight">
-      <h3 style="margin-top:0">Two scrolling chats</h3>
-      <p>
-        The dashboard shows two feeds side by side. <strong>All swings</strong> is every qualifying move.
-        <strong>Model's high-ROI picks</strong> only shows swings that clear a score of 45, and each pick prints its
-        own inputs — edge per contract, fee, spread cost — so the ranking is auditable instead of a black box.
-      </p>
-    </div>
-    <div class="card tight">
-      <h3 style="margin-top:0">Charts and liquidity</h3>
-      <p>
-        Click any market for a chart with time on the X axis and contract price on the Y axis, switchable between
-        <strong>seconds, minutes and hours</strong>. Underneath it, the order book shows how many contracts rest at
-        each price, in contracts and in dollars. Kalshi returns bids only, so the YES ask is derived as
-        <code>1.00 − best NO bid</code> — exactly as the official order book page specifies.
-      </p>
-    </div>
-    <div class="card tight">
-      <h3 style="margin-top:0">Resolution and strategies</h3>
-      <p>
-        Markets are tracked until Kalshi reports a result, and the result (<code>yes</code> or <code>no</code>) is
-        recorded once with its source. Simulated trades open on high-ROI alerts across four documented strategies,
-        then exit on take-profit, stop-loss, market close or official settlement — and the results are grouped by
-        strategy type so you can see which style of trade actually worked.
-      </p>
-    </div>
+  <div class="grid cols-3" style="margin-top:16px">
+    <div class="card"><h3>1 · Two alert chats</h3><p class="muted">All ≥ $0.10 swings scroll in the main chat. A second chat shows only high-ROI-filtered events (transparent heuristic — see Methodology).</p></div>
+    <div class="card"><h3>2 · Charts + liquidity</h3><p class="muted">Price-over-time graph (seconds / minutes / hours windows), order-book depth (contracts available at each price), and resolution tracking until each event settles yes/no.</p></div>
+    <div class="card"><h3>3 · Simulated trading</h3><p class="muted">Paper trades open automatically on high-ROI alerts. Portfolio page categorizes results by topic and strategy. Real demo orders need your own demo API keys (never stored here).</p></div>
   </div>
 
-  <div class="callout warn">
-    <strong>Read this before using any number here.</strong>
-    <p>
-      Kalshi's own documentation states that "the price and behavior of markets in the demo environment may not be
-      reflective of those in real markets." Every price on this site is a demo price. Several demo markets sit at
-      $0.00 with empty order books, so swing alerts on the demo environment are naturally sparse. Nothing here is
-      investment advice, and the simulated results are a test harness, not a track record.
-    </p>
+  <div class="card" style="margin-top:16px">
+    <h2>Executive summary</h2>
+    <p><b>What this is.</b> A static GitHub Pages site that reads Kalshi's public Trade API v2 in the browser and turns it into a trader's decision dashboard for five topics. No backend, no keys, no manual input — open the dashboard and it polls live data.</p>
+    <p><b>How topics map to Kalshi (verified 2026-11-20).</b> Kalshi organizes markets as Series → Events → Markets. Gas = <code>Economics</code> + <code>Oil &amp; Gas</code> (e.g. <code>KXAAAGASM</code>, settled by AAA). Elections = <code>Elections</code>. Culture = <code>Entertainment</code> (Kalshi has no “Culture” category — flagged). Crypto = <code>Crypto</code>. Golf = <code>Sports</code> + <code>Golf</code> tag. Full table with source links: <a href="methodology.html">Methodology</a>.</p>
+    <p><b>“Highest dollar amount”.</b> Kalshi has no single dollar-volume field, so events are ranked by <code>volume_fp × last_price_dollars</code> (documented approximation). Raw contract volume is shown alongside.</p>
+    <p><b>Alerts.</b> Every poll compares each contract's last price to its previous poll; |Δ| ≥ $0.10 posts to the all-events chat. The high-ROI chat adds: price $0.15–$0.85, dollar volume above topic median, spread ≤ $0.10, |move| ≥ $0.05. Heuristic, not advice.</p>
+    <p><b>Charts &amp; liquidity.</b> Canvas price chart with 60s / 5m / 1h / 24h windows, backfilled from Kalshi candlesticks (1-min bars) plus live poll points. Order-book panel shows YES/NO bids with contract counts per price level.</p>
+    <p><b>Resolutions.</b> Settled markets are polled separately and listed with their <code>result</code> (yes/no) and settlement time. Paper trades settle against that result.</p>
+    <p><b>Trading.</b> Default is fully simulated (localStorage). To execute on the Kalshi demo account, add your demo API key + private key locally (Python client provided; browser WS optional). See <a href="portfolio.html">Portfolio</a> and <a href="methodology.html">Methodology</a>.</p>
+    <p><b>News/catalysts.</b> The Kalshi API does not provide news. The dashboard links each market to its official settlement source (e.g. AAA gas prices) and API record — it never invents a cause for a jump. Causal attribution is flagged as unverified.</p>
+    <p class="muted">Sources: <a href="https://docs.kalshi.com/getting_started/demo_env" target="_blank" rel="noopener">Demo environment</a> ·
+    <a href="https://docs.kalshi.com/getting_started/quick_start_market_data" target="_blank" rel="noopener">Market data (no auth)</a> ·
+    <a href="https://docs.kalshi.com/getting_started/api_environments" target="_blank" rel="noopener">Endpoints</a> ·
+    <a href="https://docs.kalshi.com/getting_started/terms" target="_blank" rel="noopener">Glossary</a>.
+    Demo prices may not reflect real markets (Kalshi docs).</p>
   </div>
 
-  <h2 id="next">Where to go next</h2>
-  <div class="btnrow">
-    <a class="btn" href="markets.html">All tracked markets →</a>
-    <a class="btn" href="topics.html">Topic breakdown →</a>
-    <a class="btn" href="strategies.html">Strategy results →</a>
-    <a class="btn" href="recommendations.html">How to make it more live →</a>
-    <a class="btn" href="requirements.html">Requirements traceability →</a>
+  <div class="card" style="margin-top:16px">
+    <h2>Topics</h2>
+    <table>
+      <thead><tr><th>Topic</th><th>Kalshi category / tags</th><th>Example verified series</th><th>Page</th></tr></thead>
+      <tbody>
+        <tr><td>Gas prices</td><td>Economics · Oil &amp; Gas</td><td><code>KXAAAGASM</code> (US gas price, monthly)</td><td><a href="topics/gas.html">Open →</a></td></tr>
+        <tr><td>Elections</td><td>Elections</td><td><code>KXELECTUKRAINE</code> (Ukraine elections)</td><td><a href="topics/elections.html">Open →</a></td></tr>
+        <tr><td>Culture</td><td>Entertainment (proxy — flagged)</td><td><code>KXTOPARTIST</code> (Top Artist on Spotify)</td><td><a href="topics/culture.html">Open →</a></td></tr>
+        <tr><td>Crypto</td><td>Crypto</td><td><code>KXETHD</code> (Ethereum price Above/below, hourly)</td><td><a href="topics/crypto.html">Open →</a></td></tr>
+        <tr><td>Golf</td><td>Sports · Golf</td><td><code>KXPGAGOLFERSCORE</code> (Golf Round Strokes)</td><td><a href="topics/golf.html">Open →</a></td></tr>
+      </tbody>
+    </table>
+    <p class="muted">Every row above was returned by the live demo API on 2026-11-20. Live prices are fetched in the browser; see <a href="data/series.json">series.json</a> for the full verified snapshot.</p>
   </div>
-
+<p style="margin:10px 0 0"><a href="dashboard-site/index.html">Source-audited build: executive summary, per-topic findings, requirements traceability and flagged review →</a></p>
 </main>
+<footer>Trade3 · Kalshi demo dashboard · Not financial advice. Demo prices may not reflect real markets.
+Source: <a href="https://docs.kalshi.com/" target="_blank" rel="noopener">docs.kalshi.com</a> ·
+API: <a href="https://external-api.demo.kalshi.co/trade-api/v2/exchange/status" target="_blank" rel="noopener">exchange status</a></footer>
 </body>
 </html>

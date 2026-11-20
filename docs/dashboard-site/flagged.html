@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Flagged for Review</title>
+<meta name="description" content="Every irregularity and unverified item found during the Kalshi demo dashboard build, with sources so each can be checked." />
+<link rel="stylesheet" href="assets/site.css" />
+<script src="assets/shell.js" defer></script>
+<script type="module" src="assets/pages/flagged.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<main id="main">
+
+  <h1>Flagged for Review</h1>
+  <p class="lede">
+    These are the irregularities, surprises and open questions found while building this. Nothing here is hidden or
+    silently resolved: each item states what was found, the exact evidence, and a link so you can verify it yourself.
+    Nothing on this page blocks the site from working.
+  </p>
+
+  <div class="callout warn">
+    <strong>How to use this page.</strong>
+    Items marked <span class="badge bad">high</span> change how you should read the rest of the site. Items marked
+    <span class="badge warn">medium</span> are judgement calls you may want to overrule. <span class="badge info">low</span>
+    items are recorded so nobody rediscovers them later.
+  </div>
+
+  <div id="flagKpis" class="grid four" style="margin-bottom:20px"></div>
+  <div id="flagList"></div>
+
+  <h2>Flagged by the other session's build (kept, not discarded)</h2>
+  <p>
+    A parallel session shipped its own dashboard in this repository before this build was integrated
+    (<a href="../flagged.html">its Flagged page</a>). Its seven open items are reproduced below, unedited in
+    substance, so a reviewer sees one consolidated list. Several overlap with items above; where they disagree,
+    this page notes it.
+  </p>
+  <div id="otherFlags"></div>
+  <div class="callout warn">
+    <strong>One correction, recorded rather than silently dropped.</strong>
+    That build flags “Kalshi has no Culture category” and maps Culture to Entertainment as a proxy.
+    That is not accurate as of this capture: <code>GET /series?category=Culture</code> returns real series with
+    <code>"category":"Culture"</code> (for example <code>KXXBANNEDGROK</code> and
+    <code>KXXBANNEDMURRAYHILLGUY1</code>). Culture is therefore used directly as a category here, with no proxy.
+    The genuinely empty case is different: the Culture series had <strong>no open markets</strong> at capture time.
+    <a href="https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture" target="_blank" rel="noopener">Verify ↗</a>
+  </div>
+
+  <h2>What is <em>not</em> flagged, and why</h2>
+  <div class="card">
+    <ul style="margin-bottom:0">
+      <li><strong>Empty alert feeds.</strong> Not an error. Demo markets are frequently quoted at $0.00 with empty
+        order books, so no $0.10 move is possible. The dashboard reports its data mode instead of faking activity.</li>
+      <li><strong>Blank cells in tables.</strong> These are fields the API did not return. They are rendered as
+        <span class="unverified">— unverified</span> rather than guessed, which is the verification rule you asked for.</li>
+      <li><strong>Small or zero trade counts.</strong> The simulator only opens a position when an alert clears the
+        score threshold, so a quiet demo produces few trades. Reporting zero is correct.</li>
+    </ul>
+  </div>
+
+  <h2>Items you may want to overrule</h2>
+  <div class="card">
+    <ul style="margin-bottom:0">
+      <li>The <strong>high-ROI score threshold of 45</strong> is a judgement call, not a Kalshi number. It is exposed
+        as one constant so it can be tuned without touching anything else.</li>
+      <li>The <strong>five-topic routing rules</strong> are documented in priority order; if you would rather route
+        anything tagged <code>Oil &amp; Gas</code> more broadly, that is a one-line change in
+        <code>server/topics.js</code>.</li>
+      <li>The <strong>four strategies</strong> were chosen to be distinguishable rather than exhaustive — momentum,
+        mean reversion, threshold break and fade-extreme. Adding a fifth is deliberately trivial.</li>
+    </ul>
+  </div>
+
+<p class="source-note" style="margin-top:28px">Part of the same repository: <a href="../index.html">main site home</a> · <a href="../dashboard.html">live dashboard (other build)</a> · <a href="../flagged.html">their flagged page</a></p>
+</main>
+</body>
+</html>

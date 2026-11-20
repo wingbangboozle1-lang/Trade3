@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Kalshi Demo Dashboard — Executive Summary &amp; Findings</title>
+<meta name="description" content="Source-audited Kalshi demo dashboard: live event tracking across gas prices, elections, culture, crypto and golf, with $0.10 swing alerts, charts, liquidity, resolutions and simulated strategies." />
+<link rel="stylesheet" href="assets/site.css" />
+<script src="assets/shell.js" defer></script>
+<script type="module" src="assets/pages/overview.js" defer></script>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📈</text></svg>" />
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<main id="main">
+
+  <section class="hero">
+    <p class="eyebrow">Kalshi demo environment · captured 2026-11-20</p>
+    <h1>Live Kalshi event tracking, with every number traced to an official source.</h1>
+    <p class="lede">
+      A dashboard that watches the five topics you asked for — gas prices, elections, culture, crypto and golf —
+      flags any contract that moves <strong>$0.10 or more</strong> in either direction, tracks those events until
+      Kalshi resolves them yes or no, and tests simulated strategies on the demo account so the results can be
+      compared by trade type.
+    </p>
+    <div class="btnrow">
+      <a class="btn primary" href="#summary">Read the executive summary</a>
+      <a class="btn" href="executive-summary.html">Full summary document</a>
+      <a class="btn" href="flagged.html">Flagged for review (8)</a>
+    </div>
+  </section>
+
+  <div id="liveKpis" class="grid four" aria-live="polite"></div>
+
+  <h2 id="summary">Executive summary</h2>
+  <div class="card">
+    <div id="summaryBody"></div>
+  </div>
+
+  <h2 id="findings">The five findings that mattered most</h2>
+  <div id="keyFindings" class="grid two"></div>
+
+  <h2 id="live">Live markets, by topic</h2>
+  <p>
+    Each row is a real market read from the demo Trade API. The <em>source</em> column links to the exact
+    endpoint that returned it. Values the API did not return are blank and marked
+    <span class="unverified">— unverified</span> rather than filled in.
+  </p>
+  <div class="grid two" style="margin-bottom:8px">
+    <label class="muted" style="font-size:13px">Filter by topic
+      <select id="topicFilter" style="margin-left:8px;background:#0d141d;color:#e6edf6;border:1px solid #1e2a3a;border-radius:6px;padding:5px 8px">
+        <option value="">all topics</option>
+      </select>
+    </label>
+  </div>
+  <div id="marketTable"></div>
+  <p class="source-note" id="marketNote"></p>
+
+  <h2 id="topics">Topics</h2>
+  <p>Topics are kept separate, and markets inside a topic are grouped together. Each topic page explains exactly
+  how markets are routed into it, using Kalshi's own metadata rather than guesswork.</p>
+  <div id="topicCards" class="grid three"></div>
+
+  <h2 id="how">How the dashboard behaves</h2>
+  <div class="grid two">
+    <div class="card tight">
+      <h3 style="margin-top:0">Swing alerts (≥ $0.10)</h3>
+      <p>
+        A move counts when the absolute price change is <strong>greater than or equal to $0.10</strong>, in either
+        direction. Comparisons happen in integer 1/10,000-dollar units, so a move of exactly ten cents can never
+        fail to fire through floating-point rounding. Two bases are reported separately:
+        <code>tick</code> (change since the previous poll) and <code>day</code> (change against Kalshi's own
+        <code>previous_price_dollars</code>, documented as the last traded YES price a day ago).
+      </p>
+    </div>
+    <div class="card tight">
+      <h3 style="margin-top:0">Two scrolling chats</h3>
+      <p>
+        The dashboard shows two feeds side by side. <strong>All swings</strong> is every qualifying move.
+        <strong>Model's high-ROI picks</strong> only shows swings that clear a score of 45, and each pick prints its
+        own inputs — edge per contract, fee, spread cost — so the ranking is auditable instead of a black box.
+      </p>
+    </div>
+    <div class="card tight">
+      <h3 style="margin-top:0">Charts and liquidity</h3>
+      <p>
+        Click any market for a chart with time on the X axis and contract price on the Y axis, switchable between
+        <strong>seconds, minutes and hours</strong>. Underneath it, the order book shows how many contracts rest at
+        each price, in contracts and in dollars. Kalshi returns bids only, so the YES ask is derived as
+        <code>1.00 − best NO bid</code> — exactly as the official order book page specifies.
+      </p>
+    </div>
+    <div class="card tight">
+      <h3 style="margin-top:0">Resolution and strategies</h3>
+      <p>
+        Markets are tracked until Kalshi reports a result, and the result (<code>yes</code> or <code>no</code>) is
+        recorded once with its source. Simulated trades open on high-ROI alerts across four documented strategies,
+        then exit on take-profit, stop-loss, market close or official settlement — and the results are grouped by
+        strategy type so you can see which style of trade actually worked.
+      </p>
+    </div>
+  </div>
+
+  <div class="callout warn">
+    <strong>Read this before using any number here.</strong>
+    <p>
+      Kalshi's own documentation states that "the price and behavior of markets in the demo environment may not be
+      reflective of those in real markets." Every price on this site is a demo price. Several demo markets sit at
+      $0.00 with empty order books, so swing alerts on the demo environment are naturally sparse. Nothing here is
+      investment advice, and the simulated results are a test harness, not a track record.
+    </p>
+  </div>
+
+  <h2 id="next">Where to go next</h2>
+  <div class="btnrow">
+    <a class="btn" href="markets.html">All tracked markets →</a>
+    <a class="btn" href="topics.html">Topic breakdown →</a>
+    <a class="btn" href="strategies.html">Strategy results →</a>
+    <a class="btn" href="recommendations.html">How to make it more live →</a>
+    <a class="btn" href="requirements.html">Requirements traceability →</a>
+  </div>
+
+<p class="source-note" style="margin-top:28px">Part of the same repository: <a href="../index.html">main site home</a> · <a href="../dashboard.html">live dashboard (other build)</a> · <a href="../flagged.html">their flagged page</a></p>
+</main>
+</body>
+</html>

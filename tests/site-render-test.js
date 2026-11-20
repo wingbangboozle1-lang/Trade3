@@ -14,7 +14,7 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const DOCS = path.join(ROOT, 'docs');
+const DOCS = path.join(ROOT, 'docs', 'dashboard-site');
 
 /* ---------------- minimal DOM shim ---------------- */
 class FakeEl {

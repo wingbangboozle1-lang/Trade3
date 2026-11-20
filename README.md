@@ -1,5 +1,18 @@
 # Trade3 — Kalshi demo dashboard
 
+> **Repository state:** this repo contains **two independent builds** of the Kalshi demo dashboard, both verified
+> against official Kalshi sources, integrated side by side rather than one replacing the other:
+>
+> | | Where | What it is |
+> |---|---|---|
+> | **Build A** | [`docs/index.html`](docs/index.html) · [`docs/dashboard.html`](docs/dashboard.html) | Static browser-side dashboard: live REST polling straight from the browser, topic pages under `docs/topics/`, Python offline simulator (`strategies.py`, `backtest.py`, `run_sim.py`). |
+> | **Build B** | [`docs/dashboard-site/index.html`](docs/dashboard-site/index.html) · [`app/`](app/index.html) · [`server/`](server) | Server-side collector with three explicit data modes, swing engine, dual alert feeds, canvas charts, resolution tracking, paper strategies, plus an executive summary, requirements traceability, consolidated sources and flagged-review pages. |
+>
+> They do not conflict: Build A lives at `docs/*`, Build B at `docs/dashboard-site/*`, and both link to each other.
+> `COORDINATION.md` records which session built what, and the verification performed for each.
+
+
+
 A live event dashboard for the **Kalshi demo environment**, covering five topics only — **gas prices, elections,
 culture, crypto and golf** — with $0.10 swing alerts, two scrolling alert feeds, interactive price charts,
 order-book liquidity, yes/no resolution tracking and simulated strategy trading.
@@ -7,10 +20,10 @@ order-book liquidity, yes/no resolution tracking and simulated strategy trading.
 Everything here is source-audited. Every value on the published site links to the official Kalshi endpoint it came
 from, and anything the API did not return is left blank and marked *unverified* rather than inferred.
 
-- **Published site:** [`docs/`](docs/index.html) — static, no build step, deploys to GitHub Pages
-- **Live dashboard:** `app/` — served by the collector at `/app/`
-- **Executive summary:** [docs/executive-summary.html](docs/executive-summary.html)
-- **Flagged for review:** [docs/flagged.html](docs/flagged.html)
+- **Published site (Build B):** [`docs/dashboard-site/`](docs/dashboard-site/index.html) — static, no build step, deploys to GitHub Pages
+- **Live dashboard (Build B):** `app/` — served by the collector at `/app/`
+- **Executive summary:** [docs/dashboard-site/executive-summary.html](docs/dashboard-site/executive-summary.html)
+- **Flagged for review:** [Build B](docs/dashboard-site/flagged.html) · [Build A](docs/flagged.html)
 
 ## Quick start
 

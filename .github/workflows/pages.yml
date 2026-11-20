@@ -1,11 +1,10 @@
 # Publishes the static site in /docs to GitHub Pages.
 #
-# Notes for reviewers:
-#  - The site is plain HTML/CSS/ES modules, so this workflow only uploads /docs.
-#  - It runs the link checker and the render harness first; a broken site never deploys.
-#  - If this workflow cannot run in your repo (Actions disabled, or Pages not enabled),
-#    the alternative is Settings → Pages → Source: "Deploy from a branch" → main /docs.
-#    The /docs folder is already complete and requires no build step.
+# The site is plain HTML/CSS/ES modules with no build step, so this workflow only
+# verifies then uploads /docs. A broken site never deploys.
+#
+# If Actions/Pages are not available, the alternative is
+# Settings → Pages → Source: "Deploy from a branch" → main / docs.
 
 name: Deploy site to GitHub Pages
 
@@ -14,6 +13,10 @@ on:
     branches: [main]
     paths:
       - 'docs/**'
+      - 'app/**'
+      - 'server/**'
+      - 'tests/**'
+      - 'scripts/**'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
@@ -39,7 +42,7 @@ jobs:
         run: node scripts/check-links.js
       - name: Render harness
         run: node tests/site-render-test.js
-      - name: Unit and route tests
+      - name: Engine and route tests
         run: node tests/smoke-test.js
 
   deploy:
