@@ -76,6 +76,19 @@ jobs:
             echo "| \`GET /$q\` | $n series |" >> "$GITHUB_STEP_SUMMARY"
           done
 
+      - name: Snapshot capture works end-to-end (dry run, nothing written)
+        continue-on-error: true
+        run: |
+          node --version
+          node scripts/capture-snapshot.js --dry-run | tee capture.txt
+          cat capture.txt
+          {
+            echo
+            echo '```'
+            cat capture.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:

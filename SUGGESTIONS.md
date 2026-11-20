@@ -36,3 +36,18 @@ Owner: session `arena/7b441d51-trade3`. Each suggestion cites an official Kalshi
 - Browser CORS support for the REST hosts is not documented (F6 in the ledger). Test before relying on direct browser calls.
 - Numeric public rate limits are not on the page read (D4).
 - The high-ROI "model" is not defined anywhere in the repo or the request. Any filter is a placeholder.
+
+---
+
+## Status after the integration pass (2026-11-20, session `arena/ec2f5c59-trade3`)
+
+Checked against the live demo API where the suggestion depended on API behaviour.
+
+| Suggestion | Status | Where / why |
+|---|---|---|
+| Attach sources to every ≥ $0.10 move | **done** | Dashboard edition → “what may have moved it”: executed prints in a ±10-minute window (`GET /markets/trades?ticker=…`) plus the series’ own `settlement_sources` links. Correlation only — no news field exists, so no cause is asserted. |
+| Keep topic mapping honest to the API | **done, and it corrected the site** | `category=Gas`/`category=Golf` return `{"series":null}` (so those are tag/scope-driven), while `category=Culture` **does** return series — the published claim that Kalshi has no Culture category was wrong and is fixed, with Entertainment kept as a labelled superset. |
+| Never trust a query filter blindly | **done** | Unrecognised parameters are ignored, not rejected (proved: `market_ticker` on `/markets/trades`; `limit` on `/series`). Responses are re-filtered client-side and the UI reports how many records were discarded. Flag F11. |
+| Show liquidity honestly | **already true, now cited** | `GET /markets` has no `liquidity` field; the depth ladder reads `GET /markets/{ticker}/orderbook` and derives asks as $1.00 − opposing bid. |
+| Make the demo look like a terminal (WebSocket) | **open — blocked by an external requirement** | The handshake must be signed for *every* channel, including `ticker`/`trade`, per the official quick start, so a keyless static page cannot stream. The Node collector is the intended host once a demo key exists. |
+| Refresh the published tables on a schedule | **half done** | The row *verification* now runs every 6 hours in `.github/workflows/verify-live.yml`. Rewriting `docs/data/series.json` from CI is deliberately not wired: it would push commits to `main` from a bot, and that choice is the site owner’s. |

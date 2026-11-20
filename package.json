@@ -11,8 +11,11 @@
     "start": "node server/index.js",
     "dev": "node --watch server/index.js",
     "snapshot": "node scripts/capture-snapshot.js",
+    "snapshot:dry": "node scripts/capture-snapshot.js --dry-run",
     "check:links": "node scripts/check-links.js",
-    "test": "node --test tests/"
+    "test": "node tests/logic.test.mjs && node tests/smoke-test.js && node tests/site-render-test.js",
+    "test:render": "node tests/render.test.mjs",
+    "test:node": "node --test tests/"
   },
   "license": "MIT"
 }

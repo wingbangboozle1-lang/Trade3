@@ -94,3 +94,27 @@ Official root: https://docs.kalshi.com (Kalshi's API documentation). Machine-rea
 - Current series categories and their membership (requires live `/series` call).
 - Numeric public rate limits (see D4).
 - Demo account portfolio data (requires user API keys; none are in the repo or connected).
+
+## H. Live confirmation by the integration session (`arena/ec2f5c59-trade3`, 2026-11-20T20:0xZ)
+
+The ledger above was written from documentation only ("Live API responses were **not** fetched"). The integration
+session re-read the live demo API, so the rows that were marked as inference can now be marked as observation.
+Records: [`docs/data/live-verification-2026-11-20.json`](docs/data/live-verification-2026-11-20.json).
+
+| Ref | Fact | Live answer | Verdict |
+|---|---|---|---|
+| A3 | `GET /exchange/status` on the demo host | `exchange_active: true`, `trading_active: true`, shards 0 (Default), 1, 2, 3 | **confirmed** — [response](https://external-api.demo.kalshi.co/trade-api/v2/exchange/status) |
+| E-series | No `Gas` category | `GET /series?category=Gas` → `{"series":null}` | **confirmed** |
+| E-series | No `Golf` category | `GET /series?category=Golf` → `{"series":null}` | **confirmed** |
+| E-series | A `Culture` category exists | `GET /series?category=Culture` → 2 series, each `"category":"Culture"`, `"categories":["Culture"]` | **confirmed** — and it contradicts the earlier build's published claim that no such category exists (corrected on the site) |
+| E-series | Culture has open markets? | `GET /markets?series_ticker=KXXBANNEDGROK&status=open` → `{"markets":[]}` | **no** — reported as empty |
+| B3 | WebSocket handshake is signed even for public channels | [quick_start_websockets](https://docs.kalshi.com/getting_started/quick_start_websockets): "even channels that carry public market data still use the authenticated WebSocket session" | **confirmed from docs** |
+| new | Unrecognised query params are ignored, not rejected | `GET /markets/trades?market_ticker=KXAAAGASM-26NOV30-4.80` returned 200 with prints from `KXMARMAD` / `KXPGATOUR` / `KXPRESPERSON`; `GET /series?limit=3` returned 8+ series | **new fact** — the documented filter on that endpoint is `ticker`, and Get Series List documents no `limit`/`cursor` at all |
+| new | A market record carries no `liquidity` field | `GET /markets?series_ticker=KXBTCD&status=open` → `volume_fp`, `volume_24h_fp`, `open_interest_fp`, `*_dollars`, `price_ranges`, `settlement_bounds_type` … no `liquidity`, no `category` | **new fact** — liquidity must come from `GET /markets/{ticker}/orderbook` |
+| new | Titles ship markdown | `GET /markets?series_ticker=KXAAAGASM` → `Will average **gas prices** be above $5.00?` | **new fact** — stripped for display only |
+| D-series | Fee formula `round up(M × 0.07 × C × P × (1 − P))` | not re-derived here | **unchanged — UNVERIFIED by this session**; the published table in the fee schedule PDF was checked by another session, and the rounding step is documented at [fee_rounding](https://docs.kalshi.com/getting_started/fee_rounding) |
+
+Rows in **this** table that could not be re-read from the sandbox (any `kalshi.com` page, and the
+`search/tags_by_categories` endpoint) are marked as such on the site's Flagged page (F12) rather than carried over as
+fact.
+

@@ -283,6 +283,48 @@ await test('synthetic demo mode is unmistakably labelled and drives the full pip
   assert.match(st.status.notes[0], /NOT Kalshi markets/i);
 });
 
+// --- snapshot capture (scripts/capture-snapshot.js) -------------------------
+await test('capture keeps API records byte-identical and never invents a topic', async () => {
+  const { buildSnapshot, seriesTickerOf, dollars } = await import('../scripts/capture-snapshot.js');
+  const rawGas = {
+    ticker: 'KXAAAGASM-26NOV30-4.80', event_ticker: 'KXAAAGASM-26NOV30',
+    title: 'Will average **gas prices** be above $4.80?', status: 'active', result: '',
+    yes_bid_dollars: '0.0000', yes_ask_dollars: '1.0000', no_bid_dollars: '0.0000',
+    volume_fp: '55571.52', open_interest_fp: '55567.52', last_price_dollars: '0.0300',
+  };
+  const rawNoise = { ticker: 'OTHER-1', event_ticker: 'OTHER-1', title: 'irrelevant', volume_fp: '999999.00', last_price_dollars: '0.9900' };
+  const series = [
+    { ticker: 'KXAAAGASM', title: 'US gas price', category: 'Economics', tags: ['Oil & Gas', 'Oil and energy'], product_metadata: { scope: 'Gasoline' } },
+    { ticker: 'OTHER', title: 'not in the five topics', category: 'Weather', tags: [] },
+  ];
+  const snap = buildSnapshot({
+    env: 'demo', rawMarkets: [rawGas, rawNoise], seriesRecords: series,
+    exchangeStatus: { exchange_active: true, trading_active: true, exchange_index_statuses: [{ exchange_index: 0 }, { exchange_index: 2 }] },
+    topPerTopic: 3, capturedAt: '2026-11-20T20:00:00Z',
+  });
+  assert.equal(snap.markets.length, 1, 'only the market whose series says it is a gas series is kept');
+  assert.deepEqual(snap.markets[0], rawGas, 'the market record is stored exactly as the API returned it');
+  assert.equal(snap.markets[0].title, 'Will average **gas prices** be above $4.80?', 'not even markdown is stripped in the data');
+  assert.equal(snap.topicCounts.gas, 1);
+  assert.equal(snap.topicCounts.elections, undefined, 'no topic is invented to fill a gap');
+  assert.deepEqual(snap.exchangeStatus.shards, [0, 2]);
+  assert.equal(snap.exchangeStatus.trading_active, true);
+  assert.ok(snap.sources.every((u) => u.startsWith('https://external-api.demo.kalshi.co/trade-api/v2/markets?series_ticker=')),
+    'every source must be the official endpoint that produced the row');
+  assert.equal(seriesTickerOf({ event_ticker: 'KXETHD-26NOV2101' }), 'KXETHD');
+  assert.equal(dollars(rawGas), +(55571.52 * 0.03).toFixed(4), 'dollars = volume_fp x last price (disclosed approximation)');
+  assert.equal(dollars({}), null, 'no price or no volume stays null');
+});
+
+await test('capture never writes when the exchange is unreachable', async () => {
+  const { execFileSync } = await import('node:child_process');
+  let code = 0;
+  try {
+    execFileSync(process.execPath, ['scripts/capture-snapshot.js', '--env', 'nonsense'], { cwd: process.cwd(), stdio: 'pipe' });
+  } catch (e) { code = e.status; }
+  assert.equal(code, 2, 'an unknown environment must exit 2, not write a file');
+});
+
 console.log(results.join('\n'));
 const failed = results.filter((r) => r.startsWith('FAIL')).length;
 console.log(`\n${results.length - failed}/${results.length} checks passed`);

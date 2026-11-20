@@ -25,6 +25,12 @@ left **blank** and listed on the [Flagged for review](docs/flagged.html) page.
 
 ## Preview locally
 
+Two workflows keep this honest without anyone touching anything:
+`.github/workflows/pages.yml` runs every site check and then publishes `docs/`;
+`.github/workflows/verify-live.yml` re-reads all 39 published series rows from the live demo API every 6 hours
+(and on any change to the data file), so a row that drifts from the exchange record is caught by a machine, not by
+memory. See [docs/flagged.html](docs/flagged.html#F14) for the one owner action GitHub Pages still needs.
+
 ```bash
 python3 -m http.server 8000 --directory docs
 # http://localhost:8000/            landing page
@@ -38,9 +44,11 @@ manual input. Demo is the default environment; production is read-only market da
 
 ```bash
 python scripts/check_site.py       # broken links, JS syntax, data integrity, no localhost refs
-node tests/logic.test.mjs          # order-book maths, ROI screen, candle intervals, formatting
+npm run snapshot:dry              # capture a labelled demo snapshot (refuses to write partial data)
+npm test                           # logic + collector/smoke + both render harnesses
+node tests/logic.test.mjs          # order-book maths, ROI screen, candle intervals, formatting, titles
 node tests/render.test.mjs         # page scripts in a headless DOM (npm i --no-save jsdom)
-python scripts/verify_series.py    # re-fetch all 37 series rows and diff them (needs outbound HTTPS)
+python scripts/verify_series.py    # re-fetch all 39 series rows and diff them (needs outbound HTTPS)
 python -m py_compile kalshi_client.py strategies.py backtest.py run_sim.py
 ```
 
