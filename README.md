@@ -1,116 +1,99 @@
-# Trade3 — Kalshi demo dashboard
+# Trade3 — Kalshi live dashboard, alerts & simulated trading
 
-> **Repository state:** this repo contains **two independent builds** of the Kalshi demo dashboard, both verified
-> against official Kalshi sources, integrated side by side rather than one replacing the other:
+> **Repository state.** Two verified builds coexist and are cross-linked, neither discarded:
 >
 > | | Where | What it is |
 > |---|---|---|
-> | **Build A** | [`docs/index.html`](docs/index.html) · [`docs/dashboard.html`](docs/dashboard.html) | Static browser-side dashboard: live REST polling straight from the browser, topic pages under `docs/topics/`, Python offline simulator (`strategies.py`, `backtest.py`, `run_sim.py`). |
-> | **Build B** | [`docs/dashboard-site/index.html`](docs/dashboard-site/index.html) · [`app/`](app/index.html) · [`server/`](server) | Server-side collector with three explicit data modes, swing engine, dual alert feeds, canvas charts, resolution tracking, paper strategies, plus an executive summary, requirements traceability, consolidated sources and flagged-review pages. |
+> | **Build A** (this README) | `docs/` + Python toolkit | Static browser-side dashboard published to GitHub Pages: live REST polling, topic pages, $0.10 swing alerts, charts, liquidity, resolutions, simulated strategies. Re-verified row by row by session `arena/4f9f13c8-trade3`. |
+> | **Build B** | `docs/dashboard-site/` · `app/` · `server/` | Node collector + dashboard with three explicit data modes (`live` / `snapshot` / `demo`), served by `npm start`. Built by session `arena/63ad86b3-trade3`; see the board below for its verification record. |
 >
-> They do not conflict: Build A lives at `docs/*`, Build B at `docs/dashboard-site/*`, and both link to each other.
-> `COORDINATION.md` records which session built what, and the verification performed for each.
+> `COORDINATION.md` records who built what, what was verified, and every irregularity.
 
 
+A static site plus a small Python toolkit for tracking **gas prices, elections, culture, crypto and
+golf** on Kalshi. It ranks the biggest-dollar live events, streams two alert feeds for any contract
+moving **≥ $0.10**, charts price against time, shows order-book liquidity, follows contracts through
+to their yes/no resolution, and simulates four fixed trading strategies whose results are broken down
+by topic and by strategy.
 
-A live event dashboard for the **Kalshi demo environment**, covering five topics only — **gas prices, elections,
-culture, crypto and golf** — with $0.10 swing alerts, two scrolling alert feeds, interactive price charts,
-order-book liquidity, yes/no resolution tracking and simulated strategy trading.
+Everything published traces to an official Kalshi source. Where a value cannot be confirmed it is
+left **blank** and listed on the [Flagged for review](docs/flagged.html) page.
 
-Everything here is source-audited. Every value on the published site links to the official Kalshi endpoint it came
-from, and anything the API did not return is left blank and marked *unverified* rather than inferred.
+- **Live site:** `docs/` → GitHub Pages (`https://wingbangboozle1-lang.github.io/Trade3/`)
+- **Start here:** [docs/index.html](docs/index.html) · dashboard · [executive summary](docs/executive-summary.html)
+- **Evidence:** [verification log](docs/verification.html) · [VERIFICATION.md](VERIFICATION.md) · [methodology](docs/methodology.html)
 
-- **Published site (Build B):** [`docs/dashboard-site/`](docs/dashboard-site/index.html) — static, no build step, deploys to GitHub Pages
-- **Live dashboard (Build B):** `app/` — served by the collector at `/app/`
-- **Executive summary:** [docs/dashboard-site/executive-summary.html](docs/dashboard-site/executive-summary.html)
-- **Flagged for review:** [Build B](docs/dashboard-site/flagged.html) · [Build A](docs/flagged.html)
-
-## Quick start
-
-```bash
-# Node 20+. Zero npm dependencies.
-npm start
-#   dashboard  http://localhost:3000/app/
-#   site       http://localhost:3000/
-#   API        http://localhost:3000/api/state
-```
-
-### Data modes
-
-The collector can run in three modes and always says which one it is using, in the pill at the top right of the
-dashboard:
-
-| Mode | What it means | How to enable |
-|---|---|---|
-| `live` | Reads the Kalshi demo API on every poll. The real thing. | `DATA_MODE=live` (default) |
-| `snapshot` | Replays a committed capture of **real** demo values. Truthful but frozen, so no new swings fire. | `DATA_MODE=snapshot` |
-| `demo` | **Synthetic** prices generated locally so the pipeline can be demonstrated when Kalshi is unreachable. Every ticker is `DEMO-…` and every title starts with `[DEMO]`. Not market data. | `DATA_MODE=demo` |
-
-With `DATA_MODE=live` and `ALLOW_DEMO_FALLBACK=0`, the app reports failure instead of quietly switching to synthetic
-data.
-
-### Reading your real demo portfolio (read-only)
+## Preview locally
 
 ```bash
-export KALSHI_API_KEY_ID="your-demo-key-id"
-export KALSHI_PRIVATE_KEY_PATH="./kalshi-demo-key.pem"
-npm start
+python3 -m http.server 8000 --directory docs
+# http://localhost:8000/            landing page
+# http://localhost:8000/dashboard.html
 ```
 
-Demo keys only work against demo hosts and production keys only against production hosts. Create the key in the
-[demo UI](https://demo.kalshi.co/) under Account & Settings → API Keys. This project signs requests locally; the
-private key is never sent anywhere except as a signature to Kalshi.
+The dashboard calls Kalshi's public REST API straight from the browser — no key, no build step, no
+manual input. Demo is the default environment; production is read-only market data.
 
-## What it does
-
-| Feature | Detail |
-|---|---|
-| Topic routing | Five topics, driven by Kalshi's own series `category`, `tags` and `product_metadata.scope` |
-| Swing alerts | Inclusive **≥ $0.10** in either direction, compared in integer 1/10000-dollar space |
-| Two alert bases | `tick` (previous poll) and `day` (Kalshi's `previous_price_dollars`) reported separately |
-| Dual feeds | All swings, and only swings the model scores ≥ 45, with every score input printed |
-| Charts | Time on X, contract price on Y, switchable between seconds / minutes / hours |
-| Liquidity | Depth ladder with contracts and dollar notional per price level |
-| Resolutions | Tracks each market until Kalshi publishes `result` = yes/no, recorded once with its source |
-| Simulated trades | Four documented strategies, explicit entries and exits, results grouped by strategy type |
-| Demo portfolio | Read-only `GET /portfolio/balance` and `/portfolio/positions` when a key is configured |
-
-## Tests
+## Checks (also run in CI on every push)
 
 ```bash
-node tests/smoke-test.js        # 13 checks: engine, routing, fees, settlement, all HTTP routes, all data modes
-node tests/site-render-test.js  # 13 checks: every page script renders real content, no "undefined"
-node scripts/check-links.js     # 0 broken local links, anchors, imports or DOM targets
+python scripts/check_site.py       # broken links, JS syntax, data integrity, no localhost refs
+node tests/logic.test.mjs          # order-book maths, ROI screen, candle intervals, formatting
+node tests/render.test.mjs         # page scripts in a headless DOM (npm i --no-save jsdom)
+python scripts/verify_series.py    # re-fetch all 37 series rows and diff them (needs outbound HTTPS)
+python -m py_compile kalshi_client.py strategies.py backtest.py run_sim.py
 ```
 
-## Verification notes
+## Python toolkit
 
-The API facts this project depends on were read from the official documentation before any code was written, then
-confirmed against the live demo API. The findings that changed the design:
+```bash
+pip install -r requirements.txt
 
-- **There is no `Gas` and no `Golf` category on Kalshi.** `GET /series?category=Gas` and `?category=Golf` both return
-  `{"series":null}`. Gas lives in `Economics` with the tag `Oil & Gas`; golf lives in `Sports` with the tag `Golf`.
-- **Demo prices are not production prices.** Kalshi states the demo "may not be reflective of those in real markets".
-- **Legacy order endpoints are gone.** `POST /portfolio/orders` returns `410 deprecated_v1_order_endpoint`; orders use
-  `POST /portfolio/events/orders`.
-- **The fee formula is verifiable.** `fees = round up(M × 0.07 × C × P × (1 − P))` matches all 21 rows of Kalshi's own
-  published table to within two cents.
+# paper-trading simulation over live demo data (no key needed)
+python run_sim.py --polls 6 --interval 20            # writes sim_output.json + per-strategy CSVs
 
-Full list, with evidence links: [Flagged for Review](docs/flagged.html).
-
-## Repository layout
-
-```
-server/          collector, Kalshi client, swing engine, paper trading, HTTP API
-app/             dashboard UI (no framework, no build step)
-docs/            published static site (GitHub Pages source)
-data/            committed snapshot of real demo values + gitignored runtime state
-tests/           offline test harnesses
-scripts/         link checker
-.github/         Pages deploy workflow
-COORDINATION.md  shared task board for parallel agent sessions
+# authenticated demo calls need your own demo key — never committed, never entered in the site
+export KALSHI_API_KEY_ID=...            # demo.kalshi.co → Account & security → API keys
+export KALSHI_PRIVATE_KEY_PATH=./kalshi-key.pem
+python -c "from kalshi_client import KalshiClient; print(KalshiClient().balance())"
 ```
 
-## Licence
+`KalshiClient.place_order` builds the documented V2 order body and **defaults to `dry_run=True`**;
+sending a real demo order requires `dry_run=False` *and* `KALSHI_ALLOW_ORDERS=1`.
 
-MIT.
+## Layout
+
+```
+docs/                    GitHub Pages site
+  index.html             landing page + topic tables
+  dashboard.html         live dashboard (alerts, charts, liquidity, resolutions)
+  portfolio.html         strategy lab, P&L by topic/strategy, CSV/JSON export
+  executive-summary.html requirement → implementation map
+  methodology.html       endpoints, field names, thresholds, network options
+  verification.html      row-by-row verification with API links
+  flagged.html           unverified / judgement-call items
+  topics/*.html          one page per topic, verified series + live contracts
+  data/series.json       37 verified series rows, each with its API proof URL
+  assets/                app.js (core), dashboard.js, portfolio.js, topic.js, style.css
+scripts/check_site.py    static-site gate used by CI
+scripts/verify_series.py re-verifies every published series row
+tests/logic.test.mjs     offline unit tests of the dashboard maths
+tests/render.test.mjs    headless-DOM render tests for every page (45 checks)
+kalshi_client.py         REST client, documented signing and V2 order body
+strategies.py            four strategy rules + the high-ROI screen
+backtest.py              paper portfolio, settlement, CSV export
+run_sim.py               live paper-trading simulation CLI
+```
+
+## Documentation set
+
+| File | What it covers |
+|------|----------------|
+| [docs/executive-summary.html](docs/executive-summary.html) | Requirements → implementation, with the caveats stated per row |
+| [docs/methodology.html](docs/methodology.html) | Endpoints, field names, alert and chart maths, network fallbacks |
+| [docs/verification.html](docs/verification.html) | Every series row with the official API record that proves it |
+| [docs/flagged.html](docs/flagged.html) | Ten items that need a human decision |
+| [VERIFICATION.md](VERIFICATION.md) | Repo-side verification record and irregularities |
+| [COORDINATION.md](COORDINATION.md) | Session task board, claims, merge record |
+
+Not financial advice. Kalshi demo markets use mock funds and their prices may not reflect real markets.

@@ -1,10 +1,15 @@
 # Publishes the static site in /docs to GitHub Pages.
 #
-# The site is plain HTML/CSS/ES modules with no build step, so this workflow only
-# verifies then uploads /docs. A broken site never deploys.
+# The site is plain HTML/CSS/ES modules with no build step, so this workflow verifies it and
+# then uploads /docs. A site that fails a check never deploys.
 #
-# If Actions/Pages are not available, the alternative is
-# Settings → Pages → Source: "Deploy from a branch" → main / docs.
+# KNOWN ENVIRONMENT BLOCKER (recorded in COORDINATION.md): a repository whose Pages site has
+# never been created returns 403 "Resource not accessible by integration" to every token that
+# GitHub issues for automation, so the "Pages readiness" step below stops with an explicit
+# instruction instead of a confusing mid-deploy failure. One-time owner action, no code change:
+#   Repo -> Settings -> Pages -> Build and deployment -> Source: GitHub Actions -> Save
+# After that click, every push to main deploys automatically.
+# Manual alternative: Actions -> "Deploy site to GitHub Pages" -> Run workflow.
 
 name: Deploy site to GitHub Pages
 
@@ -15,8 +20,8 @@ on:
       - 'docs/**'
       - 'app/**'
       - 'server/**'
-      - 'tests/**'
       - 'scripts/**'
+      - 'tests/**'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
@@ -27,7 +32,7 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   verify:
@@ -38,12 +43,27 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Link check
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Static site gate (links, JS syntax, data integrity)
+        run: python scripts/check_site.py
+
+      - name: Link check (both published builds)
         run: node scripts/check-links.js
-      - name: Render harness
-        run: node tests/site-render-test.js
-      - name: Engine and route tests
+
+      - name: Dashboard logic tests
+        run: node tests/logic.test.mjs
+
+      - name: Collector and engine tests
         run: node tests/smoke-test.js
+
+      - name: Render tests (headless DOM)
+        run: |
+          npm install --no-save --no-fund --silent jsdom@25
+          node tests/render.test.mjs
+          node tests/site-render-test.js
 
   deploy:
     name: Deploy
@@ -54,11 +74,23 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Pages readiness
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/pages")
+          echo "GET /repos/$GITHUB_REPOSITORY/pages -> $code"
+          if [ "$code" = "404" ]; then
+            echo "::error title=GitHub Pages is not enabled on this repository::Pages has never been created for $GITHUB_REPOSITORY. Automation tokens are not allowed to create it (403 from POST/PUT /pages). Owner action, one time: Settings -> Pages -> Build and deployment -> Source: GitHub Actions -> Save, then re-run this workflow. The site itself passed every check in the verify job."
+            exit 1
+          fi
+
       - uses: actions/configure-pages@v5
         with:
-          # Try to turn Pages on automatically. If the repository token is not
-          # allowed to do that, this fails and the site owner must enable it once at
-          # Settings -> Pages -> Source: GitHub Actions. Everything else still passes.
           enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:

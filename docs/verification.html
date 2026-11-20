@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verification log — Trade3 · Kalshi</title>
+<meta name="description" content="Row-by-row verification log: every Kalshi series published on this site, with the official API record that proves it and the field-by-field comparison.">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">Trade3 <span>· Verification</span></div>
+  <nav class="main">
+    <a href="index.html">Home</a>
+    <a href="executive-summary.html">Summary</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="index.html#topics">Topics</a>
+    <a href="portfolio.html">Portfolio</a>
+    <a href="methodology.html">Method</a>
+    <a href="verification.html" class="active">Verification</a>
+    <a href="flagged.html">Flagged</a>
+  </nav>
+</header>
+
+<main class="stack">
+
+  <section class="card">
+    <h1>Verification log</h1>
+    <p class="muted">
+      Every row this site publishes about a Kalshi series was fetched individually from
+      <code>GET /series/{ticker}</code> and compared field by field against the stored row — title,
+      frequency, category and settlement source. The <b>API record</b> column is the exact response that
+      proves the row. Re-run the whole check with <code>python scripts/verify_series.py</code>.
+    </p>
+    <div class="controls">
+      <div class="tabs" id="verify-tabs">
+        <button data-t="all" class="on">All</button>
+        <button data-t="gas">Gas</button>
+        <button data-t="elections">Elections</button>
+        <button data-t="culture">Culture</button>
+        <button data-t="crypto">Crypto</button>
+        <button data-t="golf">Golf</button>
+      </div>
+      <span id="verify-status" class="pill">loading…</span>
+    </div>
+  </section>
+
+  <section class="grid cols-4">
+    <div class="card tight"><div class="kpi-label">Rows published</div><div class="kpi" id="v-rows">—</div></div>
+    <div class="card tight"><div class="kpi-label">Verified</div><div class="kpi up" id="v-ok">—</div></div>
+    <div class="card tight"><div class="kpi-label">Blank &amp; flagged</div><div class="kpi warn" id="v-flag">—</div></div>
+    <div class="card tight"><div class="kpi-label">Official sources cited</div><div class="kpi" id="v-docs">—</div></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>Series rows</h2>
+      <div class="right dim">checked 2026-11-20 against the demo Trade API</div>
+    </div>
+    <div class="table-wrap" style="max-height:640px;overflow-y:auto"><table>
+      <thead><tr>
+        <th>#</th><th>Topic</th><th>Series ticker</th><th>Published title</th><th>Frequency</th>
+        <th>Settlement source</th><th>API record</th><th>Result</th>
+      </tr></thead>
+      <tbody id="v-body"></tbody>
+    </table></div>
+  </section>
+
+  <section class="card">
+    <h2>Documents checked</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>#</th><th>Claim</th><th>Official source</th><th>How it was checked</th></tr></thead>
+      <tbody id="docs-body"></tbody>
+    </table></div>
+  </section>
+
+  <section class="card">
+    <h2>Computed or heuristic — not official facts</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>#</th><th>Item</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>D1</td><td>“Dollars traded” = contracts × last price</td><td>Approximation — Kalshi publishes no dollar-volume field (<a href="flagged.html">F4</a>)</td></tr>
+        <tr><td>D2</td><td>High-ROI screen thresholds</td><td>Disclosed heuristic, not a trained model (<a href="flagged.html">F5</a>)</td></tr>
+        <tr><td>D3</td><td>Four strategy rules and their historical results</td><td>Research rules; demo results are plumbing tests (<a href="flagged.html">F6</a>)</td></tr>
+        <tr><td>D4</td><td>Cause of any ≥ $0.10 jump</td><td>Not available from the API; never asserted (<a href="flagged.html">F2</a>)</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+</main>
+<footer>
+  Trade3 · <a href="index.html">Home</a> · <a href="methodology.html">Methodology</a> ·
+  <a href="flagged.html">Flagged for review</a><br>
+  Sources: docs.kalshi.com and the live Kalshi demo Trade API.
+</footer>
+<script type="module" src="assets/verification.js"></script>
+</body>
+</html>

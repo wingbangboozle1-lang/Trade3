@@ -1,49 +1,84 @@
-# Verification Log — line-by-line sources
+# Verification log — row-level evidence
 
-Every factual claim in this repo traces to one of the sources below. Values that could not be
-confirmed from an official source are left blank and listed in `docs/flagged.html`.
-Verified 2026-11-20. Live API responses were fetched on 2026-11-20 (demo base).
+The published, browsable version of this log is **docs/verification.html**.
+This file is the repo-side record of what was checked, when, and against which official source.
 
-## Official sources
+Verified 2026-11-20 against the Kalshi **demo** Trade API
+(`https://external-api.demo.kalshi.co/trade-api/v2`). Re-run everything with:
 
-| # | Claim | Official source (link) | How verified |
-|---|-------|------------------------|--------------|
-| V1 | Demo REST base `https://external-api.demo.kalshi.co/trade-api/v2`; also supported `https://demo-api.kalshi.co/trade-api/v2` | [Demo Environment](https://docs.kalshi.com/getting_started/demo_env) | Docs table matches user brief exactly |
-| V2 | Demo WS `wss://external-api-ws.demo.kalshi.co/trade-api/ws/v2`; also supported `wss://demo-api.kalshi.co/trade-api/ws/v2` | [Demo Environment](https://docs.kalshi.com/getting_started/demo_env) | Docs table |
-| V3 | Prod REST `https://external-api.kalshi.com/trade-api/v2`; also `https://api.elections.kalshi.com/trade-api/v2` | [API Environments](https://docs.kalshi.com/getting_started/api_environments) | Docs table |
-| V4 | Prod WS `wss://external-api-ws.kalshi.com/trade-api/ws/v2` | [API Environments](https://docs.kalshi.com/getting_started/api_environments) | Docs table |
-| V5 | Demo site `https://demo.kalshi.co/`; credentials not shared with prod; demo prices may not reflect real markets | [Demo Environment](https://docs.kalshi.com/getting_started/demo_env) | Docs text |
-| V6 | Public market data needs no auth (`/series`, `/events`, `/markets`, `/orderbook`) | [Quick Start: Market Data](https://docs.kalshi.com/getting_started/quick_start_market_data) | Docs + live unauthenticated fetches succeeded |
-| V7 | Series → Event → Market hierarchy; `category`/`categories`/`tags` semantics | [Glossary](https://docs.kalshi.com/getting_started/terms) | Docs; gas example `KXAAAGASM` with Economics/Commodities |
-| V8 | `GET /series?category=&tags=` filters (exact, case-sensitive) | [Get Series List](https://docs.kalshi.com/api-reference/market/get-series-list) | Docs + live queries returned expected series |
-| V9 | `GET /markets` fields incl. `volume_fp`, `last_price_dollars`, `yes_bid/ask_dollars`, `result`, `status` | [Get Markets](https://docs.kalshi.com/api-reference/market/get-markets) | Docs + live market objects match schema |
-| V10 | Orderbook returns YES/NO bids only (`orderbook_fp.yes_dollars/no_dollars` = [price, count]) | [Get Market Orderbook](https://docs.kalshi.com/api-reference/market/get-market-orderbook) | Docs + quick-start code |
-| V11 | Candlesticks `period_interval` ∈ {1, 60, 1440} minutes; `start_ts`/`end_ts` required | [Get Market Candlesticks](https://docs.kalshi.com/api-reference/market/get-market-candlesticks) | Docs |
-| V12 | Auth headers `KALSHI-ACCESS-KEY/TIMESTAMP/SIGNATURE`; sign `timestamp+METHOD+path` (no query); RSA-PSS/SHA-256 or Ed25519; timestamp ms, 30s window | [Authenticated Requests](https://docs.kalshi.com/getting_started/quick_start_authenticated_requests) | Docs; implemented verbatim in `kalshi_client.py` |
-| V13 | WS handshake signs `timestamp + "GET" + "/trade-api/ws/v2"`; channels `ticker`, `trade`, `orderbook_delta`, etc. | [Quick Start: WebSockets](https://docs.kalshi.com/getting_started/quick_start_websockets) | Docs |
-| V14 | Gas mapping: Economics + Oil & Gas; `KXAAAGASM` US gas price monthly, AAA settlement | [Glossary](https://docs.kalshi.com/getting_started/terms) + [Live series](https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASM) | Docs example + live record (AAA, gasprices.aaa.com) |
-| V15 | Golf mapping: Sports + Golf tag; e.g. `KXPGAGOLFERSCORE`, `KXPGAEAGLE`, `KXPRESCUPMATCH`, `KXPGAT20` | [Live query](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Sports&tags=Golf&limit=20) | Live API returned these series with PGA Tour settlement sources |
-| V16 | Crypto mapping: category Crypto; e.g. `KXETHD`, `KXBTC2025100`, `KXBTXMINW` | [Live query](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Crypto&limit=20) | Live API |
-| V17 | Elections mapping: category Elections; e.g. `KXELECTUKRAINE`, `KXIATREASR` | [Live query](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Elections&limit=20) | Live API |
-| V18 | Culture: no Culture category exists; Entertainment tags (Music, Awards, Movies, TV…) | [Live tags map](https://external-api.demo.kalshi.co/trade-api/v2/search/tags_by_categories) | Live API — full category list inspected; Entertainment used as proxy (F1) |
-| V19 | Exchange active on demo 2026-11-20 (`exchange_active: true`, `trading_active: true`) | [Live status](https://external-api.demo.kalshi.co/trade-api/v2/exchange/status) | Live API JSON |
-| V20 | OpenAPI spec download | [Predictions REST spec](https://docs.kalshi.com/openapi.yaml) | Linked from docs welcome page |
+```bash
+python scripts/verify_series.py      # re-fetches all 37 series rows and diffs the published fields
+python scripts/check_site.py         # links, JS syntax, data integrity
+node tests/logic.test.mjs            # dashboard maths against the documented examples
+```
 
-## Derived / heuristic items (explicitly NOT official facts)
+## 1. Documentation checked
 
-| # | Item | Status |
-|---|------|--------|
-| D1 | $ volume = `volume_fp × last_price_dollars` | Approximation (no official dollar-volume field). Flagged F4. |
-| D2 | High-ROI filter thresholds | Heuristic. Flagged F5. |
-| D3 | Strategy rules (momentum etc.) | Research heuristics. Not advice. |
-| D4 | News/catalyst causes | NOT provided by Kalshi API. Never invented. Flagged F2. |
+| # | Claim | Official source |
+|---|-------|-----------------|
+| V1 | Demo REST base and the documented fallback host | https://docs.kalshi.com/getting_started/api_environments · https://docs.kalshi.com/getting_started/demo_env |
+| V2 | Demo WebSocket URL, and that the handshake must be signed with an API key | https://docs.kalshi.com/getting_started/quick_start_websockets |
+| V3 | Public market data endpoints need no authentication | https://docs.kalshi.com/getting_started/quick_start_market_data |
+| V4 | `GET /markets` filters: `status`, `series_ticker`, `mve_filter`, `cursor`, timestamp windows | https://docs.kalshi.com/api-reference/market/get-markets |
+| V5 | `GET /events` exposes `category` and `series_ticker`; excludes multivariate events | https://docs.kalshi.com/api-reference/events/get-events |
+| V6 | `GET /series/{ticker}` returns `settlement_sources`, `frequency`, `categories`, `tags` | https://docs.kalshi.com/api-reference/market/get-series |
+| V7 | `GET /series?category=&tags=` filters; `category` matches any entry in `categories` | https://docs.kalshi.com/api-reference/market/get-series-list |
+| V8 | Order book returns bids only, `[price, count]`, ascending; implied ask = $1.00 − opposing bid | https://docs.kalshi.com/getting_started/orderbook_responses |
+| V9 | Candlesticks: `period_interval` ∈ {1, 60, 1440} minutes, ≤ 5,000 periods per request | https://docs.kalshi.com/api-reference/market/get-market-candlesticks |
+| V10 | Settlement pays $1 per winning contract; `result` carries the outcome | https://docs.kalshi.com/getting_started/market_settlement |
+| V11 | V2 order body: `side` bid/ask, `price` dollar string, `count` string, `client_order_id` | https://docs.kalshi.com/getting_started/quick_start_create_order |
+| V12 | Signing: `timestamp + METHOD + path`, RSA-PSS/SHA-256 or Ed25519, base64 | https://docs.kalshi.com/getting_started/quick_start_authenticated_requests |
+| V13 | Rate limits are token buckets; 429 is retryable with backoff | https://docs.kalshi.com/getting_started/rate_limits |
+| V14 | Category → tag map (no `Culture` key exists) | https://docs.kalshi.com/api-reference/search/get-tags-for-series-categories |
+| V15 | Public web pages are `/markets/{lowercased series ticker}` | https://kalshi.com/markets/kxaaagasm · https://kalshi.com/markets/kxethd |
 
-## Irregularities
+## 2. Series rows (37 of 37 re-fetched individually)
 
-- Sandbox egress allowlist blocks direct `curl` to Kalshi hosts from bash; verification therefore
-  used official docs pages + live API JSON via the docs fetch proxy. The deployed site fetches
-  from the user's browser (unrestricted). No values were taken from third-party blogs.
-- One golf series ticker was truncated in a paginated response chunk and was **excluded** from
-  `series.json` rather than guessed.
-- Demo market data includes synthetic multivariate markets (e.g. `KXMVECROSSCATEGORY-*`);
-  the dashboard's topic filters exclude them by construction (series-scoped queries only).
+Every row in `docs/data/series.json` was re-fetched with `GET /series/{ticker}` on 2026-11-20 and
+compared on four fields — `title`, `frequency`, `category`, first `settlement_sources` entry.
+Result: **35 rows match exactly; 2 rows publish a blank settlement source because the API returns
+`settlement_sources: null`** (`KXLINKPERP`, `KXSOLPERP` — flag F9).
+
+| Topic | Rows | All matched? | Proof pattern |
+|-------|------|--------------|---------------|
+| Gas prices | 10 | yes | `https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASM` etc. |
+| Elections | 5 | yes | `.../series/KXIATREASR` etc. |
+| Culture (Entertainment) | 8 | yes | `.../series/KXTOPARTIST` etc. |
+| Crypto | 10 | 8 matched, 2 blank (F9) | `.../series/KXETHD` etc. |
+| Golf | 4 | yes | `.../series/KXPGAGOLFERSCORE` etc. |
+
+Per-row links live in `docs/data/series.json` (`source` field, rendered on every topic page) and in
+`docs/verification.html`.
+
+## 3. Values deliberately left blank
+
+| Item | Why | Where |
+|------|-----|-------|
+| `KXLINKPERP`, `KXSOLPERP` settlement source | API returns `settlement_sources: null`, `contract_url: ""` | F9 |
+| Cause of any ≥ $0.10 jump | Not exposed by the Kalshi API; never inferred | F2 |
+| Live prices/volumes in static files | Fetched at runtime so no stale number is ever published as fact | F7 |
+
+## 4. Irregularities found and how they were handled
+
+1. **Two spellings of the gas tag.** `GET /series/KXAAAGASM` returns
+   `tags: ["Oil & Gas", "Oil and energy"]`; other gas series carry only one of them. The topic
+   filter queries both tag strings and normalises `&` → `and`, otherwise roughly a third of the gas
+   series would silently disappear.
+2. **`KXBOOKERPRIZE` contradicts itself.** Title says "booker prize"; the only settlement source is
+   `nationalbook.org` (National Book Awards) and the terms file is `BOOKERAWARDS.pdf`. Published as
+   the API returns it; flagged F8.
+3. **`KXWORLDCUPHALFTIME`** lists an empty settlement-source name with a Google search URL, and a
+   source literally named `official broadcaster of` with no state. Published verbatim; the first
+   listed source (Deadline) is the one shown.
+4. **Multivariate combos** (`KXMVECROSS…`) dominate unfiltered market listings and have no place in
+   a topic list; every request now sets `mve_filter=exclude`.
+5. **No `Culture` category exists.** Entertainment is used as the proxy and labelled as such (F1).
+6. **`KXPGAR1T5` had no open events** when queried directly; only series that actually return open
+   markets appear in live tables, while the verified static rows remain for reference.
+
+## 5. Environment note
+
+The sandbox this was built in permitted outbound HTTPS only to a small allowlist, so Kalshi
+responses were read through an official-endpoint page fetch rather than `curl`. Every value was
+copied from a real response body. `scripts/verify_series.py` reproduces the entire check from any
+unrestricted machine, and CI runs it on every push.

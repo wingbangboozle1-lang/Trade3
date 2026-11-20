@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Crypto — Trade3 Kalshi</title>
+<title>Crypto — Trade3 · Kalshi</title>
+<meta name="description" content="Crypto contracts on Kalshi: verified series list with official sources, plus live open contracts and prices.">
 <link rel="stylesheet" href="../assets/style.css">
 </head>
 <body data-topic="crypto">
@@ -11,40 +12,89 @@
   <div class="brand">Trade3 <span>· Crypto</span></div>
   <nav class="main">
     <a href="../index.html">Home</a>
-    <a href="../dashboard.html">Live Dashboard</a>
-    <a href="../portfolio.html">Portfolio &amp; Strategies</a>
-    <a href="gas.html">Gas</a>
-    <a href="elections.html">Elections</a>
-    <a href="culture.html">Culture</a>
-    <a href="crypto.html">Crypto</a>
-    <a href="golf.html">Golf</a>
-    <a href="../methodology.html">Methodology</a>
-    <a href="../flagged.html">Flagged for Review</a>
+    <a href="../executive-summary.html">Summary</a>
+    <a href="../dashboard.html">Dashboard</a>
+    <a href="../index.html#topics">Topics</a>
+    <a href="../portfolio.html">Portfolio</a>
+    <a href="../methodology.html">Method</a>
+    <a href="../verification.html">Verification</a>
+    <a href="../flagged.html">Flagged</a>
   </nav>
 </header>
-<main>
-  <div class="card">
+<main class="stack">
+  <section class="card">
     <h1 id="topic-title">Crypto</h1>
     <p id="topic-meta" class="muted">Loading verified series…</p>
-    <p class="muted">Events within this topic are grouped together below. Live prices update from the Kalshi demo API in your browser.</p>
-  </div>
-  <div class="card" style="margin-top:16px">
-    <h2>Verified series (snapshot 2026-11-20)</h2>
-    <table>
-      <thead><tr><th>Series ticker</th><th>Title</th><th>Frequency</th><th>Settlement source</th><th>Source</th></tr></thead>
+    <p class="muted" id="topic-why"></p>
+    
+    <div class="tabs" style="margin-bottom:2px">
+      <a class="pill" href="gas.html">Gas prices</a>
+      <a class="pill" href="elections.html">Elections</a>
+      <a class="pill" href="culture.html">Culture</a>
+      <a class="pill" href="crypto.html">Crypto</a>
+      <a class="pill" href="golf.html">Golf</a>
+    </div>
+    <div id="topic-flag"></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>Verified series <span class="pill" id="topic-count">—</span></h2>
+      <div class="right dim">re-verified 2026-11-20 · one row per official API record</div>
+    </div>
+    <p class="dim" style="margin:0 0 8px">
+      Each row was fetched individually from <code>GET /series/{ticker}</code> and compared field by field
+      (title, frequency, category, settlement source). The <b>API</b> link is the record that proves the row;
+      <b>Kalshi ↗</b> is the public market page. Rows the API cannot substantiate are blank and listed on
+      <a href="../flagged.html">Flagged for review</a>. Reproduce with <code>python scripts/verify_series.py</code>.
+    </p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Series ticker</th><th>Title</th><th>Frequency</th><th>Kalshi category</th><th>Settlement source</th><th>Source</th></tr></thead>
       <tbody id="series-body"></tbody>
-    </table>
-  </div>
-  <div class="card" style="margin-top:16px">
-    <h2>Live open markets (top by $ volume)</h2>
-    <table>
-      <thead><tr><th>Ticker</th><th>Title</th><th>Last price</th><th>$ volume</th><th>Close</th><th>Link</th></tr></thead>
+    </table></div>
+    <p class="dim" style="margin-top:8px">Discovery queries used to find this topic's series: <span id="discovery-links"></span></p>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>Live open contracts</h2>
+      <div class="right">
+        <span id="live-count" class="pill">—</span>
+        <span id="live-status" class="pill">idle</span>
+        <input id="live-filter" type="text" placeholder="filter ticker / title" style="width:200px">
+        <button id="live-refresh" class="sm ghost">Refresh</button>
+      </div>
+    </div>
+    <p class="dim" style="margin:0 0 8px">
+      Prices, sizes and volume come straight from the public Trade API and are rendered as returned.
+      Blank means the exchange returned no value — nothing is filled in.
+    </p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Contract</th><th>Event / outcome</th><th class="num">Last</th><th class="num">YES bid / ask</th>
+        <th class="num">Spread</th><th class="num">Volume</th><th class="num">$ traded</th><th>Closes</th><th>Links</th></tr></thead>
       <tbody id="live-body"></tbody>
-    </table>
-    <p class="muted"><a href="../dashboard.html">Open in live dashboard →</a> (charts, alerts, liquidity, resolutions)</p>
-  </div>
+    </table></div>
+  </section>
+
+  <section class="card">
+    <h2>Where these numbers come from</h2>
+    <ul class="muted">
+      <li>Categories, tags and settlement sources: <code>GET /series</code> and <code>GET /series/{ticker}</code>
+        (<a href="https://docs.kalshi.com/api-reference/market/get-series-list" target="_blank" rel="noopener">docs</a>).</li>
+      <li>Prices, bid/ask, volume, open interest: <code>GET /markets</code>
+        (<a href="https://docs.kalshi.com/api-reference/market/get-markets" target="_blank" rel="noopener">docs</a>).</li>
+      <li>Settled results (yes/no): the <code>result</code> field on settled markets
+        (<a href="https://docs.kalshi.com/getting_started/market_settlement" target="_blank" rel="noopener">settlement docs</a>).</li>
+      <li>“$ traded” is <code>contracts × last price</code> — a disclosed approximation, because Kalshi publishes contract
+        counts rather than dollar volume (<a href="../flagged.html">F4</a>).</li>
+    </ul>
+  </section>
 </main>
-<footer><a href="../dashboard.html">← Live Dashboard</a> · <a href="../methodology.html">Methodology</a></footer>
+<footer>
+  Trade3 · Crypto · <a href="../methodology.html">Methodology</a> ·
+  <a href="../verification.html">Verification</a> · <a href="../flagged.html">Flagged for review</a><br>
+  Demo markets use mock funds; prices may not reflect real markets. Not financial advice.
+</footer>
 <script type="module" src="../assets/topic.js"></script>
 </body>
 </html>

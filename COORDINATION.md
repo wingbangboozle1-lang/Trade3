@@ -138,3 +138,77 @@ integration* task that the board leaves open, because three branches carry work 
   `site/` + `app/`. `app/` and `server/` on `main` already provide the same surfaces, so this session
   integrates that branch's **non-overlapping** deliverables (`research/`, `requirements/`) and records the
   rest as not-merged with reasons. Its `site/` pages are reachable through its own branch.
+---
+
+## Session `arena/4f9f13c8-trade3` — review pass + fixes (opened 2026-11-20)
+
+Branch `arena/4f9f13c8-trade3` rebased onto `main` @ `a506e72`. The prior session's build is merged
+but its Pages deploy never ran (Setup Pages failed) and its verification log covered only spot checks.
+This session re-verified **all 37 published series rows** against the live demo API and found issues
+(listed below). Scopes below are new files or files this session now exclusively owns; no other
+session is active, and any future session must not edit these files while this claim is live.
+
+| ID | Task | Status | Owner | Files touched |
+|----|------|--------|-------|---------------|
+| T7 | Line-by-line re-verification of every table row + rebuilt `series.json` with per-row proof | done | arena/4f9f13c8-trade3 | `docs/data/series.json`, `VERIFICATION.md`, `scripts/verify_series.py` |
+| T8 | Fix topic discovery filters (gas tags: query both spellings, normalise `&`→`and`) | done | arena/4f9f13c8-trade3 | `docs/assets/app.js`, `kalshi_client.py`, `docs/methodology.html` |
+| T9 | Dashboard upgrade: candlestick chart with 7 time windows, depth + implied asks, resolution tracker, official deep links, request pacing/backoff, `#ticker` deep links | done | arena/4f9f13c8-trade3 | `docs/dashboard.html`, `docs/assets/dashboard.js`, `docs/assets/style.css` |
+| T10 | Trading client fix: order payload did not match the official V2 contract | done | arena/4f9f13c8-trade3 | `kalshi_client.py`, `docs/portfolio.html` |
+| T11 | Portfolio page: strategy comparison, equity curve, category breakdown, CSV/JSON export | done | arena/4f9f13c8-trade3 | `docs/portfolio.html`, `docs/assets/portfolio.js` |
+| T12 | Build/link check scripts + CI workflow + headless render tests | done | arena/4f9f13c8-trade3 | `scripts/check_site.py`, `.github/workflows/ci.yml` |
+| T13 | Integration: PR to `main`, merge, Pages deploy attempt + record | in progress | arena/4f9f13c8-trade3 | (integration only) |
+
+### Irregularities found in the merged build (this session)
+
+1. **Gas topic filter would return nothing.** `docs/assets/app.js` used `tags=Oil & Gas`; the live
+   `GET /series?category=Economics&tags=Oil%20%26%20Gas` returns an empty list, because gas series are
+   tagged `Oil and energy`. Verified `GET /series/KXAAAGASM` → `tags: ["Oil & Gas","Oil and energy"]`,
+   and `GET /series?tags=Oil%20and%20energy` returns the gas series.
+2. **Culture rows came from an unstated query.** Kalshi has no `Culture` category; the published
+   `culture` rows are `Entertainment`. Correct, but the row source link must show the actual query.
+3. **`KXLINKPERP` / `KXSOLPERP`** are Crypto series with `settlement_sources: null` and an empty
+   `contract_url`; they are published without any settlement source. Flagged, not filled in.
+4. **`KXBOOKERPRIZE`** — title says "booker prize" while the only settlement source is
+   `nationalbook.org` (National Book Awards). Real discrepancy in Kalshi's metadata; flagged as-is.
+5. **Trading client payload was not the documented V2 shape** (`action/side/type/yes_price` cents).
+   Official docs use `side: bid|ask`, `price` as a dollar string, `count` as string, plus
+   `time_in_force`, `self_trade_prevention_type`, `client_order_id`. Fixed against docs.
+6. **`docs/flagged.html` claimed the tags map proved "no Culture category"** — it does, but the same
+   map also shows no `Culture` key at all, so the statement is re-worded to quote the live response.
+
+### What this session changed
+
+- `docs/index.html` + `docs/executive-summary.html` — landing page and the requirement-by-requirement
+  summary that `index.html` previously linked to but which did not exist.
+- `docs/dashboard.html`, `docs/assets/dashboard.js` — two alert streams (all ≥ $0.10 swings, and the
+  subset that passes the high-ROI screen, each showing *why* an alert was filtered out), seven chart
+  windows from 1 minute to 1 week, depth ladder with implied asks, resolution tracker, contract facts
+  with settlement sources, automatic simulated trades, and `#<ticker>` deep links.
+- `docs/portfolio.html`, `docs/assets/portfolio.js` — four fixed strategies compared on the same live
+  snapshot, P&L by topic and by strategy, equity curve, blotter, CSV/JSON export.
+- `docs/topics/*.html`, `docs/assets/topic.js`, `docs/data/series.json` — 37 verified rows, each with
+  the exact API URL that proves it.
+- `docs/verification.html` (new, data-driven), `docs/flagged.html`, `docs/methodology.html`.
+- `kalshi_client.py`, `strategies.py`, `backtest.py`, `run_sim.py` — Python layer, published rule
+  constants, V2 order body, `dry_run=True` default.
+- `scripts/check_site.py`, `tests/logic.test.mjs`, `tests/render.test.mjs`, `.github/workflows/ci.yml`.
+- `README.md` rewritten; `EXECUTIVE_SUMMARY.md` superseded by `docs/executive-summary.html`.
+
+### Defects the new tests caught and this session fixed
+
+| # | Defect | How it was caught | Fix |
+|---|--------|-------------------|-----|
+| D1 | After the first successful call the client stored a **bare hostname** as its base URL, so every later request went to `external-api.demo.kalshi.co/markets…` — no scheme, no `/trade-api/v2` | render test asserts every request is absolute and starts with a documented base | `net.base` keeps the full base URL; host kept separately for display only |
+| D2 | Swing detection was not awaited, so an alert and the simulated trade it opens rendered one refresh cycle late | render test checks the feed and the blotter in the same pass | `await detectSwings(...)`, and the blotter re-renders on new alerts |
+| D3 | Selecting a contract threw where `scrollIntoView` is unavailable | render test clicked a contract row | guarded scroll |
+| D4 | The client asserted a float equality (`entry_price(m,"no") == 0.46`) that fails on IEEE rounding | CI dry-run of the workflow's own step | compare with a tolerance |
+
+### Verification run at integration time
+
+```
+python scripts/check_site.py   -> 12 pages, 216 local links, 6 JS modules, 37 series rows, all passed
+node tests/logic.test.mjs      -> logic tests passed
+node tests/render.test.mjs     -> 45 render checks passed (dashboard, phone width, deep link,
+                                  portfolio, golf topic page, index, summary, methodology,
+                                  verification, flagged)
+```
