@@ -55,6 +55,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+        with:
+          # Try to turn Pages on automatically. If the repository token is not
+          # allowed to do that, this fails and the site owner must enable it once at
+          # Settings -> Pages -> Source: GitHub Actions. Everything else still passes.
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: docs
