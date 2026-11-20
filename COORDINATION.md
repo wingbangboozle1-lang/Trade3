@@ -36,3 +36,41 @@
   Source: **GitHub Actions** → Save. The existing `pages.yml` workflow will then deploy `docs/`
   automatically on the next push (or via Actions → "Deploy GitHub Pages" → Run workflow).
   Expected URL: https://wingbangboozle1-lang.github.io/Trade3/
+
+---
+
+## Session `arena/4f9f13c8-trade3` — review pass + fixes (opened 2026-11-20)
+
+Branch `arena/4f9f13c8-trade3` rebased onto `main` @ `a506e72`. The prior session's build is merged
+but its Pages deploy never ran (Setup Pages failed) and its verification log covered only spot checks.
+This session re-verified **all 37 published series rows** against the live demo API and found issues
+(listed below). Scopes below are new files or files this session now exclusively owns; no other
+session is active, and any future session must not edit these files while this claim is live.
+
+| ID | Task | Status | Owner | Files touched |
+|----|------|--------|-------|---------------|
+| T7 | Line-by-line re-verification of every table row + rebuilt `series.json` with per-row proof | in progress | arena/4f9f13c8-trade3 | `docs/data/series.json`, `VERIFICATION.md`, `scripts/verify_series.py` |
+| T8 | Fix topic discovery filters (gas tags bug: `Oil & Gas` returns 0 series; `Oil and energy` is correct) | in progress | arena/4f9f13c8-trade3 | `docs/assets/app.js`, `kalshi_client.py`, `docs/methodology.html` |
+| T9 | Dashboard upgrade: sparklines, candlestick chart w/ seconds·minutes·hours windows, depth + implied asks, resolution tracker, official Kalshi deep links, request pacing/backoff | in progress | arena/4f9f13c8-trade3 | `docs/dashboard.html`, `docs/assets/dashboard.js`, `docs/assets/style.css` |
+| T10 | Trading client fix: order payload did not match the official V2 contract | in progress | arena/4f9f13c8-trade3 | `kalshi_client.py`, `docs/portfolio.html` |
+| T11 | Portfolio page: strategy comparison, equity curve, category breakdown, CSV/JSON export | in progress | arena/4f9f13c8-trade3 | `docs/portfolio.html`, `docs/assets/portfolio.js` |
+| T12 | Build/link check scripts + CI workflow | in progress | arena/4f9f13c8-trade3 | `scripts/check_site.py`, `.github/workflows/ci.yml` |
+| T13 | Integration: PR to `main`, merge, Pages deploy attempt + record | unclaimed | — | (integration only) |
+
+### Irregularities found in the merged build (this session)
+
+1. **Gas topic filter would return nothing.** `docs/assets/app.js` used `tags=Oil & Gas`; the live
+   `GET /series?category=Economics&tags=Oil%20%26%20Gas` returns an empty list, because gas series are
+   tagged `Oil and energy`. Verified `GET /series/KXAAAGASM` → `tags: ["Oil & Gas","Oil and energy"]`,
+   and `GET /series?tags=Oil%20and%20energy` returns the gas series.
+2. **Culture rows came from an unstated query.** Kalshi has no `Culture` category; the published
+   `culture` rows are `Entertainment`. Correct, but the row source link must show the actual query.
+3. **`KXLINKPERP` / `KXSOLPERP`** are Crypto series with `settlement_sources: null` and an empty
+   `contract_url`; they are published without any settlement source. Flagged, not filled in.
+4. **`KXBOOKERPRIZE`** — title says "booker prize" while the only settlement source is
+   `nationalbook.org` (National Book Awards). Real discrepancy in Kalshi's metadata; flagged as-is.
+5. **Trading client payload was not the documented V2 shape** (`action/side/type/yes_price` cents).
+   Official docs use `side: bid|ask`, `price` as a dollar string, `count` as string, plus
+   `time_in_force`, `self_trade_prevention_type`, `client_order_id`. Fixed against docs.
+6. **`docs/flagged.html` claimed the tags map proved "no Culture category"** — it does, but the same
+   map also shows no `Culture` key at all, so the statement is re-worded to quote the live response.
