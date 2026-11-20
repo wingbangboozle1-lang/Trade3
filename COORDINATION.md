@@ -18,7 +18,7 @@
 | T3 | Topic subpages (gas, elections, culture, crypto, golf) | done | arena/73b9db7f-trade3 | `docs/topics/*.html`, `docs/data/series.json` | Live `/series?category=&tags=` queries 2026-11-20 | "Culture" has no Kalshi category; mapped to Entertainment — flagged. |
 | T4 | Simulated trading + portfolio + strategy analysis | done | arena/73b9db7f-trade3 | `docs/portfolio.html`, `docs/assets/portfolio.js`, `kalshi_client.py`, `strategies.py`, `backtest.py`, `run_sim.py` | Auth signing per docs.kalshi.com authenticated-requests guide | No demo keys in repo; paper engine is default. Live demo trading needs user keys. |
 | T5 | GitHub Pages site + landing + methodology + flagged pages | done | arena/73b9db7f-trade3 | `docs/index.html`, `docs/methodology.html`, `docs/flagged.html`, `.github/workflows/pages.yml` | Build check + link check before merge | — |
-| T6 | Final integration: verify, PR to main, merge, confirm Pages deploy | in progress | arena/73b9db7f-trade3 | (integration only) | All pages 200 locally; internal links OK; JS syntax OK; Python offline checks passed | — |
+| T6 | Final integration: verify, PR to main, merge, confirm Pages deploy | done | arena/73b9db7f-trade3 | (integration only) | All pages 200 locally; internal links OK; JS syntax OK; Python offline checks passed; PR #1 merged | Pages enablement needs owner click (token lacks scope) — see Merge record |
 
 ## Handoff / conflict log
 
@@ -27,6 +27,12 @@
 
 ## Merge record
 
-- PR link: _(to be filled after T6)_
-- Merge result: _(to be filled after T6)_
-- Pages deploy: _(to be filled after T6)_
+- PR link: https://github.com/wingbangboozle1-lang/Trade3/pull/1
+- Merge result: MERGED 2026-11-20T13:15:43Z (merge commit `4e12443`).
+- Pages deploy: Workflow run 44742765873 failed at "Setup Pages" — repo has Pages disabled and the
+  automation token lacks Pages-admin scope (API returns 403 "Resource not accessible by integration"
+  for both POST and PUT `/pages`). Site code itself is verified (all pages 200 locally, links OK).
+  **Owner action required (one click):** Repo → Settings → Pages → Build and deployment →
+  Source: **GitHub Actions** → Save. The existing `pages.yml` workflow will then deploy `docs/`
+  automatically on the next push (or via Actions → "Deploy GitHub Pages" → Run workflow).
+  Expected URL: https://wingbangboozle1-lang.github.io/Trade3/
