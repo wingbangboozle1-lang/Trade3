@@ -111,11 +111,11 @@ function setMode(mode, message) {
   const dot = $('#statusDot');
   const banner = $('#banner');
   const labels = {
-    live: ['live demo API', 'ok'],
+    live: ['LIVE · demo API', 'ok'],
     starting: ['starting…', 'warn'],
-    stale: ['stale data', 'warn'],
-    snapshot: ['snapshot data', 'warn'],
-    demo: ['synthetic data', 'warn'],
+    stale: ['STALE data', 'warn'],
+    snapshot: ['SNAPSHOT (real, not live)', 'warn'],
+    demo: ['SYNTHETIC demo data', 'bad'],
     offline: ['offline', 'bad'],
   };
   const [label, cls] = labels[mode] ?? [mode ?? 'unknown', 'warn'];
@@ -125,9 +125,23 @@ function setMode(mode, message) {
   if (message) {
     banner.hidden = false;
     banner.innerHTML = message;
-  } else if (mode === 'snapshot' || mode === 'demo' || mode === 'stale') {
+  } else if (mode === 'demo') {
     banner.hidden = false;
-    banner.innerHTML = `<strong>Not live right now.</strong> Data mode is <code>${esc(mode)}</code>. ${esc(state.data?.status?.notes?.[0] ?? '')}`;
+    banner.innerHTML =
+      '<strong>Synthetic demo data — these are not Kalshi markets.</strong> The Kalshi API was unreachable from this host, ' +
+      'so prices are generated locally to demonstrate the alert, chart and strategy pipeline. Every ticker is prefixed ' +
+      '<code>DEMO-</code> and every title starts with <code>[DEMO]</code>. Set <code>DATA_MODE=live</code> and run on a ' +
+      'network with normal egress for real values.';
+  } else if (mode === 'snapshot') {
+    banner.hidden = false;
+    banner.innerHTML =
+      '<strong>Snapshot of real values — not live.</strong> These markets and prices were captured from the Kalshi demo API ' +
+      'at the timestamp below and are replayed, so prices do not move and no new swings can fire. ' +
+      `<code>${esc(state.data?.status?.notes?.[0] ?? '')}</code>`;
+  } else if (mode === 'stale') {
+    banner.hidden = false;
+    banner.innerHTML =
+      '<strong>Data is stale.</strong> The last poll failed. The numbers below are the last values the collector saw, not current prices.';
   } else {
     banner.hidden = true;
   }
@@ -394,6 +408,19 @@ function renderHelp() {
   const d = state.data;
   if (!d) return;
   $('#helpBody').innerHTML = `
+    <h3>Data modes (read this first)</h3>
+    <p>This dashboard can run in three modes, and it always says which one it is using in the pill at the top right:</p>
+    <ul>
+      <li><code>live</code> — reading the Kalshi demo API on every poll. This is the real thing.</li>
+      <li><code>snapshot</code> — replaying a committed capture of <em>real</em> demo values. Truthful numbers, but frozen:
+        prices cannot move, so no new swing alerts can fire.</li>
+      <li><code>demo</code> — synthetic prices generated locally so the pipeline can be demonstrated when Kalshi's hosts
+        are unreachable. Every ticker starts with <code>DEMO-</code>. These are <strong>not</strong> Kalshi markets and must
+        never be read as market data.</li>
+    </ul>
+    <p>Set it with <code>DATA_MODE=live|snapshot|demo</code>. With <code>DATA_MODE=live</code> and
+    <code>ALLOW_DEMO_FALLBACK=0</code> the app will report failure rather than quietly switch to synthetic data.</p>
+
     <h3>Data source</h3>
     <p>Every price comes from the official Kalshi <strong>demo</strong> Trade API at
     <code>${esc(d.environment.rest)}</code> (recommended demo base URL per

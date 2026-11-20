@@ -17,6 +17,7 @@ import { KalshiClient, topOfBook, midPrice, liquidity, round4 } from './kalshi.j
 import { TOPICS, classifyMarket, kalshiMarketUrl, seriesMeta } from './topics.js';
 import { SwingDetector, roiScore, moveDollars, SWING_THRESHOLD_DOLLARS, HIGH_ROI_MIN_SCORE } from './alerts.js';
 import { PaperBroker, decideTrade, analyzeTrades, STRATEGY_META, STRATEGIES } from './paper.js';
+import { syntheticMarkets, syntheticBook, SYNTHETIC_SERIES, DEMO_MODE_NOTICE } from './demo-data.js';
 
 // Categories that actually exist on Kalshi (verified against GET /series?category=...).
 // "Gas" and "Golf" are NOT categories: gas lives in Economics with an "Oil & Gas" tag,
@@ -35,6 +36,8 @@ export class Collector extends EventEmitter {
     strategies = Object.values(STRATEGIES),
     logger = console,
     client = null,
+    dataMode = 'live', // 'live' | 'snapshot' | 'demo'
+    allowDemoFallback = true,
   } = {}) {
     super();
     this.setMaxListeners(50);
@@ -47,6 +50,10 @@ export class Collector extends EventEmitter {
     this.orderbookConcurrency = orderbookConcurrency;
     this.enablePaperTrading = enablePaperTrading;
     this.strategies = strategies;
+    this.requestedMode = dataMode;
+    this.allowDemoFallback = allowDemoFallback;
+    this.effectiveMode = dataMode;
+    this.snapshot = null;
 
     this.client = client ?? new KalshiClient({ env, onLog: (lvl, msg) => this.logger[lvl]?.(msg) });
     this.detector = new SwingDetector({ threshold: SWING_THRESHOLD_DOLLARS });
@@ -157,6 +164,8 @@ export class Collector extends EventEmitter {
   // ---- polling -------------------------------------------------------------
 
   async pollOnce() {
+    if (this.requestedMode === 'demo') return this.#pollSynthetic();
+    if (this.requestedMode === 'snapshot') return this.#pollSnapshot();
     const started = Date.now();
     this.status.pollCount += 1;
     try {
@@ -178,6 +187,7 @@ export class Collector extends EventEmitter {
       await this.#refreshBooks(tracked);
 
       this.status.dataMode = 'live';
+      this.effectiveMode = 'live';
       this.status.lastError = null;
       this.status.consecutiveErrors = 0;
       this.status.notes = this.status.notes.filter((n) => !n.startsWith('Kalshi demo reports'));
@@ -193,6 +203,14 @@ export class Collector extends EventEmitter {
       if (this.status.consecutiveErrors >= 2 && this.status.dataMode === 'live') {
         this.status.dataMode = 'stale';
       }
+      // Optional fallback so a demo of the UI is still possible on a blocked network.
+      if (this.allowDemoFallback && this.status.consecutiveErrors >= 2) {
+        this.logger.warn?.('live API unreachable; switching to synthetic demo mode (clearly labelled in the UI)');
+        this.effectiveMode = 'demo';
+        this.status.notes = [DEMO_MODE_NOTICE];
+        this.emit('update', { reason: 'fallback_demo' });
+        return;
+      }
       this.emit('update', { reason: 'poll_error', error: err.message });
       throw err;
     } finally {
@@ -201,6 +219,121 @@ export class Collector extends EventEmitter {
       this.status.tracked = this.markets.size;
     }
     this.emit('update', { reason: 'poll' });
+  }
+
+  /** Poll using committed real values (labelled snapshot). */
+  async #pollSnapshot() {
+    if (!this.snapshot) {
+      const file = path.join(this.dataDir, 'snapshot.json');
+      this.snapshot = JSON.parse(fs.readFileSync(file, 'utf8'));
+      for (const [ticker, meta] of Object.entries(this.snapshot.series ?? {})) {
+        this.seriesMeta.set(ticker, meta);
+      }
+    }
+    this.status.pollCount += 1;
+    const started = Date.now();
+    const candidates = this.#classify(this.snapshot.markets ?? []);
+    const tracked = this.#selectTracked(candidates);
+    const ts = Date.now();
+    for (const { market, seriesTicker, meta, topicId, reason } of tracked) {
+      // Real bid/ask from the capture; derive a mid from them, never invent one.
+      const yesBid = numeric(market.yes_bid_dollars);
+      const noBid = numeric(market.no_bid_dollars);
+      const yesAsk = noBid !== null ? round4(1 - noBid) : numeric(market.yes_ask_dollars);
+      const price =
+        yesBid !== null && yesAsk !== null ? round4((yesBid + yesAsk) / 2) : numeric(market.last_price_dollars);
+      if (price === null) continue;
+      this.#ingest(market, { seriesTicker, meta, topicId, reason, ts, price, top: { yesBid, yesAsk }, book: null, liq: { contracts: null, notionalDollars: null } });
+    }
+    this.status.dataMode = 'snapshot';
+    this.effectiveMode = 'snapshot';
+    this.status.notes = [`Snapshot of real demo values captured ${this.snapshot.capturedAt}. Not live.`];
+    this.status.lastPollAt = new Date().toISOString();
+    this.status.lastPollMs = Date.now() - started;
+    this.status.tracked = this.markets.size;
+    this.emit('update', { reason: 'poll_snapshot' });
+  }
+
+  /** Poll using locally generated synthetic markets (labelled demo). */
+  async #pollSynthetic() {
+    this.status.pollCount += 1;
+    const started = Date.now();
+    for (const [ticker, meta] of Object.entries(SYNTHETIC_SERIES)) this.seriesMeta.set(ticker, meta);
+    const markets = syntheticMarkets();
+    const candidates = this.#classify(markets);
+    const tracked = this.#selectTracked(candidates);
+    const ts = Date.now();
+    for (const { market, seriesTicker, meta, topicId, reason } of tracked) {
+      const book = syntheticBook(market);
+      const top = topOfBook(book);
+      const liq = liquidity(book);
+      const price = midPrice(book, market.last_price_dollars);
+      this.#ingest(market, { seriesTicker, meta, topicId, reason, ts, price, top, book, liq });
+    }
+    this.status.dataMode = 'demo';
+    this.effectiveMode = 'demo';
+    this.status.notes = [DEMO_MODE_NOTICE];
+    this.status.lastPollAt = new Date().toISOString();
+    this.status.lastPollMs = Date.now() - started;
+    this.status.tracked = this.markets.size;
+    this.emit('update', { reason: 'poll_demo' });
+  }
+
+  /**
+   * Shared ingestion for one market: store history, run the swing detector, alert.
+   * All three data modes call this, so behaviour cannot drift between them.
+   */
+  #ingest(market, { seriesTicker, meta, topicId, reason, ts, price, top, book, liq }) {
+    const existing = this.markets.get(market.ticker) ?? { ticker: market.ticker, history: [], firstSeenAt: ts };
+    const next = {
+      ...existing,
+      ticker: market.ticker,
+      title: market.title,
+      yesSubTitle: market.yes_sub_title ?? null,
+      eventTicker: market.event_ticker,
+      seriesTicker,
+      kalshiCategory: meta?.category ?? null,
+      kalshiTags: meta?.tags ?? [],
+      kalshiScope: meta?.scope ?? null,
+      seriesTitle: meta?.title ?? null,
+      topicId,
+      topicReason: reason,
+      status: market.status ?? null,
+      result: market.result ?? '',
+      closeTime: market.close_time ?? null,
+      expectedExpiration: market.expected_expiration_time ?? null,
+      volume: numeric(market.volume_fp),
+      volume24h: numeric(market.volume_24h_fp),
+      openInterest: numeric(market.open_interest_fp),
+      lastPrice: numeric(market.last_price_dollars),
+      previousPrice: numeric(market.previous_price_dollars),
+      yesBid: top?.yesBid ?? numeric(market.yes_bid_dollars),
+      yesAsk: top?.yesAsk ?? numeric(market.yes_ask_dollars),
+      yesBidSize: top?.yesBidSize ?? numeric(market.yes_bid_size_fp),
+      yesAskSize: top?.yesAskSize ?? numeric(market.yes_ask_size_fp),
+      spread: spreadOf(top ?? {}),
+      liquidityContracts: liq?.contracts ?? null,
+      liquidityDollars: liq?.notionalDollars ?? null,
+      book: book ? { yes: tail(book.yes, 10), no: tail(book.no, 10) } : null,
+      price,
+      priceUpdatedAt: new Date(ts).toISOString(),
+      dataMode: this.effectiveMode,
+      kalshiUrl: market.ticker.startsWith('DEMO-') ? null : kalshiMarketUrl(market.ticker, this.env),
+    };
+    next.history = appendHistory(existing.history, { t: ts, p: price });
+    this.markets.set(market.ticker, next);
+
+    const alerts = this.detector.observe(market, {
+      price,
+      ts,
+      source: `${this.effectiveMode}_poll`,
+      topicId,
+      reason,
+      seriesTicker,
+      liquidity: { contracts: liq?.contracts ?? null, dollars: liq?.notionalDollars ?? null },
+      kalshiUrl: next.kalshiUrl,
+    });
+    for (const alert of alerts) this.#handleAlert(alert, next);
   }
 
   /** Classify every market into one of the five topics (or drop it). */

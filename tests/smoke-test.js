@@ -245,6 +245,37 @@ await test('every HTTP route answers', async () => {
   await new Promise((r) => server.close(r));
 });
 
+// --- snapshot and synthetic demo modes -------------------------------------
+await test('snapshot mode replays real captured values and labels itself', async () => {
+  const snap = new Collector({
+    dataDir: new URL('../data/', import.meta.url).pathname,
+    dataMode: 'snapshot',
+    logger: quiet,
+  });
+  await snap.pollOnce();
+  const st = snap.state();
+  assert.equal(st.dataMode, 'snapshot', 'must not claim to be live');
+  assert.ok(st.topics.reduce((n, t) => n + t.marketCount, 0) > 0, 'snapshot must contain markets');
+  const first = st.topics.flatMap((t) => t.markets)[0];
+  assert.ok(!first.ticker.startsWith('DEMO-'), 'snapshot values are real, not synthetic');
+  assert.match(st.status.notes[0], /captured/i);
+});
+
+await test('synthetic demo mode is unmistakably labelled and drives the full pipeline', async () => {
+  const demo = new Collector({ dataDir: tempDir + 'demo/', dataMode: 'demo', logger: quiet });
+  for (let i = 0; i < 6; i += 1) {
+    await demo.pollOnce();
+    demo.managePositions();
+  }
+  const st = demo.state();
+  assert.equal(st.dataMode, 'demo');
+  assert.ok(st.topics.every((t) => t.marketCount > 0), 'every topic should have synthetic markets');
+  assert.ok(st.topics.every((t) => t.markets.every((m) => m.ticker.startsWith('DEMO-'))), 'every synthetic ticker must be prefixed DEMO-');
+  assert.ok(st.topics.every((t) => t.markets.every((m) => m.title.startsWith('[DEMO]'))), 'every synthetic title must be marked [DEMO]');
+  assert.ok(st.portfolio.openPositions.length + st.portfolio.closedTrades.length > 0, 'the paper engine should have traded');
+  assert.match(st.status.notes[0], /NOT Kalshi markets/i);
+});
+
 console.log(results.join('\n'));
 const failed = results.filter((r) => r.startsWith('FAIL')).length;
 console.log(`\n${results.length - failed}/${results.length} checks passed`);

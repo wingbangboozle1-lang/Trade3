@@ -81,6 +81,8 @@ async function handleApi({ req, res, url, collector, sseClients, logger }) {
     return sendJson(res, 200, {
       ok: true,
       dataMode: collector.status.dataMode,
+      effectiveMode: collector.effectiveMode,
+      requestedMode: collector.requestedMode,
       lastPollAt: collector.status.lastPollAt,
       lastPollMs: collector.status.lastPollMs,
       consecutiveErrors: collector.status.consecutiveErrors,
@@ -216,7 +218,8 @@ export function buildChart(market, windowId) {
     window: windowId,
     label: win.label,
     bucketMs: win.bucketMs,
-    dataMode: market.history?.length ? 'live' : 'no-samples',
+    // Never let a chart claim to be live when the collector is in snapshot/demo mode.
+    dataMode: market.history?.length ? (market.dataMode ?? 'live') : 'no-samples',
     series,
     current: market.price,
     previousPrice: market.previousPrice ?? null,
@@ -300,17 +303,22 @@ if (isMain) {
   const ENV = process.env.KALSHI_ENV || 'demo';
   const POLL_MS = Number(process.env.POLL_INTERVAL_MS) || 15000;
   const TRACKED_PER_TOPIC = Number(process.env.TRACKED_PER_TOPIC) || 12;
+  // DATA_MODE: 'live' (default) | 'snapshot' (committed real capture) | 'demo' (synthetic).
+  const DATA_MODE = (process.env.DATA_MODE || 'live').toLowerCase();
+  const ALLOW_DEMO_FALLBACK = process.env.ALLOW_DEMO_FALLBACK !== '0';
 
   const collector = new Collector({
     env: ENV,
     pollIntervalMs: POLL_MS,
     trackedPerTopic: TRACKED_PER_TOPIC,
     dataDir: process.env.DATA_DIR || path.join(ROOT, 'data'),
+    dataMode: DATA_MODE,
+    allowDemoFallback: ALLOW_DEMO_FALLBACK,
   });
 
   const server = createServer({ collector });
   server.listen(PORT, HOST, () => {
-    console.log(`Kalshi dashboard: http://${HOST}:${PORT}/app/  (env=${ENV}, poll=${POLL_MS}ms)`);
+    console.log(`Kalshi dashboard: http://${HOST}:${PORT}/app/  (env=${ENV}, poll=${POLL_MS}ms, dataMode=${DATA_MODE})`);
     console.log(`Docs site:        http://${HOST}:${PORT}/`);
   });
 
@@ -319,9 +327,9 @@ if (isMain) {
     if (running) return;
     running = true;
     try {
-      await collector.refreshSeriesCategories().catch(() => {});
+      if (collector.effectiveMode === 'live') await collector.refreshSeriesCategories().catch(() => {});
       await collector.pollOnce();
-      await collector.refreshResolutions().catch(() => {});
+      if (collector.effectiveMode === 'live') await collector.refreshResolutions().catch(() => {});
       collector.managePositions();
     } catch {
       /* logged inside collector */
