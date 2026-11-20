@@ -1,11 +1,15 @@
 # Publishes the static site in /docs to GitHub Pages.
 #
-# The site is plain HTML/CSS/ES modules with no build step, so this workflow only
-# verifies then uploads /docs. A broken site never deploys.
+# The site is plain HTML/CSS/ES modules with no build step, so this workflow verifies it and
+# then uploads /docs. A site that fails a check never deploys.
 #
-# Requires Settings -> Pages -> Source: GitHub Actions (one-time owner setting).
-# If Actions/Pages are not available, the alternative is
-# Settings -> Pages -> Source: "Deploy from a branch" -> main / docs.
+# KNOWN ENVIRONMENT BLOCKER (recorded in COORDINATION.md): a repository whose Pages site has
+# never been created returns 403 "Resource not accessible by integration" to every token that
+# GitHub issues for automation, so the "Pages readiness" step below stops with an explicit
+# instruction instead of a confusing mid-deploy failure. One-time owner action, no code change:
+#   Repo -> Settings -> Pages -> Build and deployment -> Source: GitHub Actions -> Save
+# After that click, every push to main deploys automatically.
+# Manual alternative: Actions -> "Deploy site to GitHub Pages" -> Run workflow.
 
 name: Deploy site to GitHub Pages
 
@@ -16,8 +20,8 @@ on:
       - 'docs/**'
       - 'app/**'
       - 'server/**'
-      - 'tests/**'
       - 'scripts/**'
+      - 'tests/**'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
@@ -28,7 +32,7 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   verify:
@@ -39,12 +43,93 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Link check
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Static site gate (links, JS syntax, data integrity)
+        run: python scripts/check_site.py
+
+      - name: Link check (both published builds)
         run: node scripts/check-links.js
-      - name: Render harness
-        run: node tests/site-render-test.js
-      - name: Engine and route tests
+
+      - name: Dashboard logic tests
+        run: node tests/logic.test.mjs
+
+      - name: Collector and engine tests
         run: node tests/smoke-test.js
+
+      - name: Render tests (headless DOM)
+        run: |
+          npm install --no-save --no-fund --silent jsdom@25
+          node tests/render.test.mjs
+          node tests/site-render-test.js
+
+      # The Python simulation layer is dependency-free apart from `requests`; these are the
+      # offline unit checks the deleted ci.yml used to run, folded in so one workflow gates a publish.
+      - name: Python layer — syntax and offline unit checks
+        run: |
+          python -m py_compile kalshi_client.py strategies.py backtest.py run_sim.py scripts/verify_series.py scripts/check_site.py
+          pip install --quiet requests cryptography
+          python - <<'PY'
+          from strategies import momentum, mean_reversion, favorite_longshot, is_high_roi
+          from backtest import PaperPortfolio, median_dollar_vol
+          from kalshi_client import KalshiClient, dollar_volume, TOPIC_FILTERS
+
+          m = {"ticker": "T", "last_price_dollars": "0.5500", "yes_bid_dollars": "0.5400",
+               "yes_ask_dollars": "0.5600", "volume_fp": "1000.00"}
+
+          # strategy signals
+          assert momentum(m, 0.45) == "yes" and momentum(m, 0.65) == "no" and momentum(m, 0.50) is None
+          # the exact-cent comparison, which float subtraction would break: 0.42 - 0.32 = 0.09999...
+          assert (0.42 - 0.32) != 0.10, "sanity: floats really do drift here (0.09999999999999998)"
+          assert momentum({"ticker": "X", "last_price_dollars": "0.4200"}, 0.32) == "yes", \
+              "an exactly-$0.10 move must not be lost to float noise"
+          assert mean_reversion({**m, "last_price_dollars": "0.1200"}) == "yes"
+          assert mean_reversion({**m, "last_price_dollars": "0.9000"}) == "no"
+          assert favorite_longshot({**m, "last_price_dollars": "0.7000"}) == "yes"
+          assert is_high_roi(m, 0.45, 100.0) is True and is_high_roi(m, 0.54, 100.0) is False
+
+          # dollars traded = volume_fp x last price (the disclosed approximation)
+          assert dollar_volume(m) == 550.0
+          three = [m, {**m, "ticker": "B", "volume_fp": "2000.00"}, {**m, "ticker": "C", "volume_fp": "500.00"}]
+          assert median_dollar_vol(three) == 550.0
+
+          # paper ledger: a YES buy pays the ask, a NO buy pays 1 - best YES bid, settlement pays $1
+          pf = PaperPortfolio()
+          t = pf.open_position(m, "momentum", "yes", 10, 1)
+          assert abs(t.entry_price - 0.56) < 1e-9, t.entry_price
+          pf.settle({"ticker": "T", "result": "yes"})
+          got = pf.summary()
+          assert got["settled_trades"] == 1 and got["total_pnl"] == 4.4 and abs(got["cash"] - 1004.4) < 1e-9, got
+          pf2 = PaperPortfolio()
+          t2 = pf2.open_position(m, "mean_reversion", "no", 10, 1)
+          assert abs(t2.entry_price - 0.46) < 1e-9, t2.entry_price
+
+          # order contract + safety: the V2 body shape, and nothing is sent without the env opt-in
+          res = KalshiClient().place_order("T", "bid", 1, 0.42, dry_run=False)
+          assert res.get("dry_run") is True, "dry_run=False must STILL not send without KALSHI_ALLOW_ORDERS=1"
+          body = res["request"]
+          assert body == {"ticker": "T", "side": "bid", "count": "1.00", "price": "0.4200",
+                          "time_in_force": "good_till_canceled",
+                          "self_trade_prevention_type": "taker_at_cross"}, body
+
+          # topic discovery vocabulary, all re-checked against the live demo API on 2026-11-20
+          assert TOPIC_FILTERS["culture"]["category"] == "Culture", TOPIC_FILTERS["culture"]
+          assert TOPIC_FILTERS["culture"]["extra_categories"] == ["Entertainment"]
+          assert TOPIC_FILTERS["gas"]["category"] == "Economics", "there is no Gas category"
+          assert TOPIC_FILTERS["golf"]["category"] == "Sports", "there is no Golf category"
+          print("offline python checks passed")
+          PY
+
+      # Continuous, non-blocking: a drift here is a review item, not a publish blocker.
+      - name: Re-verify published rows against the live demo API
+        continue-on-error: true
+        run: python scripts/verify_series.py | tee verify-rows.txt
+
+      - name: Snapshot capture contract (dry run, nothing written)
+        continue-on-error: true
+        run: node scripts/capture-snapshot.js --dry-run
 
   deploy:
     name: Deploy
@@ -55,41 +140,26 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - id: configure
-        uses: actions/configure-pages@v5
-        continue-on-error: true
+
+      - name: Pages readiness
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/pages")
+          echo "GET /repos/$GITHUB_REPOSITORY/pages -> $code"
+          if [ "$code" = "404" ]; then
+            echo "::error title=GitHub Pages is not enabled on this repository::Pages has never been created for $GITHUB_REPOSITORY. Automation tokens are not allowed to create it (403 from POST/PUT /pages). Owner action, one time: Settings -> Pages -> Build and deployment -> Source: GitHub Actions -> Save, then re-run this workflow. The site itself passed every check in the verify job."
+            exit 1
+          fi
+
+      - uses: actions/configure-pages@v5
         with:
-          # Try to turn Pages on automatically. The repository token may not be allowed
-          # to do that (it returns 403 "Resource not accessible by integration"). This step
-          # is non-fatal so that the upload and deploy still run: if the owner has already
-          # enabled Pages (Settings -> Pages -> Source: GitHub Actions), the deploy succeeds.
           enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: docs
       - id: deployment
         uses: actions/deploy-pages@v4
-      - name: Explain a Pages enablement failure
-        # Covers both failure points: configure-pages (create site) and deploy-pages
-        # (deploy requires an existing Pages site). Either way the fix is the same
-        # one-time owner setting, and the artifact upload has already succeeded.
-        if: failure() && steps.configure.outcome == 'failure'
-        run: |
-          {
-            echo "## GitHub Pages is not enabled for this repository"
-            echo ""
-            echo "The site in /docs was verified and uploaded, but GitHub Pages could not be enabled automatically."
-            echo "Owner action (one time): **Settings -> Pages -> Build and deployment -> Source: GitHub Actions -> Save**."
-            echo "After that, re-run this workflow or push to main."
-          } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Explain a deploy failure when enablement was skipped
-        if: failure() && steps.configure.outcome == 'skipped'
-        run: |
-          {
-            echo "## GitHub Pages deploy could not run"
-            echo ""
-            echo "The artifact was verified and uploaded, but the deployment step needs a Pages site to exist."
-            echo "Owner action (one time): **Settings -> Pages -> Build and deployment -> Source: GitHub Actions -> Save**."
-            echo "Then re-run this workflow (Actions -> Deploy site to GitHub Pages -> Run workflow) or push to main."
-          } >> "$GITHUB_STEP_SUMMARY"

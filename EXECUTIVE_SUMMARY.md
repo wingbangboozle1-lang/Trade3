@@ -104,3 +104,32 @@ a missing `scripts/capture-snapshot.js` (implemented), and unverified demo-UI li
   GitHub Pages origin (CORS) could not be confirmed from the sandbox (F6, still unverified).
 
 Full line-by-line verification: [VERIFICATION.md](VERIFICATION.md). Coordination: [COORDINATION.md](COORDINATION.md).
+
+---
+
+## Final integration pass — session `arena/ec2f5c59-trade3` (2026-11-20T20:0xZ)
+
+This section is additive: everything above it, including the 21-item flag ledger and the row-by-row review that
+produced it, is unchanged and still true except where a line below says otherwise.
+
+### What this pass added on top of `main`
+
+| Addition | Why it was not already there | Where to check it |
+|---|---|---|
+| **Row-by-row verification harness**: `scripts/check_site.py`, `scripts/verify_series.py`, `tests/logic.test.mjs`, `tests/render.test.mjs`, `docs/verification.html`, `docs/.nojekyll`, the per-topic pages and the site's own method page | These came from session `arena/4f9f13c8-trade3`, which never merged; this branch is the first to carry them into `main` | `python3 scripts/check_site.py` · `node tests/logic.test.mjs` |
+| **Catalyst panel — closes most of flag F2**: for any ≥ $0.10 alert, the executed prints for that contract in a ±10-minute window (`GET /markets/trades?ticker=…&min_ts&max_ts`, seconds) shown beside the series' own `settlement_sources` links | F2 said "dashboard links settlement sources only". It now also shows the tape. News attribution is still out of reach and stays flagged | `docs/dashboard.html` → "What may have moved this contract" |
+| **`cleanTitle()`** — Kalshi ships markdown inside some titles (`Will average **gas prices** be above $5.00?`); stripped for display only, never in the data | Live gas-market records returned that exact string | `tests/logic.test.mjs` (5 assertions) |
+| **Flags F22–F25** — ignored/undocumented query parameters (with the counter-observation from F16 published beside it), empty demo books + markdown titles, kalshi.com links that cannot be machine-verified (companion to F21), and this merge itself | Each was met while integrating and is not resolvable from inside the build sandbox | `docs/flagged.html` |
+| **`.github/workflows/verify-live.yml`** — every 6 hours, from a runner that can reach Kalshi, `verify_series.py` re-reads all 39 rows and diffs every published field; drift is a warning + job summary, never a silent pass | The build sandbox has no shell route to `external-api.demo.kalshi.co` (F19), so continuous verification had to move to CI | Actions tab, job summary |
+| **`scripts/capture-snapshot.js` with `--dry-run`, `--json`, `--env`, and an exchange-active guard**; the transform is exported pure so it is testable offline | A capture had to exist for the `snapshot` data mode to be reproducible; `main` had a first version, this refines it | `node tests/smoke-test.js` (2 new checks) |
+| **39-row `series.json`**: `main`'s 31 verified rows kept verbatim, plus 8 Entertainment rows this branch had verified, each carrying `via` + `category: "Entertainment"`; every row now has **both** `source` and `source_url`, and the gate rejects them disagreeing | One build lists only Culture's own series and queries Entertainment live; the other published the Entertainment rows explicitly. Labelling beat deleting | `python3 scripts/check_site.py` |
+| **Culture settlement sources left blank on purpose** (adopted from `main`'s F10) — this branch had briefly published the first source entry (ABC); that is withdrawn here | `main`'s reading is better: the record lists Google-search URLs and a personal account, which are not official publishers | `docs/data/series.json` note field; `scripts/verify_series.py` accepts `settlement_policy: official-publishers-only` as intentional |
+| **Python layer: `main`'s version wins** — its `_ticks()` integer-cent comparison replaces float-epsilon threshold checks (0.42 − 0.32 = 0.0999… would silently drop an exactly-$0.10 move), and its `open_position` NO-pricing derivation is kept | Two independent fixes to the same file; theirs is strictly more correct | `strategies.py`, `backtest.py` |
+| **One workflow instead of two** — this branch's `ci.yml` was deleted and its suites folded into `main`'s `pages.yml` verify job | Two workflows running overlapping checks on the same push is noise, and the deploy gate must be the one that blocks publishing | `.github/workflows/pages.yml` |
+
+### Gates, as run at the end of this pass
+
+`check_site.py` (pages, links, JS parse, 39-row contract, no localhost) · `check-links.js` (both builds, imports,
+DOM targets) · `logic.test.mjs` · `render.test.mjs` (headless, jsdom) · `smoke-test.js` (collector, engines, routes,
+capture) · `site-render-test.js` (build B pages) · `py_compile` + the offline unit block for the Python layer ·
+`verify_series.py --from-cache docs/data/live-verification-2026-11-20.json` → **4/4, exit 0**.

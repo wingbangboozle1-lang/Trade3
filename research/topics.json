@@ -1,0 +1,289 @@
+{
+  "version": 1,
+  "as_of": "2026-11-20",
+  "note": "Topic classification. A series is placed in a topic only if a rule below matches. `seed_series` are series tickers whose existence and subject matter were found on Kalshi documentation (source listed per row). They are SEEDS, not a census: the app re-discovers live series every refresh via GET /series and GET /events, and anything discovered at runtime is labelled discovered:true. A seed row without a source_id is invalid and scripts/verify-sources.mjs fails the build.",
+  "thresholds": {
+    "alert_move_dollars": 0.1,
+    "alert_move_note": "Requested threshold: >= $0.10 in either direction on the contract price. Applied to observed price changes between consecutive observations of one market (print detector) and to the price now versus the price one drift-window ago (drift detector).",
+    "high_roi_min_edge": 0.005,
+    "high_roi_min_edge_note": "Minimum EXPECTED edge per contract after official fees before a signal is promoted to the high-ROI chat. $0.005 is deliberately small because a maker capturing half of a 1-2 cent spread only earns about a cent; requiring a larger edge would promote nothing and hide the model's judgement.",
+    "high_roi_min_liquidity_contracts": 25,
+    "high_roi_max_spread_dollars": 0.08,
+    "high_roi_max_minutes_to_close": 43200,
+    "high_roi_min_return_bps": 150,
+    "high_roi_min_return_bps_note": "Promotion also requires expected edge / capital >= 1.5% (150 bps) and the price move to be at least 2x the observed spread, so the high-ROI chat stays selective.",
+    "high_roi_min_shock_over_spread": 2
+  },
+  "topics": {
+    "gas": {
+      "name": "Gas prices",
+      "blurb": "Retail and wholesale gasoline prices, AAA national average, EIA weekly series.",
+      "color": "#f59e0b",
+      "rules": {
+        "series_prefixes": [
+          "KXAAAGAS",
+          "KXGAS",
+          "KXAAAGASM",
+          "KXGASOLINE"
+        ],
+        "keywords": [
+          "gas price",
+          "gasoline",
+          "aaa",
+          "fuel price",
+          "gasbuddy",
+          "eia gasoline",
+          "national average gas"
+        ],
+        "categories": [
+          "Gas"
+        ]
+      },
+      "seed_series": [
+        {
+          "series_ticker": "KXAAAGASM",
+          "subject": "US gas price (monthly / AAA)",
+          "evidence": "Kalshi fee schedule Non-Standard Fees table lists series KXAAAGASM with description 'US gas price'",
+          "source_id": "K6",
+          "status": "seed"
+        }
+      ],
+      "news_feeds": [
+        {
+          "title": "AAA Gas Prices (official national average)",
+          "url": "https://gasprices.aaa.com/",
+          "kind": "official_metric"
+        },
+        {
+          "title": "EIA Weekly Retail Gasoline Prices",
+          "url": "https://www.eia.gov/petroleum/gasdiesel/",
+          "kind": "official_metric"
+        }
+      ]
+    },
+    "elections": {
+      "name": "Elections",
+      "blurb": "US and international elections, primaries, ballot measures, election-adjacent control of power.",
+      "color": "#6366f1",
+      "rules": {
+        "series_prefixes": [
+          "KXPRES",
+          "KXSEN",
+          "KXHOUSE",
+          "KXELECT",
+          "KXGOV",
+          "KXELECTIRAN",
+          "KXIRANDEMOCRACY"
+        ],
+        "keywords": [
+          "election",
+          "primary",
+          "ballot",
+          "electoral",
+          "senate",
+          "house of representatives",
+          "governor",
+          "president",
+          "runoff",
+          "referendum"
+        ],
+        "categories": [
+          "Elections",
+          "Politics"
+        ]
+      },
+      "seed_series": [
+        {
+          "series_ticker": "KXELECTIRAN",
+          "subject": "Will Iran hold a presidential election?",
+          "evidence": "Kalshi fee schedule Non-Standard Fees table lists KXELECTIRAN 'Will Iran hold a presidential election?'",
+          "source_id": "K6",
+          "status": "seed"
+        }
+      ],
+      "news_feeds": [
+        {
+          "title": "FEC (official election filings)",
+          "url": "https://www.fec.gov/",
+          "kind": "official_metric"
+        },
+        {
+          "title": "AP Elections (official results reporting)",
+          "url": "https://apnews.com/hub/election-2024",
+          "kind": "official_metric"
+        }
+      ]
+    },
+    "culture": {
+      "name": "Culture",
+      "blurb": "Entertainment, awards, box office, music, streaming, celebrity and pop-culture milestones.",
+      "color": "#ec4899",
+      "rules": {
+        "series_prefixes": [
+          "KXEMMY",
+          "KXOSCAR",
+          "KXGRAMMY",
+          "KXGLOBES",
+          "KXBOX",
+          "KXSPOTIFY",
+          "KXTIME",
+          "KXTSWIFT",
+          "KXBALLONDOR"
+        ],
+        "keywords": [
+          "emmy",
+          "oscar",
+          "academy award",
+          "grammy",
+          "golden globe",
+          "box office",
+          "album",
+          "song",
+          "billboard",
+          "netflix",
+          "spotify",
+          "taylor swift",
+          "celebrity",
+          "tony award",
+          "ballon d'or"
+        ],
+        "categories": [
+          "Culture",
+          "Entertainment"
+        ]
+      },
+      "seed_series": [
+        {
+          "series_ticker": "KXEMMYCSERIES",
+          "subject": "Emmys Award for Comedy Series",
+          "evidence": "Kalshi fee schedule Non-Standard Fees table lists KXEMMYCSERIES 'Emmys Award for Comedy Series'",
+          "source_id": "K6",
+          "status": "seed"
+        },
+        {
+          "series_ticker": "KXBALLONDOR",
+          "subject": "Ballon d'Or",
+          "evidence": "Kalshi fee schedule Non-Standard Fees table lists KXBALLONDOR 'Ballon d'Or'",
+          "source_id": "K6",
+          "status": "seed"
+        }
+      ],
+      "news_feeds": [
+        {
+          "title": "Box Office Mojo (official weekend estimates)",
+          "url": "https://www.boxofficemojo.com/",
+          "kind": "official_metric"
+        },
+        {
+          "title": "Billboard charts (official)",
+          "url": "https://www.billboard.com/charts/",
+          "kind": "official_metric"
+        }
+      ]
+    },
+    "crypto": {
+      "name": "Crypto",
+      "blurb": "Bitcoin, Ethereum and other digital-asset price levels, ranges and milestones.",
+      "color": "#22c55e",
+      "rules": {
+        "series_prefixes": [
+          "KXBTC",
+          "KXETH",
+          "KXSOL",
+          "KXXRP",
+          "KXDOGE",
+          "KXBTCMAX",
+          "KXETHY",
+          "KXBTCY",
+          "KXCRYPTO"
+        ],
+        "keywords": [
+          "bitcoin",
+          "btc",
+          "ethereum",
+          "eth",
+          "solana",
+          "crypto",
+          "dogecoin",
+          "xrp",
+          "stablecoin"
+        ],
+        "categories": [
+          "Crypto",
+          "Financials"
+        ]
+      },
+      "seed_series": [
+        {
+          "series_ticker": "KXBTCMAX150",
+          "subject": "When will bitcoin hit 150k?",
+          "evidence": "Kalshi fee schedule Non-Standard Fees table lists KXBTCMAX150 'When will bitcoin hit 150k?'",
+          "source_id": "K6",
+          "status": "seed"
+        },
+        {
+          "series_ticker": "KXETHY",
+          "subject": "ETH price EOY",
+          "evidence": "Kalshi fee schedule Non-Standard Fees table lists KXETHY 'ETH price EOY'",
+          "source_id": "K6",
+          "status": "seed"
+        }
+      ],
+      "news_feeds": [
+        {
+          "title": "CF Benchmarks (Kalshi's documented index source for crypto)",
+          "url": "https://www.cfbenchmarks.com/",
+          "kind": "official_metric"
+        },
+        {
+          "title": "CME CF Bitcoin Reference Rate",
+          "url": "https://www.cmegroup.com/markets/cryptocurrencies/bitcoin/bitcoin-reference-rate.html",
+          "kind": "official_metric"
+        }
+      ]
+    },
+    "golf": {
+      "name": "Golf",
+      "blurb": "PGA Tour, DP World Tour, majors, LIV and golf tournament markets.",
+      "color": "#0ea5e9",
+      "rules": {
+        "series_prefixes": [
+          "KXPGA",
+          "KXGOLF",
+          "KXMASTERS",
+          "KXOPEN",
+          "KXLIVGOLF",
+          "KXRYDER"
+        ],
+        "keywords": [
+          "golf",
+          "pga",
+          "masters",
+          "ryder cup",
+          "open championship",
+          "liv golf",
+          "dp world tour",
+          "birdie",
+          "tournament winner"
+        ],
+        "categories": [
+          "Golf",
+          "Sports"
+        ]
+      },
+      "seed_series": [],
+      "news_feeds": [
+        {
+          "title": "PGA Tour (official leaderboard)",
+          "url": "https://www.pgatour.com/leaderboard",
+          "kind": "official_metric"
+        },
+        {
+          "title": "Official World Golf Ranking",
+          "url": "https://www.owgr.com/",
+          "kind": "official_metric"
+        }
+      ]
+    }
+  }
+}

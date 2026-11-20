@@ -1,0 +1,184 @@
+{
+  "captured_at": "2026-11-20T20:0xZ (during the integration session)",
+  "captured_from": "https://external-api.demo.kalshi.co/trade-api/v2",
+  "how": "GET /series/{ticker} responses, transcribed from the API answer as received; the settlement_sources arrays for the two Culture series are truncated here to the first four entries (the records list 23).",
+  "also_verified": {
+    "GET /exchange/status": {
+      "exchange_active": true,
+      "trading_active": true,
+      "shards": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    "GET /series?category=Gas": {
+      "series": null
+    },
+    "GET /series?category=Golf": {
+      "series": null
+    },
+    "GET /markets?series_ticker=KXXBANNEDGROK&status=open": {
+      "markets": []
+    },
+    "GET /markets?series_ticker=KXAAAGASM&status=open&limit=4": {
+      "sample": {
+        "ticker": "KXAAAGASM-26NOV30-4.80",
+        "title": "Will average **gas prices** be above $5.00?",
+        "last_price_dollars": "0.0300",
+        "volume_fp": "55571.52",
+        "open_interest_fp": "55562.52",
+        "close_time": "2026-11-30T04:59:00Z",
+        "status": "active"
+      },
+      "note": "two of four strikes had volume_fp 0.00 and last_price 0.0000; no liquidity field is present on any market record"
+    },
+    "GET /markets?series_ticker=KXBTCD&status=open&limit=3": {
+      "note": "all three hourly Bitcoin strikes had last_price_dollars 0.0000 and volume_fp 0.00"
+    },
+    "GET /markets/trades?market_ticker=KXAAAGASM-26NOV30-4.80&limit=5": {
+      "note": "returned prints from KXMARMAD / KXPGATOUR / KXPRESPERSON — the unknown 'market_ticker' filter was ignored; the documented filter is 'ticker' (flag F11)"
+    }
+  },
+  "series_cache": {
+    "KXAAAGASM": {
+      "series": {
+        "additional_prohibitions": [
+          "Persons who are employed by any of the Source Agencies are not permitted to trade on the Contract.",
+          "Persons who hold any material, non-public information on the Underlying are not permitted to trade on the Contract."
+        ],
+        "categories": [
+          "Economics"
+        ],
+        "category": "Economics",
+        "contract_terms_url": "https://assets.kalshi.com/contract_terms/AAAGAS.pdf",
+        "contract_url": "https://kalshi-public-docs-staging.s3.us-east-1.amazonaws.com/regulatory/product-certifications/AAAGAS.pdf",
+        "exchange_index": 0,
+        "fee_multiplier": 1,
+        "fee_type": "quadratic",
+        "frequency": "monthly",
+        "last_updated_ts": "2026-11-20T17:14:15.863634Z",
+        "product_metadata": {
+          "scope": "Gasoline"
+        },
+        "settlement_sources": [
+          {
+            "name": "AAA",
+            "url": "https://gasprices.aaa.com/"
+          }
+        ],
+        "tags": [
+          "Oil & Gas",
+          "Oil and energy"
+        ],
+        "ticker": "KXAAAGASM",
+        "title": "US gas price"
+      }
+    },
+    "KXNGASMAX": {
+      "series": {
+        "categories": [
+          "Economics"
+        ],
+        "category": "Economics",
+        "contract_terms_url": "https://assets.kalshi.com/contract_terms/NGAS.pdf",
+        "contract_url": "https://kalshi-public-docs-staging.s3.us-east-1.amazonaws.com/regulatory/product-certifications/NGAS.pdf",
+        "exchange_index": 0,
+        "fee_multiplier": 1,
+        "fee_type": "quadratic",
+        "frequency": "annual",
+        "last_updated_ts": "2026-11-20T19:00:58.894473Z",
+        "product_metadata": {
+          "scope": "Natural Gas"
+        },
+        "settlement_sources": [
+          {
+            "name": "Energy Information Administration",
+            "url": "https://www.eia.gov/dnav/ng/NG_PRI_FUT_S1_D.htm"
+          }
+        ],
+        "tags": [
+          "Oil & Gas",
+          "Oil and energy"
+        ],
+        "ticker": "KXNGASMAX",
+        "title": "Natural gas price peak"
+      }
+    },
+    "KXXBANNEDGROK": {
+      "series": {
+        "categories": [
+          "Culture"
+        ],
+        "category": "Culture",
+        "contract_terms_url": "https://assets.kalshi.com/contract_terms/XBANNED.pdf",
+        "contract_url": "https://kalshi-public-docs-staging.s3.us-east-1.amazonaws.com/regulatory/product-certifications/XBANNED.pdf",
+        "exchange_index": 0,
+        "fee_multiplier": 1,
+        "fee_type": "quadratic",
+        "frequency": "one_off",
+        "last_updated_ts": "2026-11-20T19:43:15.762746Z",
+        "settlement_sources": [
+          {
+            "name": "ABC",
+            "url": "https://abcnews.go.com/"
+          },
+          {
+            "name": "Fox News",
+            "url": "https://www.foxnews.com/"
+          },
+          {
+            "name": "Reuters",
+            "url": "https://www.reuters.com/"
+          },
+          {
+            "name": "the Associated Press",
+            "url": "https://apnews.com/"
+          }
+        ],
+        "tags": [
+          "AI"
+        ],
+        "ticker": "KXXBANNEDGROK",
+        "title": "Will Grok be banned this year"
+      }
+    },
+    "KXXBANNEDMURRAYHILLGUY1": {
+      "series": {
+        "categories": [
+          "Culture"
+        ],
+        "category": "Culture",
+        "contract_terms_url": "https://assets.kalshi.com/contract_terms/XBANNED.pdf",
+        "contract_url": "https://kalshi-public-docs-staging.s3.us-east-1.amazonaws.com/regulatory/product-certifications/XBANNED.pdf",
+        "exchange_index": 0,
+        "fee_multiplier": 1,
+        "fee_type": "quadratic",
+        "frequency": "one_off",
+        "last_updated_ts": "2026-11-20T19:43:15.743447Z",
+        "settlement_sources": [
+          {
+            "name": "ABC",
+            "url": "https://abcnews.go.com/"
+          },
+          {
+            "name": "Fox News",
+            "url": "https://www.foxnews.com/"
+          },
+          {
+            "name": "Reuters",
+            "url": "https://www.reuters.com/"
+          },
+          {
+            "name": "the Associated Press",
+            "url": "https://apnews.com/"
+          }
+        ],
+        "tags": null,
+        "ticker": "KXXBANNEDMURRAYHILLGUY1",
+        "title": "Will @MurrayHillGuy1 get banned from X this year?"
+      }
+    }
+  }
+}

@@ -65,9 +65,10 @@
   <div class="card">
     <pre class="mono" style="margin:0;overflow-x:auto"># 1. Start the collector + dashboard (zero dependencies, Node 20+)
 npm start
-#    dashboard: http://localhost:3000/app/
-#    this site: http://localhost:3000/
-#    API:       http://localhost:3000/api/state
+#    the collector prints the port it bound; from that origin:
+#    dashboard  /app/
+#    this site  /
+#    API state  /api/state
 
 # 2. Optional: read the real Kalshi demo portfolio (read-only)
 export KALSHI_API_KEY_ID="your-demo-key-id"

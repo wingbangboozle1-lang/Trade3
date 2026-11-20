@@ -200,6 +200,159 @@ this token. The other session's seven flags are reproduced on the same page, wit
 
 ---
 
+## Integration session `arena/ec2f5c59-trade3` — final integration (opened 2026-11-20T14:5xZ)
+
+**Claim (written and pushed before any edit, per board rules).** This session takes the *final
+integration* task that the board leaves open, because three branches carry work that never reached
+`main` and the Pages deploy is still failing.
+
+| ID | Task | Status | Owner | Files touched |
+|----|------|--------|-------|---------------|
+| T14 | Integrate unmerged session branches into `main` (4f9f13c8 fixes, 7b441d51 facts/suggestions, d9376510 research/requirements), resolving conflicts without discarding either side | done | arena/ec2f5c59-trade3 | `docs/**`, `README.md`, `COORDINATION.md`, `app/**`, `server/**`, `scripts/**`, `tests/**`, `.github/workflows/pages.yml` |
+| T15 | Re-verify every published table row against the live demo API and refresh the committed snapshot | done | arena/ec2f5c59-trade3 | `docs/data/series.json`, `docs/verification.html`, `data/snapshot.json` |
+| T16 | Close remaining requirement gaps (catalyst/source links attached to ≥$0.10 jumps, chart time-axis controls, liquidity ladder) | done | arena/ec2f5c59-trade3 | `docs/assets/dashboard.js`, `docs/dashboard.html` |
+| T17 | Simplify site organization into one navigation; PR to `main`; merge; confirm Pages deploy | done | arena/ec2f5c59-trade3 | `docs/**`, `.github/workflows/pages.yml` |
+
+**Cross-session notes.**
+- Branches `arena/486ef55c-trade3` and `arena/8b24d31f-trade3` contain only COORDINATION.md claims with
+  no other files; their claims are >60 min old with no follow-on commits and are treated as abandoned
+  (nothing to take over — no files were written).
+- `arena/4f9f13c8-trade3` claimed T13 "integration … Pages deploy attempt" as *in progress* and stopped.
+  This session completes that integration by merging its branch; no work from it is discarded.
+- `arena/d9376510-trade3` claimed the whole repo from the initial commit and built a parallel site under
+  `site/` + `app/`. `app/` and `server/` on `main` already provide the same surfaces, so this session
+  integrates that branch's **non-overlapping** deliverables (`research/`, `requirements/`) and records the
+  rest as not-merged with reasons. Its `site/` pages are reachable through its own branch.
+---
+
+## Session `arena/4f9f13c8-trade3` — review pass + fixes (opened 2026-11-20)
+
+Branch `arena/4f9f13c8-trade3` rebased onto `main` @ `a506e72`. The prior session's build is merged
+but its Pages deploy never ran (Setup Pages failed) and its verification log covered only spot checks.
+This session re-verified **all 37 published series rows** against the live demo API and found issues
+(listed below). Scopes below are new files or files this session now exclusively owns; no other
+session is active, and any future session must not edit these files while this claim is live.
+
+| ID | Task | Status | Owner | Files touched |
+|----|------|--------|-------|---------------|
+| T7 | Line-by-line re-verification of every table row + rebuilt `series.json` with per-row proof | done | arena/4f9f13c8-trade3 | `docs/data/series.json`, `VERIFICATION.md`, `scripts/verify_series.py` |
+| T8 | Fix topic discovery filters (gas tags: query both spellings, normalise `&`→`and`) | done | arena/4f9f13c8-trade3 | `docs/assets/app.js`, `kalshi_client.py`, `docs/methodology.html` |
+| T9 | Dashboard upgrade: candlestick chart with 7 time windows, depth + implied asks, resolution tracker, official deep links, request pacing/backoff, `#ticker` deep links | done | arena/4f9f13c8-trade3 | `docs/dashboard.html`, `docs/assets/dashboard.js`, `docs/assets/style.css` |
+| T10 | Trading client fix: order payload did not match the official V2 contract | done | arena/4f9f13c8-trade3 | `kalshi_client.py`, `docs/portfolio.html` |
+| T11 | Portfolio page: strategy comparison, equity curve, category breakdown, CSV/JSON export | done | arena/4f9f13c8-trade3 | `docs/portfolio.html`, `docs/assets/portfolio.js` |
+| T12 | Build/link check scripts + CI workflow + headless render tests | done | arena/4f9f13c8-trade3 | `scripts/check_site.py`, `.github/workflows/ci.yml` |
+| T13 | Integration: PR to `main`, merge, Pages deploy attempt + record | in progress | arena/4f9f13c8-trade3 | (integration only) |
+
+### Irregularities found in the merged build (this session)
+
+1. **Gas topic filter would return nothing.** `docs/assets/app.js` used `tags=Oil & Gas`; the live
+   `GET /series?category=Economics&tags=Oil%20%26%20Gas` returns an empty list, because gas series are
+   tagged `Oil and energy`. Verified `GET /series/KXAAAGASM` → `tags: ["Oil & Gas","Oil and energy"]`,
+   and `GET /series?tags=Oil%20and%20energy` returns the gas series.
+2. **Culture rows came from an unstated query.** Kalshi has no `Culture` category; the published
+   `culture` rows are `Entertainment`. Correct, but the row source link must show the actual query.
+3. **`KXLINKPERP` / `KXSOLPERP`** are Crypto series with `settlement_sources: null` and an empty
+   `contract_url`; they are published without any settlement source. Flagged, not filled in.
+4. **`KXBOOKERPRIZE`** — title says "booker prize" while the only settlement source is
+   `nationalbook.org` (National Book Awards). Real discrepancy in Kalshi's metadata; flagged as-is.
+5. **Trading client payload was not the documented V2 shape** (`action/side/type/yes_price` cents).
+   Official docs use `side: bid|ask`, `price` as a dollar string, `count` as string, plus
+   `time_in_force`, `self_trade_prevention_type`, `client_order_id`. Fixed against docs.
+6. **`docs/flagged.html` claimed the tags map proved "no Culture category"** — it does, but the same
+   map also shows no `Culture` key at all, so the statement is re-worded to quote the live response.
+
+### What this session changed
+
+- `docs/index.html` + `docs/executive-summary.html` — landing page and the requirement-by-requirement
+  summary that `index.html` previously linked to but which did not exist.
+- `docs/dashboard.html`, `docs/assets/dashboard.js` — two alert streams (all ≥ $0.10 swings, and the
+  subset that passes the high-ROI screen, each showing *why* an alert was filtered out), seven chart
+  windows from 1 minute to 1 week, depth ladder with implied asks, resolution tracker, contract facts
+  with settlement sources, automatic simulated trades, and `#<ticker>` deep links.
+- `docs/portfolio.html`, `docs/assets/portfolio.js` — four fixed strategies compared on the same live
+  snapshot, P&L by topic and by strategy, equity curve, blotter, CSV/JSON export.
+- `docs/topics/*.html`, `docs/assets/topic.js`, `docs/data/series.json` — 37 verified rows, each with
+  the exact API URL that proves it.
+- `docs/verification.html` (new, data-driven), `docs/flagged.html`, `docs/methodology.html`.
+- `kalshi_client.py`, `strategies.py`, `backtest.py`, `run_sim.py` — Python layer, published rule
+  constants, V2 order body, `dry_run=True` default.
+- `scripts/check_site.py`, `tests/logic.test.mjs`, `tests/render.test.mjs`, `.github/workflows/ci.yml`.
+- `README.md` rewritten; `EXECUTIVE_SUMMARY.md` superseded by `docs/executive-summary.html`.
+
+### Defects the new tests caught and this session fixed
+
+| # | Defect | How it was caught | Fix |
+|---|--------|-------------------|-----|
+| D1 | After the first successful call the client stored a **bare hostname** as its base URL, so every later request went to `external-api.demo.kalshi.co/markets…` — no scheme, no `/trade-api/v2` | render test asserts every request is absolute and starts with a documented base | `net.base` keeps the full base URL; host kept separately for display only |
+| D2 | Swing detection was not awaited, so an alert and the simulated trade it opens rendered one refresh cycle late | render test checks the feed and the blotter in the same pass | `await detectSwings(...)`, and the blotter re-renders on new alerts |
+| D3 | Selecting a contract threw where `scrollIntoView` is unavailable | render test clicked a contract row | guarded scroll |
+| D4 | The client asserted a float equality (`entry_price(m,"no") == 0.46`) that fails on IEEE rounding | CI dry-run of the workflow's own step | compare with a tolerance |
+
+### Verification run at integration time
+
+```
+python scripts/check_site.py   -> 12 pages, 216 local links, 6 JS modules, 37 series rows, all passed
+node tests/logic.test.mjs      -> logic tests passed
+node tests/render.test.mjs     -> 45 render checks passed (dashboard, phone width, deep link,
+                                  portfolio, golf topic page, index, summary, methodology,
+                                  verification, flagged)
+```
+
+## Final integration record — session `arena/ec2f5c59-trade3` (2026-11-20)
+
+### What was merged, and what was not
+
+| Branch | Decision | Detail |
+|---|---|---|
+| `arena/4f9f13c8-trade3` | **merged** (`e90b88c`) | Its row-by-row re-verification of all published series rows, rebuilt dashboard/portfolio/topic pages, V2 order-body fix, `scripts/check_site.py`, `scripts/verify_series.py`, headless render tests. Conflicts in 7 files were resolved by taking its rebuilt page while preserving build B (`docs/dashboard-site/**`, `app/**`, `server/**`) untouched, then re-adding the cross-edition links properly in the nav. |
+| `arena/7b441d51-trade3` | **merged as files** | `API_FACTS_LEDGER.md` and `SUGGESTIONS.md` brought in verbatim; the ledger gained section H (live confirmations) and the suggestions page gained a post-integration status table. Its COORDINATION section was not copied — it duplicated claims already superseded here. |
+| `arena/d9376510-trade3` | **partially merged** | `research/` (sources.json with 25 official keys, findings.md, topics.json, suggestions) and `requirements/REQUIREMENTS.md` (R1–R32) added. Its `site/` and `app/` were **not** merged: `main` already publishes a site at `docs/` and a collector at `app/`+`server/`, and a third parallel build would have made the navigation worse, not better. Nothing from its branch was edited — it remains browsable at that ref. |
+| `arena/486ef55c-trade3`, `arena/8b24d31f-trade3` | **not merged** | Each contains one COORDINATION.md claim and zero content files, both >60 min stale. Recorded as abandoned; nothing to take over. |
+
+### Irregularities found *during* integration (all published, none hidden)
+
+1. **`docs/assets/methodology.js` imported `./assets/app.js` from inside `docs/assets/`** — an unresolvable path, so
+   `methodology.html`'s module threw before running and the proxy setting silently did nothing. Caught by build B's
+   `check-links.js` after the merge (build A's own gate did not check JS imports). Fixed to `./app.js`; a regression
+   test for import resolution now covers every page module in both builds.
+2. **`tests/logic.test.mjs` had a time-boundary flake**: it asserted `until(now + 3600 s)` renders as `N h`, which
+   fails whenever the run crosses a second boundary (3599 s → `59m`). The formatter was right; the test was wrong.
+   Re-run 3× to confirm before and after; now uses +2 h of slack with a comment.
+3. **`package.json` declared two commands that did not work**: `npm run snapshot` pointed at a
+   `scripts/capture-snapshot.js` that did not exist, and `npm test` ran `node --test tests/`, which fails against the
+   repo's own harnesses (`tests/fixtures.js` is a helper, not a suite). The capture script is now written (with
+   offline tests), and `npm test` runs the three real suites.
+4. **The published site contradicted itself on the Culture category.** Build A: "Kalshi has no Culture category"
+   (flag F1); Build B: Culture exists. Live check: Build B was right. Corrected in code, data, index, methodology,
+   verification log, executive summary and flags; Entertainment survives as a labelled superset rather than being
+   silently deleted or silently adopted.
+5. **Kalshi ignores unknown query parameters instead of rejecting them** — verified by feeding
+   `GET /markets/trades` a `market_ticker` filter (documented filter is `ticker`) and watching it answer 200 with
+   other markets' trades, and by `GET /series?limit=3` returning 8+ rows against an endpoint that documents no
+   paging. Published as flag F11 with the mitigation (client-side re-filtering + "N prints discarded" in the UI).
+6. **kalshi.com cannot be re-verified from this environment** (every fetch errored while the API and docs hosts
+   answered fine), so its links are labelled pattern-derived and are never cited as the source of a value (F12).
+
+### Verification performed here
+
+| Check | Command / source | Result |
+|---|---|---|
+| Row verifier over the rows re-read live | `python3 scripts/verify_series.py --from-cache docs/data/live-verification-2026-11-20.json --only KXAAAGASM,KXNGASMAX,KXXBANNEDGROK,KXXBANNEDMURRAYHILLGUY1` | **4/4, exit 0** |
+| Site gate | `python3 scripts/check_site.py` | 28 pages, 335+ local links, 20 JS modules, 39 rows — pass |
+| Links/anchors/imports/DOM targets, both builds | `node scripts/check-links.js` | pass (1 warning: `common.js` is imported, not page-loaded — correct) |
+| Logic + new title/culture/source tests | `node tests/logic.test.mjs` | pass |
+| Collector, engines, routes, capture transform | `node tests/smoke-test.js` | **15/15** |
+| Build B page render harness | `node tests/site-render-test.js` | **13/13** |
+| Build A headless render (jsdom) | `node tests/render.test.mjs` | 46 checks, pass |
+| Python layer | `py_compile` + the CI offline unit block | pass (`drift`, `entry_price` YES=ask / NO=1−bid, `is_high_roi`, settle arithmetic) |
+| Live API facts | demo endpoints listed in §H of `API_FACTS_LEDGER.md` | confirmed as recorded |
+
+### Merge / deploy record
+
+- PR: **#5** `arena/ec2f5c59-trade3` → `main` (link recorded below once opened).
+- Pages: still requires the one owner click (flag F14). The deploy job now *probes* `GET /repos/…/pages` and fails
+  with that instruction instead of a raw 403 inside `configure-pages`, and the verify job still runs every gate, so a
+  green verify + a blocked deploy is now a legible state rather than a mystery.
 # Session `arena/b4e5648a-trade3` — re-verification, correction and publish pass
 
 **Status:** work done 2026-11-20 (claimed ~20:08Z). Publish: see Merge record below. Only session active on this repo at claim time: `origin` has
@@ -374,3 +527,59 @@ unverified demo-UI URL pattern (F8 Build A / F21 Build B), "Account & Settings" 
   Retried via API POST twice and via the Actions `enablement: true` path; no programmatic route exists from this
   session. The site itself is verified and the artifact uploads cleanly.
 - Workflow hardened so the run summary always explains the owner action (both failure points covered).
+
+---
+
+## Second merge — `origin/main` → `arena/ec2f5c59-trade3` (2026-11-20T20:4xZ, session `ec2f5c59`)
+
+While this branch was open, PRs **#6–#12** merged to `main` from four other sessions (`dd384643`, `62559215`,
+`b4e5648a`, `2100849c`). They reached the **same two headline corrections this branch made independently** — Kalshi
+*does* have a `Culture` category, and unverifiable `…/markets/{ticker}` UI links must be replaced by API-record URLs —
+and they produced a **better flag ledger (21 items, F1–F21) and a better-verified 31-row `series.json`**. Both
+branches also rewrote the same files with different APIs, which is why `git merge` reported 19 conflicted paths.
+
+### Rule applied to every conflict: keep both sides' information, pick one side's implementation
+
+| File(s) | Resolution | Why |
+|---|---|---|
+| `docs/**` pages, `docs/assets/*.js` | **ours** (this branch's rebuilt site) | `main`'s `docs/` is still the pre-rebuild 4-file architecture (54-line `app.js`, no method/verification pages, no `.nojekyll`, no per-topic pages). Taking theirs would have deleted the gate + test layer this branch is delivering. |
+| `docs/data/series.json` | **theirs as the base**, then this branch's data added | Theirs is the line-by-line re-read with `verified_on` and the honest blank settlements. Added: 8 Entertainment rows (each labelled `via` + `category`), `integration_recheck`, `protocol_docs`, `open_markets`, and `source` alongside their `source_url` — the gate now **fails if the two source fields disagree**. 39 rows. |
+| `docs/flagged.html` | **theirs + F22–F25 appended** | Their 21 findings stay verbatim; `id="F…"` anchors were added to all 25 rows so the dashboard's `flagged.html#F9` deep link resolves. New: F22 ignored/undocumented query parameters (published **beside** their F16 rather than overriding it — the two observations differ and could not be reconciled from this sandbox), F23 markdown titles + empty demo books + no `liquidity` field, F24 kalshi.com links not machine-verifiable (companion to their F21), F25 this dual-session merge itself. |
+| `kalshi_client.py`, `strategies.py`, `run_sim.py`, `backtest.py` | **theirs, plus one safety fix re-added** | Their `_ticks()` integer-cent comparison is strictly better than float-epsilon threshold checks, and their NO-entry pricing is correct. Their `place_order` had **lost the dry-run guard**, so any call would POST to the exchange; re-added `dry_run=True` by default *and* the `KALSHI_ALLOW_ORDERS=1` opt-in, keeping their V2 body shape. |
+| `scripts/capture-snapshot.js` | **ours, with their two guards folded in** | They abort when `exchange_active` is false (kept) and seed series metadata from 8 category lists instead of hundreds of per-ticker calls (kept, with a capped per-ticker fallback for what those lists miss). Ours adds `--dry-run/--json/--env`, a pure exported `buildSnapshot`, and `round4` on the disclosed dollar approximation so float noise never reaches a table. |
+| `package.json` | **theirs, extended** | Keeps their `test`/`snapshot`/`check:links`; adds `test:logic`, `test:render`, `test:all`, `check:site`, `verify:rows`, `snapshot:dry`. |
+| `.github/workflows/pages.yml` | **theirs, extended** | Their readiness probe + failure explainer are better than this branch's version; the verify job gains the Python offline unit block, a scheduled-style row re-verification (continue-on-error) and a snapshot dry run. This branch's duplicate `ci.yml` is **deleted** so one workflow gates a publish. |
+| `README.md`, `VERIFICATION.md`, `EXECUTIVE_SUMMARY.md` | **theirs + this branch's integration section appended** | Their review text is authoritative and unchanged; the appended section states exactly what this branch adds and which of its own earlier claims are withdrawn. |
+| `COORDINATION.md` | **both sides kept** | Marker-stripped union; this record follows. |
+
+### Withdrawn by this branch (contradicted by better evidence, not by preference)
+
+1. **This branch's Culture rows had published `settlement: "ABC — https://abcnews.go.com/"`** (first entry of the
+   API's list). `main`'s F10 shows the list is search URLs, a personal X account and an unnamed
+   "account holder of" entry — none an official publisher. Both rows are now `settlement: null` with
+   `settlement_policy: "official-publishers-only"`, which `verify_series.py` accepts as an intentional blank
+   (with a note) instead of a mismatch.
+2. **The claim "`limit` is simply ignored by `/series`"** is published as an *observation* now, next to `main`'s
+   opposite observation (F22 ↔ F16). `GET /series?category=Entertainment&limit=3` did return far more than three
+   records here; that cannot be reconciled with `hasMore: true` from this sandbox, so both are on the page.
+3. **"(14 items)"** and similar counts on the site were corrected to F1–F25 / 39 rows as part of the merge.
+
+### Defect found in `main` by this pass — CI was red for the wrong reason
+
+`main`'s `pages.yml` verify job calls `python scripts/check_site.py`, `node tests/logic.test.mjs` and
+`node tests/render.test.mjs`, but **none of those files exist on `main`** (`git ls-tree origin/main scripts/ tests/`
+lists only `check-links.js`, `capture-snapshot.js`, `fixtures.js`, `site-render-test.js`, `smoke-test.js`). Four
+consecutive merges (#6, #9, #11, #12) failed in ~25 s on missing files, *before* reaching the Pages step — so the
+"Pages is broken" diagnosis was hiding a **missing-test-files** failure. This merge supplies those files, so the
+verify job should now pass and only the deploy job should fail on Pages enablement (owner click, F8).
+
+| Run | Result before this merge |
+|---|---|
+| `44811029591` (#12), `44810805045` (#11), `44809348023` (#9), `44808722852` (#6) | failure in ~25 s — verify job, missing scripts/tests |
+| `44746746116` (`arena/4f9f13c8`, this branch's ancestor) | **success** — the same suite, run where the files existed |
+
+### Gates after the merge (all run in this session's sandbox)
+
+`check_site.py` 39 rows + all links **pass** · `check-links.js` 360 refs **pass** · `logic.test.mjs` **pass** ·
+`smoke-test.js` **15/15** · `site-render-test.js` **13/13** · `render.test.mjs` (jsdom) **pass** · CI's Python block
+run locally **pass** · `verify_series.py --from-cache docs/data/live-verification-2026-11-20.json` **4/4, exit 0**.

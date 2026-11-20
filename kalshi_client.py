@@ -153,7 +153,7 @@ class KalshiClient:
         return self.get("/portfolio/positions").get("market_positions", [])
 
     def place_order(self, ticker: str, side: str, count: int, price_dollars: float,
-                    time_in_force: str = "good_till_canceled") -> dict:
+                    time_in_force: str = "good_till_canceled", dry_run: bool = True) -> dict:
         """Place a limit order via Create Order (V2).
 
         Body shape verified 2026-11-20 against
@@ -165,15 +165,28 @@ class KalshiClient:
         (code deprecated_v1_order_endpoint) and are NOT used here.
         NOTE: a "buy NO" order is expressed as side="ask" with price = 1 - yes_price
         on the single book; this helper always quotes the YES side.
+
+        SAFETY: `dry_run` defaults to True and the request body is returned without being sent.
+        A real POST additionally requires KALSHI_ALLOW_ORDERS=1, so no code path can place an
+        order by accident — not a test, not a REPL, not a backtest. (Re-added 2026-11-20 during
+        integration: the dry-run guard existed on one branch and not the other, and its absence
+        meant any call would write to the exchange.)
         """
-        return self.post("/portfolio/events/orders", {
+        body = {
             "ticker": ticker,
             "side": side,  # "bid" or "ask"
             "count": f"{count:.2f}",
             "price": f"{price_dollars:.4f}",
             "time_in_force": time_in_force,
             "self_trade_prevention_type": "taker_at_cross",
-        })
+        }
+        if dry_run or os.environ.get("KALSHI_ALLOW_ORDERS") != "1":
+            return {"dry_run": True, "request": body}
+        if not self.api_key_id or self._private_key is None:
+            raise RuntimeError(
+                "placing a real order needs KALSHI_API_KEY_ID and KALSHI_PRIVATE_KEY_PATH "
+                "(a signing key is required by the authenticated-request contract)")
+        return self.post("/portfolio/events/orders", body)
 
 
 def dollar_volume(market: dict) -> float:

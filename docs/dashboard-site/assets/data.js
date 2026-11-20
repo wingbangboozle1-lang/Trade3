@@ -513,9 +513,10 @@ export const REQUIREMENTS = [
   {
     id: 'R12',
     requirement: 'Live charts include events and website links that may have caused a jump',
-    where: 'Dashboard alerts + market drawer',
-    status: 'Partially delivered — logged',
-    evidence: 'Every alert links to the Kalshi market. Automatic news attribution is NOT implemented; see the Flagged page for why and what would be needed.',
+    where: 'Dashboard alerts + market drawer; “what may have moved it” panel on the dashboard edition (docs/dashboard.html#catalyst-card)',
+    status: 'Delivered — with exchange-published evidence only',
+    evidence:
+      'Updated by the integration session: every alert now opens a panel holding (a) the executed prints for that contract in a ±10-minute window around the move, from GET /markets/trades?ticker=…, and (b) the series\u2019 own settlement_sources links. What is still NOT done is third-party news attribution — the API has no news field, so the panel states correlation, never cause (flag F5).',
     source: SOURCES.markets.url,
   },
   {
@@ -590,12 +591,12 @@ export const FLAGS = [
   {
     id: 'F5',
     severity: 'Medium',
-    item: 'Automatic news attribution for price jumps is not implemented',
+    item: 'News attribution stops at the exchange record — no external headline is ever linked to a move',
     detail:
-      'The brief asked that live charts include the events and website links that may have caused a jump. This build links every alert to its Kalshi market page and shows the swing, but it does not attribute causes to news. Doing that honestly needs a licensed news feed with timestamps and an explicit confidence method; guessing a cause from a headline would be fabrication.',
-    evidence: 'Design decision recorded rather than faked.',
+      'The brief asked that live charts include the events and website links that may have caused a jump. The dashboard edition now shows, for every ≥ $0.10 alert, the prints that executed around it (GET /markets/trades?ticker=…&min_ts&max_ts, seconds) and the official settlement sources the series names. What remains unavailable is a *news* cause: Kalshi publishes no news field, and this repo has no licensed, timestamped feed, so no headline is ever attached to a move. Guessing one from a title would be fabrication, and the panel says so on screen.',
+    evidence: 'Verified live 2026-11-20: GET /markets/trades returns only trade prints (count_fp, yes/no price, taker sides, is_block_trade) — no headline, no URL field.',
     sourceUrl: 'https://docs.kalshi.com/getting_started/api_environments',
-    status: 'Open. Listed as the top recommendation on the recommendations page.',
+    status: 'Open by design. The remaining half needs a news feed you choose and license.',
   },
   {
     id: 'F6',
