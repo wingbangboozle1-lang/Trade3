@@ -89,6 +89,9 @@ document.addEventListener("DOMContentLoaded", () => {
   renderTopicTabs();
   buildChats();
   renderPaper();
+  window.addEventListener("hashchange", () => {
+    if (selectFromHash()) { renderEvents(); renderDetail(); drawChart(true); }
+  });
   startTimer();
   refresh();
   refreshResolutions();
@@ -154,7 +157,9 @@ async function refresh(manual = false) {
 
     state.markets = classified;
     const now = Date.now();
-    detectSwings(classified, now);
+    // Awaited: the alert feeds and any simulated trade they open must be on
+    // screen in the same render pass that shows the new snapshot.
+    await detectSwings(classified, now);
     for (const m of classified) {
       state.prev.set(m.ticker, lastPrice(m));
       if (!state.sessionOpen.has(m.ticker)) state.sessionOpen.set(m.ticker, lastPrice(m));
@@ -164,9 +169,11 @@ async function refresh(manual = false) {
       state.history.set(m.ticker, h.slice(-1200));
     }
 
-    if (!state.selected) {
+    // Deep link: dashboard.html#<ticker> wins over the default selection, so a
+    // link to one contract can be shared and reloaded.
+    if (!selectFromHash() && (!state.selected || !state.markets.some((m) => m.ticker === state.selected))) {
       const top = [...scoped()].sort((a, b) => (b.volume_fp || 0) - (a.volume_fp || 0))[0];
-      if (top) state.selected = top.ticker;
+      state.selected = top ? top.ticker : null;
     }
 
     state.lastRefresh = now;
@@ -249,6 +256,7 @@ async function detectSwings(markets, now) {
   state.roiAlerts = state.roiAlerts.slice(0, 200);
   if (hits.length) {
     renderChats();
+    renderPaper();
     if (state.sound) beep(0.08);
     const biggest = hits.reduce((a, b) => (Math.abs(b.delta) > Math.abs(a.delta) ? b : a));
     toast(`${hits.length} swing${hits.length > 1 ? "s" : ""} ≥ $0.10 · biggest ${biggest.m.ticker} ${fmtDelta(biggest.delta)}`);
@@ -410,13 +418,36 @@ function seriesLink(seriesTicker) {
 // ---------------------------------------------------------------------------
 // selection + detail panel
 // ---------------------------------------------------------------------------
+/** The ticker in location.hash, if any. */
+function hashTicker() {
+  try {
+    const raw = decodeURIComponent(String(location.hash || "").replace(/^#/, "")).trim();
+    return raw || null;
+  } catch { return null; }
+}
+
+/** Adopt the hash selection when that contract is in the current snapshot. */
+function selectFromHash() {
+  const t = hashTicker();
+  if (!t || !state.markets.some((m) => m.ticker === t)) return false;
+  state.selected = t;
+  return true;
+}
+
 function select(ticker) {
   state.selected = ticker;
+  if (ticker && hashTicker() !== ticker) {
+    try { history.replaceState(null, "", "#" + encodeURIComponent(ticker)); } catch { /* file:// */ }
+  }
   state.book = null;
   renderEvents();
   renderDetail();
   drawChart(true);
-  $("detail-card").scrollIntoView({ behavior: "smooth", block: "start" });
+  // Not every engine implements smooth scrolling; never let that break selection.
+  const card = $("detail-card");
+  if (card && typeof card.scrollIntoView === "function") {
+    try { card.scrollIntoView({ behavior: "smooth", block: "start" }); } catch { card.scrollIntoView(); }
+  }
 }
 
 function selectedMarket() {

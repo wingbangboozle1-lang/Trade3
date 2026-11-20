@@ -130,7 +130,8 @@ const net = {
   minGapMs: 90,
   lastStart: 0,
   queue: [],
-  okHost: null,
+  base: null,          // full base URL that last answered, e.g. https://.../trade-api/v2
+  okHost: null,        // its host, for display only
   stats: { requests: 0, errors: 0, lastError: null, lastOkAt: null, proxyUsed: false },
 };
 
@@ -152,7 +153,7 @@ function enqueue(fn) {
 
 /** Build the URL. A proxy, if configured, is applied as `<proxy><full-url>`. */
 function buildUrl(path, params) {
-  const host = net.okHost || baseUrls()[0];
+  const host = net.base || baseUrls()[0];
   const qs = new URLSearchParams(params || {}).toString();
   const url = `${host}${path}${qs ? "?" + qs : ""}`;
   const proxy = getProxy();
@@ -191,6 +192,7 @@ export function apiGet(path, params = {}, opts = {}) {
           attempt++; continue;
         }
         if (!r.ok) throw new Error(`HTTP ${r.status} from ${hostOf(url)}`);
+        net.base = baseUrls().find((b) => url.startsWith(b)) || net.base;
         net.okHost = hostOf(url);
         net.stats.lastOkAt = Date.now();
         net.stats.lastError = null;
@@ -199,10 +201,11 @@ export function apiGet(path, params = {}, opts = {}) {
         lastErr = e;
         net.stats.errors++;
         net.stats.lastError = String(e && e.message || e);
-        // Try the alternate documented host on the first failure.
-        if (!net.okHost && attempt === 0) {
+        // Try the alternate documented base on the first failure, as the docs
+        // describe, then keep using whichever one answered.
+        if (!net.base && attempt === 0) {
           const alt = baseUrls()[1];
-          if (alt && !net.okHost) { net.okHost = alt; attempt++; continue; }
+          if (alt) { net.base = alt; net.okHost = hostOf(alt); attempt++; continue; }
         }
         await sleep(300 * Math.pow(2, attempt));
         attempt++;
@@ -217,7 +220,7 @@ function hostOf(url) {
 }
 
 export function netStats() {
-  return { ...net.stats, host: net.okHost || baseUrls()[0], queued: net.queue.length };
+  return { ...net.stats, host: net.okHost || hostOf(net.base || baseUrls()[0]), base: net.base || baseUrls()[0], queued: net.queue.length };
 }
 
 // ---------------------------------------------------------------------------
@@ -482,15 +485,15 @@ export function kalshiSeriesUrl(seriesTicker) {
 }
 
 export function apiSeriesUrl(ticker) {
-  return `${(net.okHost || baseUrls()[0])}/series/${encodeURIComponent(ticker)}`;
+  return `${(net.base || baseUrls()[0])}/series/${encodeURIComponent(ticker)}`;
 }
 
 export function apiMarketUrl(ticker) {
-  return `${(net.okHost || baseUrls()[0])}/markets/${encodeURIComponent(ticker)}`;
+  return `${(net.base || baseUrls()[0])}/markets/${encodeURIComponent(ticker)}`;
 }
 
 export function apiEventUrl(ticker) {
-  return `${(net.okHost || baseUrls()[0])}/events/${encodeURIComponent(ticker)}`;
+  return `${(net.base || baseUrls()[0])}/events/${encodeURIComponent(ticker)}`;
 }
 
 // ---------------------------------------------------------------------------

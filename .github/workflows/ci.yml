@@ -29,6 +29,11 @@ jobs:
       - name: Dashboard logic unit tests
         run: node tests/logic.test.mjs
 
+      - name: Render tests (real page scripts against recorded API shapes)
+        run: |
+          npm install --no-save --no-fund --silent jsdom@25
+          node tests/render.test.mjs
+
       - name: Python deps
         run: pip install requests cryptography
 

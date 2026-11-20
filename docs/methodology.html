@@ -12,6 +12,7 @@
   <div class="brand">Trade3 <span>· Method</span></div>
   <nav class="main">
     <a href="index.html">Home</a>
+    <a href="executive-summary.html">Summary</a>
     <a href="dashboard.html">Dashboard</a>
     <a href="index.html#topics">Topics</a>
     <a href="portfolio.html">Portfolio</a>
@@ -199,7 +200,49 @@ KALSHI_PRIVATE_KEY_PATH=./demo_private_key.pem
       <li><b>No news attribution.</b> Causation for a jump is not in the API; the site links sources instead of guessing.</li>
       <li><b>Static hosting.</b> No server means no shared state: paper trades live in your browser's local storage and
         are exported as CSV/JSON if you want them elsewhere.</li>
+      <li><b>Egress.</b> The site is a plain browser app, so it only works where Kalshi's API is reachable and its CORS
+        policy allows the origin — see <a href="#network">network</a> for the proxy option if your network blocks it.</li>
     </ul>
+  </section>
+
+  <section class="card" id="checks">
+    <h2>How this site is tested</h2>
+    <p class="dim">Three independent layers, all of them re-run on every push. If any fails, the
+      deploy job does not run — a broken build cannot reach the live site.</p>
+    <table>
+      <thead><tr><th>Layer</th><th>Command</th><th>What it proves</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Static</td>
+          <td><code>python scripts/check_site.py</code></td>
+          <td>Every local link, anchor, script and stylesheet resolves; every page closes its HTML;
+            every JS module parses; <code>series.json</code> keeps its contract (37 rows, each with a
+            <code>https://external-api.…</code> proof URL and a category matching its topic); no
+            <code>localhost</code> references leak into the published site.</td>
+        </tr>
+        <tr>
+          <td>Logic</td>
+          <td><code>node tests/logic.test.mjs</code></td>
+          <td>Order-book maths against the documented example (implied ask = $1.00 − best opposing
+            bid), the ≥ $0.10 alert threshold, the ROI screen's four rejection reasons, legal candle
+            intervals for all seven chart windows, and formatting that renders missing data as “—”,
+            never as a zero.</td>
+        </tr>
+        <tr>
+          <td>Render</td>
+          <td><code>node tests/render.test.mjs</code></td>
+          <td>The real page scripts run in a headless DOM against recorded Kalshi response shapes:
+            the dashboard must classify only in-scope contracts, detect the reprice as an alert, put
+            it in the high-ROI feed, open a simulated trade, draw the book and chart, and honour
+            <code>#ticker</code> deep links; the portfolio must compare four strategies; a topic page
+            must keep its proof links and stay inside its own topic.</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="dim">The render layer caught two real defects during this build: the client kept a
+      bare hostname as its base URL after the first successful call (so every later request lost its
+      scheme and <code>/trade-api/v2</code> path), and selecting a contract threw in engines without
+      <code>scrollIntoView</code>. Both are fixed.</p>
   </section>
 
 </main>
@@ -208,18 +251,6 @@ KALSHI_PRIVATE_KEY_PATH=./demo_private_key.pem
   <a href="flagged.html">Flagged for review</a><br>
   Not financial advice. Kalshi demo funds are mock funds.
 </footer>
-<script type="module">
-  import { getProxy, setProxy } from "./assets/app.js";
-  const input = document.getElementById("proxy-input");
-  const status = document.getElementById("proxy-status");
-  const paint = () => {
-    const p = getProxy();
-    input.value = p;
-    status.textContent = p ? "a proxy is set for this browser" : "using the Kalshi API directly";
-  };
-  document.getElementById("proxy-save").addEventListener("click", () => { setProxy(input.value); paint(); });
-  document.getElementById("proxy-clear").addEventListener("click", () => { setProxy(""); input.value = ""; paint(); });
-  paint();
-</script>
+<script type="module" src="assets/methodology.js"></script>
 </body>
 </html>
