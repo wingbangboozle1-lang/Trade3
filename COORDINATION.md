@@ -32,6 +32,20 @@
 - Merge result: MERGED 2026-11-20T13:15:43Z (merge commit `4e12443`).
 - PR #7 link: https://github.com/wingbangboozle1-lang/Trade3/pull/7
 - PR #7 merge result: MERGED 2026-11-20T20:10:38Z (merge commit `2524516f`). Merged session `arena/62559215-trade3` independent verification record (`COORDINATION.md`) into `main`.
+
+---
+
+# Session `arena/2100849c-trade3` — full line-by-line repo review + re-verification + final integration
+
+**Claimed (2026-11-20, committed immediately on branch `arena/2100849c-trade3`; rebased onto `main` after PRs #6–#10 landed from parallel sessions — see handoff note below):**
+
+| Task | Status | Owner | File scope |
+|---|---|---|---|
+| T7 | Full line-by-line repo review, re-verification of every live-API claim against official sources, test reruns, irregularity flags | in progress | `VERIFICATION.md`, `EXECUTIVE_SUMMARY.md`, `docs/flagged.html` (+ review notes only) |
+| T8 | Fixes from review (any file), then integration: PR to `main`, merge, enable/confirm GitHub Pages deploy | unclaimed | everything not under another live claim (no other session active) |
+
+
+
 - Pages deploy: Workflow run 44742765873 failed at "Setup Pages" — repo has Pages disabled and the
   automation token lacks Pages-admin scope (API returns 403 "Resource not accessible by integration"
   for both POST and PUT `/pages`). Site code itself is verified (all pages 200 locally, links OK).
