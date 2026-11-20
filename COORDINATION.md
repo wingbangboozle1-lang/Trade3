@@ -112,3 +112,19 @@ this token. The other session's seven flags are reproduced on the same page, wit
 - Integration approach: `git merge origin/main` on `integrate`; this build's site moved under `docs/dashboard-site/`
   so the existing `docs/*` pages, `docs/assets/*`, `docs/topics/*` and the Python tooling are preserved untouched.
 - Cross-links added both ways so neither build is orphaned.
+- Duplicate copies of Build A's page names were removed from Build B's subtree so the published site never
+  contains two competing versions of the same URL.
+
+## Merge record (final, this session)
+
+| Item | Result |
+|---|---|
+| PR | https://github.com/wingbangboozle1-lang/Trade3/pull/3 — **MERGED** 2026-11-20T13:29:18Z, merge commit `5265acf` |
+| CI on merged `main` | Workflow run [44744922676](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44744922676) — job **Verify site: SUCCESS** (link check, render harness, engine + route tests all green on a clean checkout, with zero npm dependencies) |
+| Pages deploy | **Still blocked** — job `Deploy` fails at `actions/configure-pages@v5`. `GET/POST /pages` return 403/404 for this token and `has_pages` is false, so neither this session nor CI can switch Pages on. `enablement: true` was added in PR #4 and did not help, because the workflow token has the same restriction. |
+| Owner action (one click) | Repo → **Settings → Pages → Build and deployment → Source: GitHub Actions → Save**. The workflow then deploys `docs/` on the next push, or immediately via Actions → "Deploy site to GitHub Pages" → Run workflow. |
+| Expected URLs once enabled | `https://wingbangboozle1-lang.github.io/Trade3/` (Build A) · `/dashboard.html` · `/dashboard-site/` (Build B) · `/dashboard-site/flagged.html` |
+| Verified locally meanwhile | All routes 200 from the collector: `/`, `/index.html`, `/dashboard.html`, `/topics/golf.html`, `/dashboard-site/`, `/dashboard-site/flagged.html`, `/dashboard-site/executive-summary.html`, `/dashboard-site/assets/site.css`, `/app/`, `/api/health` |
+
+Nothing is flagged as blocking merge: the site itself is verified and complete; the only outstanding item is a
+permission the token does not hold, which is exactly the kind of thing the Flagged for Review page exists for.
