@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kalshi demo dashboard — live swings, 5 topics</title>
+<meta name="description" content="Live Kalshi demo dashboard: >=$0.10 swings on gas prices, elections, culture, crypto and golf markets, with a simulated-trading tournament and a resolution log.">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">Kalshi demo dashboard <small id="envLabel">—</small></div>
+  <span class="provenance" id="prov">connecting…</span>
+  <div class="conn">
+    <span><span class="dot" id="feedDot"></span><span id="feedLabel">feed</span></span>
+    <span>alerts <b id="mAlerts">0</b></span>
+    <span>markets <b id="mMarkets">0</b></span>
+    <span>paper <b id="mPaper">—</b></span>
+    <span>live acct <b id="mLive">—</b></span>
+    <span>clock <b id="mClock">—</b></span>
+  </div>
+</div>
+
+<nav class="tabs" id="tabs"></nav>
+
+<main>
+  <div id="modeBanner"></div>
+
+  <!-- ============================================================= LIVE -->
+  <section id="view-live">
+    <div class="grid two" style="margin-bottom:14px">
+      <div class="panel">
+        <header>
+          <h2>Highest dollar-volume live events</h2>
+          <span class="spacer"></span>
+          <span class="toolbar">
+            <input id="evSearch" type="search" placeholder="filter events, tickers, markets…" aria-label="Filter events">
+            <button class="tab" id="evRefresh" style="padding:3px 8px;border:1px solid var(--line);border-radius:5px">refresh</button>
+          </span>
+        </header>
+        <div class="body tight">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th><th>Event</th><th>Topic</th>
+                <th class="num" title="Dollar volume as reported by Kalshi's dollar_volume field; derived values are labelled">$ volume</th>
+                <th class="num">Markets</th><th class="num">OI</th>
+                <th class="num">Closes</th><th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="evBody"><tr><td colspan="8" class="empty">waiting for the first snapshot…</td></tr></tbody>
+          </table>
+        </div>
+        <div class="footnote" id="evFootnote">Ranked by Kalshi's reported <span class="mono">dollar_volume</span>. Ties break on open interest, then ticker. <a href="https://docs.kalshi.com/api-reference/market/get-markets" target="_blank" rel="noopener">source</a></div>
+      </div>
+
+      <div class="panel">
+        <header>
+          <h2>Feed health</h2>
+          <span class="spacer"></span>
+          <span class="chip" id="wsChip">ws</span>
+        </header>
+        <div class="body">
+          <div class="cards" id="healthCards"></div>
+          <div id="keyWarn" style="margin-top:10px"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid alerts">
+      <div class="panel">
+        <header>
+          <h2>All swings ≥ $0.10</h2>
+          <span class="chip" id="chat1Count">0</span>
+          <span class="spacer"></span>
+          <span class="toolbar">
+            <button class="tab" id="pause1" style="padding:2px 8px;border:1px solid var(--line);border-radius:5px">pause</button>
+          </span>
+        </header>
+        <div class="chat" id="chatAll"></div>
+        <div class="footnote">Every observation that moved ≥ $0.10 from the previous print or from the price one drift-window ago. Prints come from the <span class="mono">trade</span> channel; snapshots from <span class="mono">ticker</span>. <a href="https://docs.kalshi.com/websockets/public-trades" target="_blank" rel="noopener">source</a></div>
+      </div>
+
+      <div class="panel">
+        <header>
+          <h2>Model picks · positive EV after fees</h2>
+          <span class="chip ok" id="chat2Count">0</span>
+          <span class="spacer"></span>
+          <span class="toolbar">
+            <button class="tab" id="pause2" style="padding:2px 8px;border:1px solid var(--line);border-radius:5px">pause</button>
+          </span>
+        </header>
+        <div class="chat" id="chatModel"></div>
+        <div class="footnote">Promoted only when the expected edge after official fees is ≥ $0.005/contract, ≥150 bps of capital, and the move is ≥2× the spread. Each card shows the inputs. <a href="/docs/model.html">How the model works</a></div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:14px">
+      <header>
+        <h2>Price chart</h2>
+        <span class="spacer"></span>
+        <span class="rangebar" id="rangeBar"></span>
+        <select id="chartMarket" style="margin-left:8px;background:var(--bg);border:1px solid var(--line);color:var(--text);border-radius:5px;padding:3px 6px;font-size:11.5px;max-width:280px">
+          <option>loading…</option>
+        </select>
+      </header>
+      <div class="body">
+        <div class="chartwrap"><canvas id="priceChart" height="240"></canvas></div>
+        <div class="toolbar" style="margin-top:8px">
+          <label class="mute" style="font-size:11px"><input type="checkbox" id="stepChart" checked> step line</label>
+          <label class="mute" style="font-size:11px"><input type="checkbox" id="fixedAxis" checked> fix y axis $0–$1</label>
+          <span class="spacer" style="margin-left:auto"></span>
+          <span class="mute" style="font-size:11px">x = time · y = YES contract price</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================== TOPICS -->
+  <section id="view-topics" hidden>
+    <div class="grid two">
+      <div class="panel">
+        <header><h2 id="topicTitle">Topic</h2><span class="spacer"></span><span class="chip" id="topicChip"></span></header>
+        <div class="body tight">
+          <table>
+            <thead>
+              <tr><th>Market</th><th>Ticker</th><th class="num">YES bid</th><th class="num">YES ask</th><th class="num">Last</th><th class="num">Spread</th><th class="num">Vol</th><th class="num">Closes</th><th>Result</th></tr>
+            </thead>
+            <tbody id="topicBody"><tr><td colspan="9" class="empty">loading…</td></tr></tbody>
+          </table>
+        </div>
+        <div class="footnote">Markets grouped by event, highest dollar volume first. Bid/ask are Kalshi fixed-point dollar strings reformatted; asks are implied as 1 − opposite bid because the API returns bids only. <a href="https://docs.kalshi.com/getting_started/orderbook_responses" target="_blank" rel="noopener">source</a></div>
+      </div>
+      <div class="panel">
+        <header><h2>Depth ladder</h2><span class="spacer"></span><span class="chip" id="bookTicker">—</span></header>
+        <div class="body" id="bookBody"><div class="empty">pick a market row</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================== PORTFOLIO -->
+  <section id="view-portfolio" hidden>
+    <div class="grid two" style="margin-bottom:14px">
+      <div class="panel">
+        <header><h2>Paper portfolio</h2><span class="spacer"></span><span class="chip" id="paperChip">simulated</span></header>
+        <div class="body">
+          <div class="cards" id="paperCards"></div>
+          <div style="margin-top:12px"><canvas id="equityChart" height="150"></canvas></div>
+        </div>
+      </div>
+      <div class="panel">
+        <header><h2>Kalshi demo account</h2><span class="spacer"></span><span class="chip" id="liveChip">not connected</span></header>
+        <div class="body" id="liveBody"></div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-bottom:14px">
+      <header><h2>Trade categories</h2><span class="spacer"></span><span class="mute" style="font-size:11px">every category is measured from recorded trades only</span></header>
+      <div class="body tight">
+        <table>
+          <thead><tr><th>Category</th><th>Group</th><th class="num">n</th><th class="num">P&L</th><th class="num">Fees</th><th class="num">Win rate</th><th class="num">EV/contract</th><th class="num">Avg hold</th><th class="num">Profit factor</th></tr></thead>
+          <tbody id="catBody"><tr><td colspan="9" class="empty">no closed trades yet</td></tr></tbody>
+        </table>
+      </div>
+      <div class="footnote">Rows with fewer than 10 trades are shown but not ranked — a 3-trade win rate is noise, not evidence.</div>
+    </div>
+
+    <div class="panel">
+      <header><h2>Strategy comparison</h2></header>
+      <div class="body tight">
+        <table>
+          <thead><tr><th>Strategy</th><th>Fills as</th><th class="num">Trades</th><th class="num">P&L</th><th class="num">Win rate</th><th class="num">EV/contract</th><th class="num">Max DD</th><th>Thesis</th></tr></thead>
+          <tbody id="stratBody"></tbody>
+        </table>
+      </div>
+      <div class="footnote" id="adverseNote"></div>
+    </div>
+  </section>
+
+  <!-- ====================================================== RESOLUTIONS -->
+  <section id="view-resolutions" hidden>
+    <div class="panel">
+      <header><h2>Resolved events · YES or NO</h2><span class="spacer"></span><span class="chip" id="resCount">0</span></header>
+      <div class="body tight">
+        <table>
+          <thead><tr><th>Resolved</th><th>Event</th><th>Market</th><th>Topic</th><th>Result</th><th class="num">Settlement</th><th>Determined</th><th>Source</th></tr></thead>
+          <tbody id="resBody"><tr><td colspan="8" class="empty">no resolutions observed yet</td></tr></tbody>
+        </table>
+      </div>
+      <div class="footnote">Captured from the <span class="mono">market_lifecycle_v2</span> <span class="mono">determined</span> and <span class="mono">settled</span> messages. <a href="https://docs.kalshi.com/websockets/market-and-event-lifecycle" target="_blank" rel="noopener">source</a></div>
+    </div>
+  </section>
+
+  <!-- ========================================================== SEARCH -->
+  <section id="view-search" hidden>
+    <div class="panel">
+      <header><h2>Search all markets in the five topics</h2><span class="spacer"></span><input id="searchBox" type="search" placeholder="ticker, event, market…" style="background:var(--bg);border:1px solid var(--line);color:var(--text);border-radius:5px;padding:4px 8px;font-size:12px;min-width:280px"></header>
+      <div class="body tight">
+        <table>
+          <thead><tr><th>Market</th><th>Ticker</th><th>Topic</th><th class="num">Bid</th><th class="num">Ask</th><th class="num">Depth Y/N</th><th class="num">Vol</th><th>Classified by</th></tr></thead>
+          <tbody id="searchBody"><tr><td colspan="8" class="empty">type to search</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script type="module" src="/app.js"></script>
+</body>
+</html>
