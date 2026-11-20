@@ -29,11 +29,11 @@ PROD_WS = "wss://external-api-ws.kalshi.com/trade-api/ws/v2"
 
 # Topic -> (category, tags) discovery filters, verified via
 # GET /search/tags_by_categories on 2026-11-20 (see VERIFICATION.md).
-# "Culture" has no Kalshi category; Entertainment is the closest match (flagged).
+# "Culture" is a Kalshi series category (verified 2026-11-20: GET /series?category=Culture). It has no markets at capture.
 TOPIC_FILTERS = {
     "gas": {"category": "Economics", "tags": ["Oil & Gas", "Oil and energy"]},
     "elections": {"category": "Elections", "tags": []},
-    "culture": {"category": "Entertainment", "tags": []},
+    "culture": {"category": "Culture", "tags": []},
     "crypto": {"category": "Crypto", "tags": []},
     "golf": {"category": "Sports", "tags": ["Golf"]},
 }

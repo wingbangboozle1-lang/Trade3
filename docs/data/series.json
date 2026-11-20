@@ -1,25 +1,98 @@
 {
   "generated": "2026-11-20",
-  "note": "Verified snapshot of Kalshi series for the five dashboard topics. Every row was returned by the live demo API on 2026-11-20. Live values (prices, volume) are fetched in the browser and are NOT stored here. Source links point to the exact API query that returned the row.",
+  "note": "Verified snapshot of Kalshi series for the five dashboard topics. Every row was returned by the live demo API. Each row was re-read in session b4e5648a on 2026-11-20 with GET /series/{ticker} (see source_url) and compared with the title, frequency and settlement source. Corrections made in that pass: settlement text for KXLINKPERP and KXSOLPERP (API lists none), KXPGAGOLFERSCORE (AP missing), KXBTC2025100 (exact URL). Live values (prices, volume) are fetched in the browser and are NOT stored here.",
   "demo_base": "https://external-api.demo.kalshi.co/trade-api/v2",
   "prod_base": "https://external-api.kalshi.com/trade-api/v2",
   "topics": {
     "gas": {
       "label": "Gas prices",
       "kalshi_category": "Economics",
-      "kalshi_tags": ["Oil & Gas", "Oil and energy"],
+      "kalshi_tags": [
+        "Oil & Gas",
+        "Oil and energy"
+      ],
       "source": "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Economics&tags=Oil%20%26%20Gas&limit=20",
       "series": [
-        {"ticker": "KXAAAGASM", "title": "US gas price", "frequency": "monthly", "settlement": "AAA — https://gasprices.aaa.com/"},
-        {"ticker": "KXAAAGASMIN", "title": "US lowest gas price yearly", "frequency": "annual", "settlement": "AAA — https://gasprices.aaa.com/"},
-        {"ticker": "KXAAAGASY", "title": "US gas price up", "frequency": "annual", "settlement": "AAA — https://gasprices.aaa.com/"},
-        {"ticker": "KXAAAGASED", "title": "US gas price on Election Day", "frequency": "one_off", "settlement": "AAA — https://gasprices.aaa.com/"},
-        {"ticker": "KXAAAGASMAX", "title": "US highest gas price yearly", "frequency": "annual", "settlement": "AAA — https://gasprices.aaa.com/"},
-        {"ticker": "KXAAAGASMAXCA", "title": "California highest gas price yearly", "frequency": "annual", "settlement": "AAA — https://gasprices.aaa.com/"},
-        {"ticker": "KXAAAGASMAXTX", "title": "Texas highest gas price yearly", "frequency": "annual", "settlement": "AAA — https://gasprices.aaa.com/"},
-        {"ticker": "KXAAAGASMINFL", "title": "Florida lowest gas price yearly", "frequency": "annual", "settlement": "AAA — https://gasprices.aaa.com/"},
-        {"ticker": "KXAAAGASMAXFL", "title": "Florida highest gas price yearly", "frequency": "annual", "settlement": "AAA — https://gasprices.aaa.com/"},
-        {"ticker": "KXNGASMAX", "title": "Natural gas price peak", "frequency": "annual", "settlement": "Energy Information Administration — https://www.eia.gov/dnav/ng/NG_PRI_FUT_S1_D.htm"}
+        {
+          "ticker": "KXAAAGASM",
+          "title": "US gas price",
+          "frequency": "monthly",
+          "settlement": "AAA — https://gasprices.aaa.com/",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASM",
+          "verified_on": "2026-11-20"
+        },
+        {
+          "ticker": "KXAAAGASMIN",
+          "title": "US lowest gas price yearly",
+          "frequency": "annual",
+          "settlement": "AAA — https://gasprices.aaa.com/",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASMIN",
+          "verified_on": "2026-11-20"
+        },
+        {
+          "ticker": "KXAAAGASY",
+          "title": "US gas price up",
+          "frequency": "annual",
+          "settlement": "AAA — https://gasprices.aaa.com/",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASY",
+          "verified_on": "2026-11-20"
+        },
+        {
+          "ticker": "KXAAAGASED",
+          "title": "US gas price on Election Day",
+          "frequency": "one_off",
+          "settlement": "AAA — https://gasprices.aaa.com/",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASED",
+          "verified_on": "2026-11-20"
+        },
+        {
+          "ticker": "KXAAAGASMAX",
+          "title": "US highest gas price yearly",
+          "frequency": "annual",
+          "settlement": "AAA — https://gasprices.aaa.com/",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASMAX",
+          "verified_on": "2026-11-20"
+        },
+        {
+          "ticker": "KXAAAGASMAXCA",
+          "title": "California highest gas price yearly",
+          "frequency": "annual",
+          "settlement": "AAA — https://gasprices.aaa.com/",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASMAXCA",
+          "verified_on": "2026-11-20"
+        },
+        {
+          "ticker": "KXAAAGASMAXTX",
+          "title": "Texas highest gas price yearly",
+          "frequency": "annual",
+          "settlement": "AAA — https://gasprices.aaa.com/",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASMAXTX",
+          "verified_on": "2026-11-20"
+        },
+        {
+          "ticker": "KXAAAGASMINFL",
+          "title": "Florida lowest gas price yearly",
+          "frequency": "annual",
+          "settlement": "AAA — https://gasprices.aaa.com/",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASMINFL",
+          "verified_on": "2026-11-20"
+        },
+        {
+          "ticker": "KXAAAGASMAXFL",
+          "title": "Florida highest gas price yearly",
+          "frequency": "annual",
+          "settlement": "AAA — https://gasprices.aaa.com/",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASMAXFL",
+          "verified_on": "2026-11-20"
+        },
+        {
+          "ticker": "KXNGASMAX",
+          "title": "Natural gas price peak",
+          "frequency": "annual",
+          "settlement": "Energy Information Administration — https://www.eia.gov/dnav/ng/NG_PRI_FUT_S1_D.htm",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXNGASMAX",
+          "verified_on": "2026-11-20"
+        }
       ]
     },
     "elections": {
@@ -28,11 +101,46 @@
       "kalshi_tags": [],
       "source": "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Elections&limit=20",
       "series": [
-        {"ticker": "POPVOTEKHVA", "title": "Kamala Virginia", "frequency": "one_off", "settlement": "United States Congress — https://www.congress.gov/"},
-        {"ticker": "KXGOVNJNOMR", "title": "New Jersey Governor Republican nominee", "frequency": "custom", "settlement": "Republican Party — https://gop.com/"},
-        {"ticker": "KXIATREASR", "title": "Iowa Treasurer winner", "frequency": "custom", "settlement": "Iowa Secretary of State — https://sos.iowa.gov/iowans/election-results-statistics"},
-        {"ticker": "KXFRPRESCANDCOUNT", "title": "How many candidates will be on the French presidential first-round ballot?", "frequency": "one_off", "settlement": "Conseil constitutionnel — https://www.conseil-constitutionnel.fr/"},
-        {"ticker": "KXELECTUKRAINE", "title": "Ukraine elections", "frequency": "custom", "settlement": "See series record for full source list"}
+        {
+          "ticker": "POPVOTEKHVA",
+          "title": "Kamala Virginia",
+          "frequency": "one_off",
+          "settlement": "United States Congress — https://www.congress.gov/",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/POPVOTEKHVA",
+          "verified_on": "2026-11-20"
+        },
+        {
+          "ticker": "KXGOVNJNOMR",
+          "title": "New Jersey Governor Republican nominee",
+          "frequency": "custom",
+          "settlement": "Republican Party — https://gop.com/",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXGOVNJNOMR",
+          "verified_on": "2026-11-20"
+        },
+        {
+          "ticker": "KXIATREASR",
+          "title": "Iowa Treasurer winner",
+          "frequency": "custom",
+          "settlement": "Iowa Secretary of State — https://sos.iowa.gov/iowans/election-results-statistics",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXIATREASR",
+          "verified_on": "2026-11-20"
+        },
+        {
+          "ticker": "KXFRPRESCANDCOUNT",
+          "title": "How many candidates will be on the French presidential first-round ballot?",
+          "frequency": "one_off",
+          "settlement": "Conseil constitutionnel — https://www.conseil-constitutionnel.fr/",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXFRPRESCANDCOUNT",
+          "verified_on": "2026-11-20"
+        },
+        {
+          "ticker": "KXELECTUKRAINE",
+          "title": "Ukraine elections",
+          "frequency": "custom",
+          "settlement": "See series record for full source list",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXELECTUKRAINE",
+          "verified_on": "2026-11-20"
+        }
       ]
     },
     "culture": {
@@ -40,10 +148,26 @@
       "kalshi_category": "Culture",
       "kalshi_tags": [],
       "source": "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture",
-      "note": "The official query returned two Culture series. One checked series, KXXBANNEDGROK, had no open markets at verification time. Settlement source is left blank where not explicitly verified in this record.",
+      "flag": "Kalshi's Culture category has 2 series and no markets at capture (2026-11-20). Entertainment (a much larger Kalshi category) is NOT used by default; the owner decides (flag F15). Settlement sources are left blank: the Culture series list Google search pages and a personal account, which are not official publishers (flag F10).",
       "series": [
-        {"ticker": "KXXBANNEDMURRAYHILLGUY1", "title": "Will @MurrayHillGuy1 get banned from X this year?", "frequency": "one_off", "settlement": null},
-        {"ticker": "KXXBANNEDGROK", "title": "Will Grok be banned this year", "frequency": "one_off", "settlement": null}
+        {
+          "ticker": "KXXBANNEDGROK",
+          "title": "Will Grok be banned this year",
+          "frequency": "one_off",
+          "settlement": null,
+          "markets_at_capture": 0,
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXXBANNEDGROK",
+          "verified_on": "2026-11-20"
+        },
+        {
+          "ticker": "KXXBANNEDMURRAYHILLGUY1",
+          "title": "Will @MurrayHillGuy1 get banned from X this year?",
+          "frequency": "one_off",
+          "settlement": null,
+          "markets_at_capture": 0,
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXXBANNEDMURRAYHILLGUY1",
+          "verified_on": "2026-11-20"
+        }
       ]
     },
     "crypto": {
@@ -52,28 +176,128 @@
       "kalshi_tags": [],
       "source": "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Crypto&limit=20",
       "series": [
-        {"ticker": "KXLINKPERP", "title": "1 LINK", "frequency": "often", "settlement": "See series record"},
-        {"ticker": "KXXRPMAXY", "title": "XRP Max", "frequency": "annual", "settlement": "CF Benchmarks — https://www.cfbenchmarks.com/"},
-        {"ticker": "KXSOL26500", "title": "Sol above 500 in 2026", "frequency": "one_off", "settlement": "CF Benchmarks — https://www.cfbenchmarks.com/"},
-        {"ticker": "KXBTXMINW", "title": "How low will Bitcoin get this week?", "frequency": "weekly", "settlement": "CF Benchmarks — https://www.cfbenchmarks.com/"},
-        {"ticker": "KXBTC2025100", "title": "Will Bitcoin reach 100k again this year?", "frequency": "one_off", "settlement": "CF Benchmarks — https://www.cfbenchmarks.com/data/indices/BRTI"},
-        {"ticker": "KXSOLPERP", "title": ".1 SOL", "frequency": "often", "settlement": "See series record"},
-        {"ticker": "KXETHD", "title": "Ethereum price Above/below", "frequency": "hourly", "settlement": "CF Benchmarks — https://www.cfbenchmarks.com/data/indices/ETHUSD_RTI"},
-        {"ticker": "KXFDVBIRB", "title": "BIRB FDV", "frequency": "one_off", "settlement": "CoinGecko — https://www.coingecko.com"},
-        {"ticker": "KXSOLSTABLESUPP", "title": "sol stable supp", "frequency": "custom", "settlement": "Artemis — https://artemis.org"},
-        {"ticker": "KXNEARY", "title": "NEAR Yearly", "frequency": "annual", "settlement": "CF Benchmarks — https://www.cfbenchmarks.com/"}
+        {
+          "ticker": "KXLINKPERP",
+          "title": "1 LINK",
+          "frequency": "often",
+          "settlement": "None listed by Kalshi (settlement_sources is null on the series record; flag F18)",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXLINKPERP",
+          "verified_on": "2026-11-20"
+        },
+        {
+          "ticker": "KXXRPMAXY",
+          "title": "XRP Max",
+          "frequency": "annual",
+          "settlement": "CF Benchmarks — https://www.cfbenchmarks.com/",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXXRPMAXY",
+          "verified_on": "2026-11-20"
+        },
+        {
+          "ticker": "KXSOL26500",
+          "title": "Sol above 500 in 2026",
+          "frequency": "one_off",
+          "settlement": "CF Benchmarks — https://www.cfbenchmarks.com/",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXSOL26500",
+          "verified_on": "2026-11-20"
+        },
+        {
+          "ticker": "KXBTXMINW",
+          "title": "How low will Bitcoin get this week?",
+          "frequency": "weekly",
+          "settlement": "CF Benchmarks — https://www.cfbenchmarks.com/",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXBTXMINW",
+          "verified_on": "2026-11-20"
+        },
+        {
+          "ticker": "KXBTC2025100",
+          "title": "Will Bitcoin reach 100k again this year?",
+          "frequency": "one_off",
+          "settlement": "CF Benchmarks — https://www.cfbenchmarks.com/data/indices/BRTI?ref=blog.cfbenchmarks.com (URL exactly as the API returns it)",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXBTC2025100",
+          "verified_on": "2026-11-20"
+        },
+        {
+          "ticker": "KXSOLPERP",
+          "title": ".1 SOL",
+          "frequency": "often",
+          "settlement": "None listed by Kalshi (settlement_sources is null on the series record; flag F18)",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXSOLPERP",
+          "verified_on": "2026-11-20"
+        },
+        {
+          "ticker": "KXETHD",
+          "title": "Ethereum price Above/below",
+          "frequency": "hourly",
+          "settlement": "CF Benchmarks — https://www.cfbenchmarks.com/data/indices/ETHUSD_RTI",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXETHD",
+          "verified_on": "2026-11-20"
+        },
+        {
+          "ticker": "KXFDVBIRB",
+          "title": "BIRB FDV",
+          "frequency": "one_off",
+          "settlement": "CoinGecko — https://www.coingecko.com",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXFDVBIRB",
+          "verified_on": "2026-11-20"
+        },
+        {
+          "ticker": "KXSOLSTABLESUPP",
+          "title": "sol stable supp",
+          "frequency": "custom",
+          "settlement": "Artemis — https://artemis.org",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXSOLSTABLESUPP",
+          "verified_on": "2026-11-20"
+        },
+        {
+          "ticker": "KXNEARY",
+          "title": "NEAR Yearly",
+          "frequency": "annual",
+          "settlement": "CF Benchmarks — https://www.cfbenchmarks.com/",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXNEARY",
+          "verified_on": "2026-11-20"
+        }
       ]
     },
     "golf": {
       "label": "Golf",
       "kalshi_category": "Sports",
-      "kalshi_tags": ["Golf"],
+      "kalshi_tags": [
+        "Golf"
+      ],
       "source": "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Sports&tags=Golf&limit=20",
       "series": [
-        {"ticker": "KXPGAGOLFERSCORE", "title": "Golf Round Strokes", "frequency": "custom", "settlement": "PGA Tour — https://www.pgatour.com/ (also NBC Sports, Fox Sports, Golf Channel)"},
-        {"ticker": "KXPGAEAGLE", "title": "Player to Record an Eagle in Round", "frequency": "custom", "settlement": "PGA Tour — https://www.pgatour.com/ (also Fox Sports, ESPN)"},
-        {"ticker": "KXPRESCUPMATCH", "title": "Presidents Cup Match Winner", "frequency": "custom", "settlement": "PGA Tour — https://www.pgatour.com/ (also ESPN)"},
-        {"ticker": "KXPGAT20", "title": "T 20", "frequency": "custom", "settlement": "PGA Tour — https://www.pgatour.com/ (also Fox Sports, ESPN)"}
+        {
+          "ticker": "KXPGAGOLFERSCORE",
+          "title": "Golf Round Strokes",
+          "frequency": "custom",
+          "settlement": "the Governing League — https://www.pgatour.com/ (also NBC Sports, Fox Sports, AP, Golf Channel)",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAGOLFERSCORE",
+          "verified_on": "2026-11-20"
+        },
+        {
+          "ticker": "KXPGAEAGLE",
+          "title": "Player to Record an Eagle in Round",
+          "frequency": "custom",
+          "settlement": "PGA Tour — https://www.pgatour.com/ (also Fox Sports, ESPN)",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAEAGLE",
+          "verified_on": "2026-11-20"
+        },
+        {
+          "ticker": "KXPRESCUPMATCH",
+          "title": "Presidents Cup Match Winner",
+          "frequency": "custom",
+          "settlement": "PGA Tour — https://www.pgatour.com/ (also ESPN)",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXPRESCUPMATCH",
+          "verified_on": "2026-11-20"
+        },
+        {
+          "ticker": "KXPGAT20",
+          "title": "T 20",
+          "frequency": "custom",
+          "settlement": "PGA Tour — https://www.pgatour.com/ (also Fox Sports, ESPN)",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAT20",
+          "verified_on": "2026-11-20"
+        }
       ]
     }
   }

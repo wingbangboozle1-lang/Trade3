@@ -8,7 +8,7 @@ export const ALERT_THRESHOLD = 0.10; // $ swing that triggers an alert
 export const TOPICS = [
   { id: "gas", label: "Gas prices", category: "Economics", tags: ["Oil & Gas", "Oil and energy"] },
   { id: "elections", label: "Elections", category: "Elections", tags: [] },
-  { id: "culture", label: "Culture", category: "Culture", tags: [] },
+  { id: "culture", label: "Culture", category: "Culture", tags: [], note: "Kalshi's Culture category has 2 series and no markets at capture (verified 2026-11-20). Entertainment is NOT included by default (flag F15)." },
   { id: "crypto", label: "Crypto", category: "Crypto", tags: [] },
   { id: "golf", label: "Golf", category: "Sports", tags: ["Golf"] },
 ];

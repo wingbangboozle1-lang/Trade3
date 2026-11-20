@@ -157,3 +157,59 @@ this token. The other session's seven flags are reproduced on the same page, wit
 - Integration approach: `git merge origin/main` on `integrate`; this build's site moved under `docs/dashboard-site/`
   so the existing `docs/*` pages, `docs/assets/*`, `docs/topics/*` and the Python tooling are preserved untouched.
 - Cross-links added both ways so neither build is orphaned.
+
+---
+
+# Session `arena/b4e5648a-trade3` — re-verification, correction and publish pass
+
+**Status:** work done 2026-11-20 (claimed ~20:08Z). Publish: see Merge record below. Only session active on this repo at claim time: `origin` has
+`main` only; the earlier `arena/*` branches are merged and closed.
+
+## Claim
+
+| Task | Status | Owner | File scope |
+|---|---|---|---|
+| T7 Re-verify rows against live official API and correct errors (Build B golf/Elon rows, Build A Culture mapping) | done | `arena/b4e5648a-trade3` | `docs/dashboard-site/assets/data.js`, `docs/dashboard-site/assets/pages/flagged.js`, `docs/assets/app.js`, `docs/data/series.json`, `docs/index.html`, `docs/methodology.html`, `docs/flagged.html`, `kalshi_client.py` |
+| T8 Documentation: correct V18 / F1 and log new flags | done | `arena/b4e5648a-trade3` | `VERIFICATION.md`, `EXECUTIVE_SUMMARY.md`, `README.md`, `COORDINATION.md` |
+| T9 Pages readiness: link checker false positive, workflow failure message | done | `arena/b4e5648a-trade3` | `scripts/check-links.js`, `.github/workflows/pages.yml` |
+| T10 Integration: tests, PR to `main`, merge, Pages status check | done (merge) · **blocked** (Pages not enabled) | `arena/b4e5648a-trade3` | integration only |
+
+Other sessions' files are not touched: no other session has an open claim.
+
+### Results, sources and verification (T7–T9)
+
+| Check | Official source (link) | Result |
+|---|---|---|
+| Culture category | [GET /series?category=Culture](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture) | **Exists**: `KXXBANNEDGROK`, `KXXBANNEDMURRAYHILLGUY1`. Earlier V18 claim (no Culture category) was **wrong**; corrected in Build A (`app.js`, `series.json`, `index`, `methodology`, `kalshi_client.py`, `VERIFICATION.md`, `EXECUTIVE_SUMMARY.md`) and Build B flag F1. |
+| Culture markets | [GET /markets?series_ticker=KXXBANNEDMURRAYHILLGUY1](https://external-api.demo.kalshi.co/trade-api/v2/markets?series_ticker=KXXBANNEDMURRAYHILLGUY1) · [GET /markets?series_ticker=KXXBANNEDGROK&status=open](https://external-api.demo.kalshi.co/trade-api/v2/markets?series_ticker=KXXBANNEDGROK&status=open) | Both empty. Culture shows zero rows by design (F9). |
+| Gas / Golf categories | [category=Gas](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Gas) · [category=Golf](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Golf) | Both `{"series":null}` (still true). Routing uses Economics+Oil & Gas and Sports+Golf. |
+| Series rows, Build A `series.json` (31 rows) | `GET /series/{ticker}` per row (`source_url` in the file) | All re-read. Corrections: KXLINKPERP and KXSOLPERP (no settlement source listed), KXPGAGOLFERSCORE (AP missing), KXBTC2025100 (exact URL). |
+| Market rows, Build B `data.js` (10 rows, 9 re-read) | `GET /markets/{ticker}` per row | 6 matched; **2 golf rows corrected** (yes-ask / no-bid had been reversed, e.g. [KXPGATOUR-THRC26-BHAA](https://external-api.demo.kalshi.co/trade-api/v2/markets/KXPGATOUR-THRC26-BHAA)); KXELONMARS-99 volume and OI updated (drift). KXAAAGASM-26NOV30-4.50 not re-read. |
+| Fee schedule | [kalshi-fee-schedule.pdf](https://kalshi.com/docs/kalshi-fee-schedule.pdf) | Formula and "effective July 7, 2026" confirmed. |
+| Exchange status | [exchange/status](https://external-api.demo.kalshi.co/trade-api/v2/exchange/status) | Active (`exchange_active`, `trading_active`). |
+| Tests | local | `node tests/smoke-test.js` 13/13; `node tests/site-render-test.js` 13/13; `node scripts/check-links.js` 0 broken (warning fixed: helper modules imported by other page scripts are no longer flagged). |
+| GitHub Pages | `gh api POST repos/…/pages` | **403 "Resource not accessible by integration"** (re-tested). Not fixable from the session token. |
+
+### Irregularities (all on the Flagged for Review page with links)
+
+- F1 corrected (Culture); F9 Culture has no markets; F10 non-official Culture settlement sources (Google search URLs, personal X account).
+- F11 contract PDFs on `kalshi-public-docs-staging` S3 host; F12 tags map has no Culture key; F13 "Oil & Gas" tag under two categories (KXNATGASD under Entertainment).
+- F14 Build B golf rows corrected; F15 owner decision: include Entertainment for Culture?; F16 page-limited series lists; F17 `?ref=` settlement URLs; F18 two crypto series with no settlement source.
+- F6 browser CORS from GitHub Pages still unverified (sandbox cannot read CORS headers).
+- Sandbox cannot reach Kalshi from bash (TLS reset); reads done through the docs fetch tool.
+
+### Handoff / conflict log (this session)
+
+- No other session active. Earlier `arena/*` branches were already merged. No file of another session was rewritten; the Build B `data.js` and `flagged.js` edits were limited to the rows and flags listed above.
+- **Merge conflict (logged, resolved without discarding other work).** While this branch was being rebased, `origin/main`
+  had gained PRs #6–#8 from sessions `arena/dd384643-trade3` and `arena/62559215-trade3`, which made the same Culture
+  correction in the same files (`docs/assets/app.js`, `docs/data/series.json`, `docs/index.html`, `docs/methodology.html`,
+  `docs/flagged.html`, `VERIFICATION.md`, `EXECUTIVE_SUMMARY.md`). Resolution: kept upstream's `index.html` and
+  `methodology.html` (per-row source links, Culture correction) and `topic.js` (unverified-settlement rendering); kept this
+  branch's per-row `source_url` and `verified_on` fields, Culture settlement left blank (matches upstream), flag F10 text, and
+  the full flag table (F1–F20); kept upstream's `package.json` and `tests/smoke-test.js` changes. Nothing upstream was deleted.
+  Upstream `README.md` edits merged cleanly.
+- New finding during the merge review: Build B's classifier also routes by tags and title keywords into Culture (flag F20).
+  The earlier F9 sentence saying it "does not borrow markets from other categories" was **wrong for Build B** and has been
+  corrected.
+- Pages: the token cannot enable GitHub Pages. The workflow now runs the upload and deploy even if enablement fails, and writes an owner-action message to the job summary.
