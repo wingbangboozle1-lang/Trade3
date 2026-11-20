@@ -1,0 +1,18 @@
+{
+  "name": "trade3-kalshi-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Live Kalshi demo dashboard: swing alerts (>= $0.10), dual alert feeds, charts, orderbook liquidity, resolution tracking and simulated strategy trading.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "snapshot": "node scripts/capture-snapshot.js",
+    "check:links": "node scripts/check-links.js",
+    "test": "node --test tests/"
+  },
+  "license": "MIT"
+}

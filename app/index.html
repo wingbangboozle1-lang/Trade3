@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Kalshi Demo Dashboard — Live Event Tracker</title>
+<meta name="description" content="Live Kalshi demo dashboard: swing alerts >= $0.10, dual alert feeds, price charts, orderbook liquidity, resolution tracking and simulated strategy trading." />
+<link rel="stylesheet" href="./styles.css" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📈</text></svg>" />
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="dot" id="statusDot" aria-hidden="true"></span>
+    <div>
+      <h1>Kalshi Demo Dashboard</h1>
+      <p class="sub">Live event tracker · swings ≥ $0.10 · gas · elections · culture · crypto · golf</p>
+    </div>
+  </div>
+  <div class="topmeta">
+    <span class="pill" id="modePill" title="Where the data on this page came from">connecting…</span>
+    <span class="pill ghost" id="pollPill">poll —</span>
+    <span class="pill ghost" id="clock">—</span>
+    <a class="pill ghost link" href="/">Published site</a>
+  </div>
+</header>
+
+<div class="banner" id="banner" hidden></div>
+
+<nav class="tabs" role="tablist" aria-label="Dashboard sections">
+  <button role="tab" aria-selected="true" data-view="overview">Overview</button>
+  <button role="tab" data-view="alerts">Alerts</button>
+  <button role="tab" data-view="markets">Markets</button>
+  <button role="tab" data-view="portfolio">Portfolio</button>
+  <button role="tab" data-view="resolutions">Resolved</button>
+  <button role="tab" data-view="help">How it works</button>
+</nav>
+
+<main id="main">
+
+  <!-- OVERVIEW -->
+  <section class="view" id="view-overview">
+    <div class="kpis" id="kpis"></div>
+
+    <div class="split">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>All swings <span class="count" id="countAll">0</span></h2>
+          <span class="hint">every move ≥ $0.10, both directions</span>
+        </div>
+        <div class="chat" id="feedAll" aria-live="polite" aria-label="All swing alerts"></div>
+      </div>
+
+      <div class="panel model">
+        <div class="panel-head">
+          <h2>Model's high-ROI picks <span class="count" id="countModel">0</span></h2>
+          <span class="hint">scored ≥ 45 · transparent factors</span>
+        </div>
+        <div class="chat" id="feedModel" aria-live="polite" aria-label="High ROI swing alerts"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Topics</h2>
+        <div class="topic-tabs" id="topicTabs"></div>
+      </div>
+      <div id="topicBody" class="topic-body"></div>
+    </div>
+  </section>
+
+  <!-- ALERTS -->
+  <section class="view" id="view-alerts" hidden>
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Swing alert log</h2>
+        <div class="controls">
+          <label>Basis
+            <select id="alertBasis">
+              <option value="">any</option>
+              <option value="tick">tick (poll-to-poll)</option>
+              <option value="day">day (Kalshi previous_price_dollars)</option>
+            </select>
+          </label>
+          <label>Topic
+            <select id="alertTopic"><option value="">all</option></select>
+          </label>
+          <label>Direction
+            <select id="alertDir">
+              <option value="">both</option>
+              <option value="up">up</option>
+              <option value="down">down</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <div class="tablewrap"><table id="alertTable" class="data"></table></div>
+    </div>
+  </section>
+
+  <!-- MARKETS -->
+  <section class="view" id="view-markets" hidden>
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Tracked markets</h2>
+        <div class="controls">
+          <label>Topic <select id="marketTopic"><option value="">all</option></select></label>
+          <label>Sort
+            <select id="marketSort">
+              <option value="volume">24h volume</option>
+              <option value="oi">open interest</option>
+              <option value="liquidity">book liquidity</option>
+              <option value="move">biggest move</option>
+              <option value="close">closing soonest</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <div class="tablewrap"><table id="marketTable" class="data"></table></div>
+      <p class="footnote" id="marketFootnote"></p>
+    </div>
+  </section>
+
+  <!-- PORTFOLIO -->
+  <section class="view" id="view-portfolio" hidden>
+    <div class="kpis" id="portfolioKpis"></div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Kalshi demo account</h2>
+        <span class="hint">read-only · requires API key</span>
+      </div>
+      <div id="kalshiAccount" class="account"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Strategy comparison</h2>
+        <span class="hint">closed simulated trades, grouped by strategy type</span>
+      </div>
+      <div class="tablewrap"><table id="strategyTable" class="data"></table></div>
+    </div>
+
+    <div class="split">
+      <div class="panel">
+        <div class="panel-head"><h2>Open simulated positions</h2></div>
+        <div class="tablewrap"><table id="openTable" class="data"></table></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>Closed trades</h2></div>
+        <div class="tablewrap"><table id="closedTable" class="data"></table></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESOLUTIONS -->
+  <section class="view" id="view-resolutions" hidden>
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Resolved events</h2>
+        <span class="hint">yes / no as reported by Kalshi's <code>result</code> field</span>
+      </div>
+      <div class="tablewrap"><table id="resolutionTable" class="data"></table></div>
+      <p class="footnote">Source: <code>GET /markets?status=settled</code> → <code>result</code> and <code>settlement_value_dollars</code>. Overnight history is capped by the API's 3-day window used here.</p>
+    </div>
+  </section>
+
+  <!-- HELP -->
+  <section class="view" id="view-help" hidden>
+    <div class="panel prose">
+      <h2>How this dashboard works</h2>
+      <div id="helpBody"></div>
+    </div>
+  </section>
+</main>
+
+<!-- MARKET DETAIL DRAWER -->
+<aside id="detail" class="detail" hidden aria-label="Market detail">
+  <div class="detail-head">
+    <div>
+      <h2 id="detailTitle">—</h2>
+      <p class="sub" id="detailSub">—</p>
+    </div>
+    <button id="detailClose" class="close" aria-label="Close detail">×</button>
+  </div>
+
+  <div class="chart-controls">
+    <div class="seg" role="group" aria-label="Chart window">
+      <button data-window="seconds">Seconds</button>
+      <button data-window="minutes" class="on">Minutes</button>
+      <button data-window="hours">Hours</button>
+    </div>
+    <span class="hint" id="chartLabel"></span>
+  </div>
+  <canvas id="chart" height="240" aria-label="Contract price over time"></canvas>
+
+  <div class="detail-grid">
+    <div><span>Last</span><strong id="dPrice">—</strong></div>
+    <div><span>Yes bid / ask</span><strong id="dBidAsk">—</strong></div>
+    <div><span>Spread</span><strong id="dSpread">—</strong></div>
+    <div><span>24h volume</span><strong id="dVol">—</strong></div>
+    <div><span>Open interest</span><strong id="dOI">—</strong></div>
+    <div><span>Book liquidity</span><strong id="dLiq">—</strong></div>
+  </div>
+
+  <h3>Order book (depth)</h3>
+  <div id="dBook" class="book"></div>
+
+  <h3>Alerts on this market</h3>
+  <div id="dAlerts" class="chat mini"></div>
+
+  <div class="detail-foot">
+    <a id="dLink" class="btn" target="_blank" rel="noopener">Open on Kalshi demo ↗</a>
+    <a id="dCandles" class="btn ghost" target="_blank" rel="noopener">Official candles API ↗</a>
+  </div>
+</aside>
+
+<script type="module" src="./app.js"></script>
+</body>
+</html>
