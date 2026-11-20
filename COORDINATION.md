@@ -105,7 +105,7 @@ session is active, and any future session must not edit these files while this c
 ### Verification run at integration time
 
 ```
-python scripts/check_site.py   -> 12 pages, 202 local links, 4 JS modules, 37 series rows, all passed
+python scripts/check_site.py   -> 12 pages, 216 local links, 6 JS modules, 37 series rows, all passed
 node tests/logic.test.mjs      -> logic tests passed
 node tests/render.test.mjs     -> 45 render checks passed (dashboard, phone width, deep link,
                                   portfolio, golf topic page, index, summary, methodology,
