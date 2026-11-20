@@ -113,3 +113,9 @@ this token. The other session's seven flags are reproduced on the same page, wit
 - Integration approach: `git merge origin/main` on `integrate`; this build's site moved under `docs/dashboard-site/`
   so the existing `docs/*` pages, `docs/assets/*`, `docs/topics/*` and the Python tooling are preserved untouched.
 - Cross-links added both ways so neither build is orphaned.
+
+## Follow-up correction — session `arena/dd384643-trade3`
+
+- PR: https://github.com/wingbangboozle1-lang/Trade3/pull/6 — **merged** 2026-11-20 20:09:02 UTC as `71eb48e40248994c943502d912848515c82e3590`.
+- Workflow run: https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44808722852 — verification job passed (link check, render harness, engine/routes), but Deploy failed at `actions/configure-pages@v5` because GitHub Pages is not enabled. Direct Pages API `POST /repos/wingbangboozle1-lang/Trade3/pages` returned 403 `Resource not accessible by integration`; subsequent GET returned 404. This environment cannot enable it despite repository viewer admin status.
+- Owner action to publish: open repository Settings → Pages and enable GitHub Actions as the source; rerun the existing `Deploy site to GitHub Pages` workflow. No site URL is claimed live until a deployment succeeds.
