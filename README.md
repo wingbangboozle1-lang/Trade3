@@ -88,8 +88,8 @@ node scripts/check-links.js     # 0 broken local links, anchors, imports or DOM 
 The API facts this project depends on were read from the official documentation before any code was written, then
 confirmed against the live demo API. The findings that changed the design:
 
-- **There is no `Gas` and no `Golf` category on Kalshi.** `GET /series?category=Gas` and `?category=Golf` both return
-  `{"series":null}`. Gas lives in `Economics` with the tag `Oil & Gas`; golf lives in `Sports` with the tag `Golf`.
+- **Gas and Golf are not top-level Kalshi categories.** In the verified demo responses, gas series use `Economics` with the `Oil & Gas` tag; golf series use `Sports` with the `Golf` tag.
+- **Culture is a first-class category.** The official demo API returned two series from `GET /series?category=Culture`; an earlier build incorrectly mapped it to Entertainment. The checked `KXXBANNEDGROK` series had no open markets at verification time. See the correction in [Flagged for Review](docs/flagged.html).
 - **Demo prices are not production prices.** Kalshi states the demo "may not be reflective of those in real markets".
 - **Legacy order endpoints are gone.** `POST /portfolio/orders` returns `410 deprecated_v1_order_endpoint`; orders use
   `POST /portfolio/events/orders`.

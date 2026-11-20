@@ -36,20 +36,14 @@
       ]
     },
     "culture": {
-      "label": "Culture (Kalshi: Entertainment)",
-      "kalshi_category": "Entertainment",
+      "label": "Culture",
+      "kalshi_category": "Culture",
       "kalshi_tags": [],
-      "source": "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Entertainment&limit=20",
-      "flag": "Kalshi has no 'Culture' category (verified via /search/tags_by_categories). Entertainment is the closest match and is used as the culture proxy. See Flagged for Review.",
+      "source": "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture",
+      "note": "The official query returned two Culture series. One checked series, KXXBANNEDGROK, had no open markets at verification time. Settlement source is left blank where not explicitly verified in this record.",
       "series": [
-        {"ticker": "KXBOOKERPRIZE", "title": "who will win the booker prize", "frequency": "one_off", "settlement": "National Book Awards — https://www.nationalbook.org/"},
-        {"ticker": "KXWORLDCUPHALFTIME", "title": "Who will perform at event", "frequency": "one_off", "settlement": "See series record (Deadline, ABC, Billboard, Variety, …)"},
-        {"ticker": "KXTOPARTIST", "title": "Top Artist on Spotify", "frequency": "annual", "settlement": "Spotify — https://open.spotify.com/"},
-        {"ticker": "RTKRAVEN", "title": "Kraven Rotten Tomatoes score", "frequency": "custom", "settlement": "Rotten Tomatoes — https://www.rottentomatoes.com/"},
-        {"ticker": "KXVMALATIN", "title": "BEST LATIN", "frequency": "one_off", "settlement": "MTV — https://www.mtv.com/event/vma"},
-        {"ticker": "KXGAMEAWARDSBGD", "title": "Game Awards Best Game Direction", "frequency": "annual", "settlement": "Game Awards — https://thegameawards.com/"},
-        {"ticker": "KXCLDPLAY", "title": "Coldplay album drop", "frequency": "one_off", "settlement": "Alpha Data LLC — https://music.alphadata.fm/"},
-        {"ticker": "KXMANOFTHEYEAR", "title": "How many streams will Man of The Year have?", "frequency": "custom", "settlement": "Spotify — https://open.spotify.com/"}
+        {"ticker": "KXXBANNEDMURRAYHILLGUY1", "title": "Will @MurrayHillGuy1 get banned from X this year?", "frequency": "one_off", "settlement": null},
+        {"ticker": "KXXBANNEDGROK", "title": "Will Grok be banned this year", "frequency": "one_off", "settlement": null}
       ]
     },
     "crypto": {
