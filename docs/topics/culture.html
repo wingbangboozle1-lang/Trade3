@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Culture — Trade3 Kalshi</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-topic="culture">
+<header class="top">
+  <div class="brand">Trade3 <span>· Culture</span></div>
+  <nav class="main">
+    <a href="../index.html">Home</a>
+    <a href="../dashboard.html">Live Dashboard</a>
+    <a href="../portfolio.html">Portfolio &amp; Strategies</a>
+    <a href="gas.html">Gas</a>
+    <a href="elections.html">Elections</a>
+    <a href="culture.html">Culture</a>
+    <a href="crypto.html">Crypto</a>
+    <a href="golf.html">Golf</a>
+    <a href="../methodology.html">Methodology</a>
+    <a href="../flagged.html">Flagged for Review</a>
+  </nav>
+</header>
+<main>
+  <div class="card">
+    <h1 id="topic-title">Culture</h1>
+    <p id="topic-meta" class="muted">Loading verified series…</p>
+    <p class="muted">Events within this topic are grouped together below. Live prices update from the Kalshi demo API in your browser.</p>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <h2>Verified series (snapshot 2026-11-20)</h2>
+    <table>
+      <thead><tr><th>Series ticker</th><th>Title</th><th>Frequency</th><th>Settlement source</th><th>Source</th></tr></thead>
+      <tbody id="series-body"></tbody>
+    </table>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <h2>Live open markets (top by $ volume)</h2>
+    <table>
+      <thead><tr><th>Ticker</th><th>Title</th><th>Last price</th><th>$ volume</th><th>Close</th><th>Link</th></tr></thead>
+      <tbody id="live-body"></tbody>
+    </table>
+    <p class="muted"><a href="../dashboard.html">Open in live dashboard →</a> (charts, alerts, liquidity, resolutions)</p>
+  </div>
+</main>
+<footer><a href="../dashboard.html">← Live Dashboard</a> · <a href="../methodology.html">Methodology</a></footer>
+<script type="module" src="../assets/topic.js"></script>
+</body>
+</html>
