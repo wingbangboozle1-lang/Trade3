@@ -157,3 +157,21 @@ this token. The other session's seven flags are reproduced on the same page, wit
 - Integration approach: `git merge origin/main` on `integrate`; this build's site moved under `docs/dashboard-site/`
   so the existing `docs/*` pages, `docs/assets/*`, `docs/topics/*` and the Python tooling are preserved untouched.
 - Cross-links added both ways so neither build is orphaned.
+
+---
+
+# Session `arena/b4e5648a-trade3` — re-verification, correction and publish pass
+
+**Status:** in progress (claimed 2026-11-20 ~20:08Z). Only session active on this repo at claim time: `origin` has
+`main` only; the earlier `arena/*` branches are merged and closed.
+
+## Claim
+
+| Task | Status | Owner | File scope |
+|---|---|---|---|
+| T7 Re-verify rows against live official API and correct errors (Build B golf/Elon rows, Build A Culture mapping) | in progress | `arena/b4e5648a-trade3` | `docs/dashboard-site/assets/data.js`, `docs/dashboard-site/assets/pages/flagged.js`, `docs/assets/app.js`, `docs/data/series.json`, `docs/index.html`, `docs/methodology.html`, `docs/flagged.html`, `kalshi_client.py` |
+| T8 Documentation: correct V18 / F1 and log new flags | in progress | `arena/b4e5648a-trade3` | `VERIFICATION.md`, `EXECUTIVE_SUMMARY.md`, `README.md`, `COORDINATION.md` |
+| T9 Pages readiness: link checker false positive, workflow failure message | in progress | `arena/b4e5648a-trade3` | `scripts/check-links.js`, `.github/workflows/pages.yml` |
+| T10 Integration: tests, PR to `main`, merge, Pages status check | in progress | `arena/b4e5648a-trade3` | integration only |
+
+Other sessions' files are not touched: no other session has an open claim.
