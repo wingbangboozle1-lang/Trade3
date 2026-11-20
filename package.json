@@ -10,12 +10,17 @@
   "scripts": {
     "start": "node server/index.js",
     "dev": "node --watch server/index.js",
-    "snapshot": "node scripts/capture-snapshot.js",
-    "snapshot:dry": "node scripts/capture-snapshot.js --dry-run",
     "check:links": "node scripts/check-links.js",
+    "test:engine": "node tests/smoke-test.js",
+    "test:site": "node tests/site-render-test.js",
     "test": "node tests/logic.test.mjs && node tests/smoke-test.js && node tests/site-render-test.js",
+    "snapshot": "node scripts/capture-snapshot.js",
+    "test:logic": "node tests/logic.test.mjs",
     "test:render": "node tests/render.test.mjs",
-    "test:node": "node --test tests/"
+    "test:all": "node tests/logic.test.mjs && node tests/render.test.mjs && node tests/smoke-test.js && node tests/site-render-test.js",
+    "check:site": "python3 scripts/check_site.py",
+    "verify:rows": "python3 scripts/verify_series.py",
+    "snapshot:dry": "node scripts/capture-snapshot.js --dry-run"
   },
   "license": "MIT"
 }

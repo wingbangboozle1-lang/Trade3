@@ -65,14 +65,26 @@ def check_row(base: str, ticker: str, expect: dict, cache: dict | None) -> dict:
 
     # Settlement source: published as "NAME — URL"; must match the API's first source.
     sources = rec.get("settlement_sources") or []
-    if sources:
+    if sources and expect.get("settlement_policy") == "official-publishers-only":
+        if not expect.get("settlement"):
+            result["notes"].append("sources exist but are not official publishers; blank is the published choice "
+                                   "(flag F10)")
+        else:
+            first_all = [f"{x.get('name','')} — {x.get('url','')}".strip() for x in sources]
+            if (expect.get("settlement") or "").strip() not in first_all:
+                result["ok"] = False
+                result["diffs"].append("settlement: not one of the API's settlement_sources entries")
+    elif sources:
         first = f"{sources[0].get('name','')} — {sources[0].get('url','')}".strip()
         if (expect.get("settlement") or "").strip() != first.strip():
             result["ok"] = False
             result["diffs"].append(
                 f"settlement: published {expect.get('settlement')!r} != API {first!r}")
     else:
-        if expect.get("settlement"):
+        if expect.get("settlement_policy") == "official-publishers-only":
+            result["notes"].append("published blank on purpose: the record's sources are not official "
+                                   "publishers (flag F10) — intentional, not a mismatch")
+        elif expect.get("settlement"):
             result["ok"] = False
             result["diffs"].append("settlement: API returns no settlement_sources, "
                                    "but a value is published (must be blank)")

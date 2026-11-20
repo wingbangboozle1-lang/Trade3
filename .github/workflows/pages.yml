@@ -65,6 +65,72 @@ jobs:
           node tests/render.test.mjs
           node tests/site-render-test.js
 
+      # The Python simulation layer is dependency-free apart from `requests`; these are the
+      # offline unit checks the deleted ci.yml used to run, folded in so one workflow gates a publish.
+      - name: Python layer — syntax and offline unit checks
+        run: |
+          python -m py_compile kalshi_client.py strategies.py backtest.py run_sim.py scripts/verify_series.py scripts/check_site.py
+          pip install --quiet requests cryptography
+          python - <<'PY'
+          from strategies import momentum, mean_reversion, favorite_longshot, is_high_roi
+          from backtest import PaperPortfolio, median_dollar_vol
+          from kalshi_client import KalshiClient, dollar_volume, TOPIC_FILTERS
+
+          m = {"ticker": "T", "last_price_dollars": "0.5500", "yes_bid_dollars": "0.5400",
+               "yes_ask_dollars": "0.5600", "volume_fp": "1000.00"}
+
+          # strategy signals
+          assert momentum(m, 0.45) == "yes" and momentum(m, 0.65) == "no" and momentum(m, 0.50) is None
+          # the exact-cent comparison, which float subtraction would break: 0.42 - 0.32 = 0.09999...
+          assert (0.42 - 0.32) != 0.10, "sanity: floats really do drift here (0.09999999999999998)"
+          assert momentum({"ticker": "X", "last_price_dollars": "0.4200"}, 0.32) == "yes", \
+              "an exactly-$0.10 move must not be lost to float noise"
+          assert mean_reversion({**m, "last_price_dollars": "0.1200"}) == "yes"
+          assert mean_reversion({**m, "last_price_dollars": "0.9000"}) == "no"
+          assert favorite_longshot({**m, "last_price_dollars": "0.7000"}) == "yes"
+          assert is_high_roi(m, 0.45, 100.0) is True and is_high_roi(m, 0.54, 100.0) is False
+
+          # dollars traded = volume_fp x last price (the disclosed approximation)
+          assert dollar_volume(m) == 550.0
+          three = [m, {**m, "ticker": "B", "volume_fp": "2000.00"}, {**m, "ticker": "C", "volume_fp": "500.00"}]
+          assert median_dollar_vol(three) == 550.0
+
+          # paper ledger: a YES buy pays the ask, a NO buy pays 1 - best YES bid, settlement pays $1
+          pf = PaperPortfolio()
+          t = pf.open_position(m, "momentum", "yes", 10, 1)
+          assert abs(t.entry_price - 0.56) < 1e-9, t.entry_price
+          pf.settle({"ticker": "T", "result": "yes"})
+          got = pf.summary()
+          assert got["settled_trades"] == 1 and got["total_pnl"] == 4.4 and abs(got["cash"] - 1004.4) < 1e-9, got
+          pf2 = PaperPortfolio()
+          t2 = pf2.open_position(m, "mean_reversion", "no", 10, 1)
+          assert abs(t2.entry_price - 0.46) < 1e-9, t2.entry_price
+
+          # order contract + safety: the V2 body shape, and nothing is sent without the env opt-in
+          res = KalshiClient().place_order("T", "bid", 1, 0.42, dry_run=False)
+          assert res.get("dry_run") is True, "dry_run=False must STILL not send without KALSHI_ALLOW_ORDERS=1"
+          body = res["request"]
+          assert body == {"ticker": "T", "side": "bid", "count": "1.00", "price": "0.4200",
+                          "time_in_force": "good_till_canceled",
+                          "self_trade_prevention_type": "taker_at_cross"}, body
+
+          # topic discovery vocabulary, all re-checked against the live demo API on 2026-11-20
+          assert TOPIC_FILTERS["culture"]["category"] == "Culture", TOPIC_FILTERS["culture"]
+          assert TOPIC_FILTERS["culture"]["extra_categories"] == ["Entertainment"]
+          assert TOPIC_FILTERS["gas"]["category"] == "Economics", "there is no Gas category"
+          assert TOPIC_FILTERS["golf"]["category"] == "Sports", "there is no Golf category"
+          print("offline python checks passed")
+          PY
+
+      # Continuous, non-blocking: a drift here is a review item, not a publish blocker.
+      - name: Re-verify published rows against the live demo API
+        continue-on-error: true
+        run: python scripts/verify_series.py | tee verify-rows.txt
+
+      - name: Snapshot capture contract (dry run, nothing written)
+        continue-on-error: true
+        run: node scripts/capture-snapshot.js --dry-run
+
   deploy:
     name: Deploy
     needs: verify

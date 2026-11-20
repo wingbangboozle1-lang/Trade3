@@ -1,137 +1,118 @@
-"""Trading strategies (research rules, published in full) + the high-ROI screen.
+"""Trading strategies + high-ROI filter (transparent heuristics).
 
-These are *rules you can read*, not a prediction model. Every threshold is a
-module constant so a result can be reproduced exactly.
+These are *research heuristics*, not financial advice and not a prediction
+model. Every rule is explicit so results can be reproduced and audited.
 
-Rules
------
-momentum        follow a move: buy YES after a >= $0.10 rise, NO after a fall.
-mean_reversion  fade extremes: buy YES at <= $0.15, NO at >= $0.85.
-favorite        buy the favourite when priced >= $0.65.
-longshot_value  buy cheap YES at <= $0.35 (many small losses, occasional big win).
+Strategies (each returns side in {"yes", "no", None} given a snapshot) — the
+three registered in the STRATEGIES dict below are the ones run_sim.py and
+backtest.py can route through:
+- momentum: follow a >= $0.10 move in the same direction.
+- mean_reversion: fade an extreme price (<=0.15 or >=0.85) toward 0.50.
+- favorite_longshot: buy the favorite (price >= 0.65) for small edge.
 
-High-ROI screen (used by the second alert stream)
--------------------------------------------------
-price in [0.15, 0.85], |move| >= $0.05, spread <= $0.10,
-dollar volume >= $250, depth within 3c of best bid >= 50 contracts.
+`volume_breakout` is a helper, not an auto-traded strategy: its cutoff depends
+on the topic's dollar-volume distribution, so it is applied through the
+high-ROI filter (`is_high_roi`) instead of the STRATEGIES registry.
+
+High-ROI filter (for the selective alert chat): price in [0.15, 0.85],
+dollar volume above the topic median, spread <= $0.10 when quotes exist,
+and |recent move| >= $0.05. All thresholds are constants below.
 """
 from __future__ import annotations
 
-ALERT_THRESHOLD = 0.10   # a swing this large raises an alert (either direction)
-
+ALERT_THRESHOLD = 0.10  # $ swing that triggers an alert (either direction)
 ROI_MIN_PRICE = 0.15
 ROI_MAX_PRICE = 0.85
 ROI_MIN_MOVE = 0.05
 ROI_MAX_SPREAD = 0.10
-ROI_MIN_DOLLAR_VOL = 250.0
-ROI_MIN_DEPTH = 50.0
-
-FAVORITE_MIN = 0.65
-LONGSHOT_MAX = 0.35
-REVERSION_LOW = 0.15
-REVERSION_HIGH = 0.85
 
 
-def _f(value, default=None):
+def _f(x, default=0.0):
     try:
-        return float(value)
+        return float(x)
     except (TypeError, ValueError):
         return default
 
 
-def last_price(market: dict) -> float | None:
-    price = _f(market.get("last_price_dollars"))
-    if price is not None:
-        return price
-    return _f(market.get("yes_bid_dollars"))
+def _ticks(x) -> int | None:
+    """Price in integer 1/10000-dollar units so threshold comparisons are exact.
+    Floating-point subtraction (e.g. 0.42 - 0.32) can yield 0.09999..., which would
+    silently drop an exactly-$0.10 move."""
+    v = _f(x, float("nan"))
+    return round(v * 10000) if v == v else None
 
 
-def drift(market: dict) -> float | None:
-    """Change since the previous print. Kalshi publishes previous_price_dollars,
-    so the baseline is a documented field rather than something we invent."""
-    now = last_price(market)
-    prev = _f(market.get("previous_price_dollars"))
-    if now is None or prev is None or prev <= 0:
-        return None
-    return now - prev
+def last_price(m: dict) -> float:
+    return _f(m.get("last_price_dollars"), _f(m.get("yes_bid_dollars")))
 
 
-def spread(market: dict) -> float | None:
-    bid = _f(market.get("yes_bid_dollars"))
-    ask = _f(market.get("yes_ask_dollars"))
+def spread(m: dict) -> float | None:
+    bid, ask = _f(m.get("yes_bid_dollars"), None), _f(m.get("yes_ask_dollars"), None)
     if bid is None or ask is None:
         return None
     return ask - bid
 
 
-def dollar_volume(market: dict) -> float:
-    return (_f(market.get("volume_fp"), 0.0) or 0.0) * (last_price(market) or 0.0)
-
-
-# --- strategies: (market) -> "yes" | "no" | None -----------------------------
-def momentum(market: dict) -> str | None:
-    d = drift(market)
+def momentum(m: dict, prev_price: float | None) -> str | None:
+    if prev_price is None:
+        return None
+    d = _ticks(last_price(m)) - _ticks(prev_price)
     if d is None:
         return None
-    if d >= ALERT_THRESHOLD:
+    if d >= _ticks(ALERT_THRESHOLD):
         return "yes"
-    if d <= -ALERT_THRESHOLD:
+    if d <= -_ticks(ALERT_THRESHOLD):
         return "no"
     return None
 
 
-def mean_reversion(market: dict) -> str | None:
-    p = last_price(market)
-    if p is None:
+def mean_reversion(m: dict) -> str | None:
+    p = last_price(m)
+    if p <= 0.15:
+        return "yes"   # cheap yes, fade down
+    if p >= 0.85:
+        return "no"    # expensive yes, fade up
+    return None
+
+
+def favorite_longshot(m: dict) -> str | None:
+    p = last_price(m)
+    if p >= 0.65:
+        return "yes"
+    if p <= 0.35:
+        return "no"
+    return None
+
+
+def volume_breakout(m: dict, volume_cutoff: float) -> str | None:
+    from kalshi_client import dollar_volume
+
+    if dollar_volume(m) < volume_cutoff:
         return None
-    if p <= REVERSION_LOW:
-        return "yes"
-    if p >= REVERSION_HIGH:
-        return "no"
-    return None
+    p = last_price(m)
+    return "yes" if p >= 0.50 else "no"
 
 
-def favorite(market: dict) -> str | None:
-    p = last_price(market)
-    return "yes" if p is not None and p >= FAVORITE_MIN else None
+def is_high_roi(m: dict, prev_price: float | None, median_dollar_vol: float) -> bool:
+    from kalshi_client import dollar_volume
 
-
-def longshot_value(market: dict) -> str | None:
-    p = last_price(market)
-    return "yes" if p is not None and p <= LONGSHOT_MAX else None
+    p = last_price(m)
+    if not (ROI_MIN_PRICE <= p <= ROI_MAX_PRICE):
+        return False
+    if dollar_volume(m) < median_dollar_vol:
+        return False
+    s = spread(m)
+    if s is not None and s > ROI_MAX_SPREAD:
+        return False
+    if prev_price is not None:
+        move = _ticks(p) - _ticks(prev_price)
+        if move is not None and abs(move) < _ticks(ROI_MIN_MOVE):
+            return False
+    return True
 
 
 STRATEGIES = {
     "momentum": momentum,
-    "mean_reversion": mean_reversion,
-    "favorite": favorite,
-    "longshot_value": longshot_value,
+    "mean_reversion": lambda m, prev=None: mean_reversion(m),
+    "favorite_longshot": lambda m, prev=None: favorite_longshot(m),
 }
-
-STRATEGY_RULES = {
-    "momentum": "Follow a >= $0.10 move: buy YES after a rise, NO after a fall.",
-    "mean_reversion": "Fade extremes: buy YES at <= $0.15, NO at >= $0.85.",
-    "favorite": "Buy the favourite when priced >= $0.65.",
-    "longshot_value": "Buy cheap YES at <= $0.35.",
-}
-
-
-def is_high_roi(market: dict, move_delta: float | None = None,
-                depth: float | None = None) -> tuple[bool, list[str]]:
-    """Apply the published screen. Returns (pass, reasons it failed)."""
-    reasons: list[str] = []
-    price = last_price(market)
-    if price is None:
-        reasons.append("no price")
-    elif not (ROI_MIN_PRICE <= price <= ROI_MAX_PRICE):
-        reasons.append(f"price outside {ROI_MIN_PRICE:.2f}-{ROI_MAX_PRICE:.2f}")
-    if move_delta is None or abs(move_delta) < ROI_MIN_MOVE:
-        reasons.append(f"move < ${ROI_MIN_MOVE:.2f}")
-    s = spread(market)
-    if s is not None and s > ROI_MAX_SPREAD:
-        reasons.append(f"spread > ${ROI_MAX_SPREAD:.2f}")
-    if dollar_volume(market) < ROI_MIN_DOLLAR_VOL:
-        reasons.append(f"$ volume < ${ROI_MIN_DOLLAR_VOL:.0f}")
-    if depth is not None and depth < ROI_MIN_DEPTH:
-        reasons.append(f"depth < {ROI_MIN_DEPTH:.0f} contracts")
-    return (not reasons, reasons)

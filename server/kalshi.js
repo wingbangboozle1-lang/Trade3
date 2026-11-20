@@ -331,17 +331,22 @@ export class KalshiClient {
    * side is `bid` or `ask` (single book); price is fixed-point dollars as a string.
    */
   createOrder({ ticker, side, count, price, timeInForce = 'good_till_canceled', clientOrderId, selfTradePreventionType = 'taker_at_cross', exchangeIndex }) {
+    const n = Number(count);
     return this.request('POST', '/portfolio/events/orders', {
       auth: true,
       body: {
         ticker,
         side,
-        count: String(count),
+        // Body shape verified 2026-11-20 against docs.kalshi.com/api-reference/orders/create-order-v2:
+        // count and price are fixed-point strings (example: "10.00", "0.5600"), side is "bid"/"ask".
+        count: Number.isFinite(n) ? n.toFixed(2) : String(count),
         price: String(price),
         time_in_force: timeInForce,
         self_trade_prevention_type: selfTradePreventionType,
         ...(clientOrderId ? { client_order_id: clientOrderId } : {}),
-        ...(exchangeIndex === undefined ? { exchange_index: -1 } : { exchange_index: exchangeIndex }),
+        // exchange_index omitted unless explicitly provided: -1 is documented as auto-route for
+        // CANCEL, not for create, so no default is invented here.
+        ...(exchangeIndex === undefined ? {} : { exchange_index: exchangeIndex }),
       },
     });
   }

@@ -148,24 +148,37 @@ async function main(argv) {
 
   try {
     exchangeStatus = await client.exchangeStatus();
+    if (exchangeStatus && exchangeStatus.exchange_active === false) {
+      throw new Error('exchange_active is false — captured prices could not move, so a dead snapshot must never be written');
+    }
     const page = await client.allMarkets({ status: 'open', limit: 1000 }, { maxPages: 4 });
     rawMarkets = Array.isArray(page) ? page : (page?.markets ?? []);
     if (!rawMarkets.length) throw new Error('GET /markets?status=open returned no markets');
 
-    // Read official series metadata for the busiest markets first, capped so the capture
-    // stays inside the documented rate budget. A market with no readable series record is
-    // dropped by buildSnapshot() rather than guessed at.
-    const ranked = [...rawMarkets].sort((a, b) => (num(b.volume_fp) ?? 0) - (num(a.volume_fp) ?? 0));
-    const wanted = [];
-    for (const m of ranked) {
-      const t = seriesTickerOf(m);
-      if (t && !wanted.includes(t)) wanted.push(t);
-      if (wanted.length >= seriesCap) break;
+    // Series metadata comes from the category lists FIRST (a handful of requests — the way
+    // server/collector.js seeds its cache); only for a series still unknown do we fall back to a
+    // per-ticker GET /series/{ticker}, capped so the capture stays inside the rate budget.
+    // A market whose series record cannot be read is dropped by buildSnapshot() — never guessed.
+    const SERIES_CATEGORIES = ['Crypto', 'Elections', 'Culture', 'Sports', 'Economics', 'Politics', 'Entertainment', 'Financials'];
+    const seenSeries = new Set();
+    for (const category of SERIES_CATEGORIES) {
+      try {
+        const data = await client.seriesList({ category });
+        for (const sr of data?.series ?? []) {
+          if (sr?.ticker && !seenSeries.has(sr.ticker)) { seenSeries.add(sr.ticker); seriesRecords.push(sr); }
+        }
+      } catch { /* an unreadable category contributes no series; its markets then drop out */ }
     }
-    for (const t of wanted) {
+    const ranked = [...rawMarkets].sort((a, b) => (num(b.volume_fp) ?? 0) - (num(a.volume_fp) ?? 0));
+    let extra = 0;
+    for (const m of ranked) {
+      if (extra >= seriesCap) break;
+      const t = seriesTickerOf(m);
+      if (!t || seenSeries.has(t)) continue;
+      extra += 1;
       try {
         const rec = await client.series(t);
-        if (rec?.series) seriesRecords.push(rec.series);
+        if (rec?.series) { seenSeries.add(t); seriesRecords.push(rec.series); }
       } catch {
         /* unreadable series => its markets classify to nothing; never invented */
       }

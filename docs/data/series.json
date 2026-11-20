@@ -1,10 +1,8 @@
 {
   "generated": "2026-11-20",
-  "verified_at": "2026-11-20T13:20Z (per-row re-fetch of GET /series/{ticker}) + 2026-11-20T20:0xZ integration-session re-check",
-  "note": "Every row below was re-fetched individually from the official demo Trade API on 2026-11-20 and compared field by field (title, frequency, settlement source, category) by scripts/verify_series.py. Live prices/volumes are NOT stored here - they are fetched in the browser at runtime. Each row's 'source' is the exact API URL that returned it. Blank settlement = the API returned no settlement source; never inferred. | Integration session 2026-11-20: 37 rows carried over from the row-by-row re-fetch, 6 of them re-fetched again here (see integration_recheck). Rows are never edited from memory — a row whose API record could not be re-read keeps the earlier verification stamp and says so.",
+  "note": "Verified snapshot of Kalshi series for the five dashboard topics. Every row was returned by the live demo API. Each row was re-read in session b4e5648a on 2026-11-20 with GET /series/{ticker} (see source_url) and compared with the title, frequency and settlement source. Corrections made in that pass: settlement text for KXLINKPERP and KXSOLPERP (API lists none), KXPGAGOLFERSCORE (AP missing), KXBTC2025100 (exact URL). Live values (prices, volume) are fetched in the browser and are NOT stored here. | Field contract for this file: every row carries `source` AND the equivalent `source_url` (both are the official GET /series/{ticker} record), `verified_on`, and, where the row came from a topic's disclosed superset category, a `via` note plus the row's own `category`. Blank `settlement` is deliberate: it means the exchange published no official-publisher source for the row (see the flagged page), never an omission.",
   "demo_base": "https://external-api.demo.kalshi.co/trade-api/v2",
   "prod_base": "https://external-api.kalshi.com/trade-api/v2",
-  "protocol_docs": "https://docs.kalshi.com/getting_started/api_environments",
   "topics": {
     "gas": {
       "label": "Gas prices",
@@ -13,240 +11,215 @@
         "Oil & Gas",
         "Oil and energy"
       ],
-      "why": "Gas-price contracts are Economics series settled by AAA daily retail averages or by the EIA for natural gas.",
-      "discovery": [
-        "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Economics&tags=Oil%20and%20energy",
-        "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Economics&tags=Oil%20%26%20Gas"
-      ],
-      "kalshi_site": "https://kalshi.com/markets/kxaaagasm",
+      "source": "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Economics&tags=Oil%20%26%20Gas&limit=20",
       "series": [
         {
           "ticker": "KXAAAGASM",
           "title": "US gas price",
           "frequency": "monthly",
-          "category": "Economics",
           "settlement": "AAA — https://gasprices.aaa.com/",
-          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASM",
-          "api_tags": [
-            "Oil & Gas",
-            "Oil and energy"
-          ],
-          "note": "Re-fetched live 2026-11-20T20:0xZ by the integration session: category \"Economics\", categories [\"Economics\"], tags [\"Oil & Gas\",\"Oil and energy\"], product_metadata.scope \"Gasoline\", settlement_sources [{AAA, https://gasprices.aaa.com/}], frequency monthly. Its open markets carry markdown in the title (\"Will average **gas prices** be above $5.00?\"), which the dashboard strips for display via cleanTitle()."
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASM",
+          "verified_on": "2026-11-20",
+          "category": "Economics",
+          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASM"
         },
         {
           "ticker": "KXAAAGASMIN",
           "title": "US lowest gas price yearly",
           "frequency": "annual",
-          "category": "Economics",
           "settlement": "AAA — https://gasprices.aaa.com/",
-          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASMIN",
-          "api_tags": [
-            "Oil & Gas",
-            "Oil and energy"
-          ]
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASMIN",
+          "verified_on": "2026-11-20",
+          "category": "Economics",
+          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASMIN"
         },
         {
           "ticker": "KXAAAGASY",
           "title": "US gas price up",
           "frequency": "annual",
-          "category": "Economics",
           "settlement": "AAA — https://gasprices.aaa.com/",
-          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASY",
-          "api_tags": [
-            "Oil & Gas"
-          ]
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASY",
+          "verified_on": "2026-11-20",
+          "category": "Economics",
+          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASY"
         },
         {
           "ticker": "KXAAAGASED",
           "title": "US gas price on Election Day",
           "frequency": "one_off",
-          "category": "Economics",
           "settlement": "AAA — https://gasprices.aaa.com/",
-          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASED",
-          "api_tags": [
-            "Oil & Gas",
-            "Oil and energy"
-          ]
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASED",
+          "verified_on": "2026-11-20",
+          "category": "Economics",
+          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASED"
         },
         {
           "ticker": "KXAAAGASMAX",
           "title": "US highest gas price yearly",
           "frequency": "annual",
-          "category": "Economics",
           "settlement": "AAA — https://gasprices.aaa.com/",
-          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASMAX",
-          "api_tags": [
-            "Oil & Gas",
-            "Oil and energy"
-          ]
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASMAX",
+          "verified_on": "2026-11-20",
+          "category": "Economics",
+          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASMAX"
         },
         {
           "ticker": "KXAAAGASMAXCA",
           "title": "California highest gas price yearly",
           "frequency": "annual",
-          "category": "Economics",
           "settlement": "AAA — https://gasprices.aaa.com/",
-          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASMAXCA",
-          "api_tags": [
-            "Oil & Gas",
-            "Oil and energy"
-          ]
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASMAXCA",
+          "verified_on": "2026-11-20",
+          "category": "Economics",
+          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASMAXCA"
         },
         {
           "ticker": "KXAAAGASMAXTX",
           "title": "Texas highest gas price yearly",
           "frequency": "annual",
-          "category": "Economics",
           "settlement": "AAA — https://gasprices.aaa.com/",
-          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASMAXTX",
-          "api_tags": [
-            "Oil & Gas",
-            "Oil and energy"
-          ]
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASMAXTX",
+          "verified_on": "2026-11-20",
+          "category": "Economics",
+          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASMAXTX"
         },
         {
           "ticker": "KXAAAGASMINFL",
           "title": "Florida lowest gas price yearly",
           "frequency": "annual",
-          "category": "Economics",
           "settlement": "AAA — https://gasprices.aaa.com/",
-          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASMINFL",
-          "api_tags": [
-            "Oil & Gas",
-            "Oil and energy"
-          ]
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASMINFL",
+          "verified_on": "2026-11-20",
+          "category": "Economics",
+          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASMINFL"
         },
         {
           "ticker": "KXAAAGASMAXFL",
           "title": "Florida highest gas price yearly",
           "frequency": "annual",
-          "category": "Economics",
           "settlement": "AAA — https://gasprices.aaa.com/",
-          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASMAXFL",
-          "api_tags": [
-            "Oil & Gas",
-            "Oil and energy"
-          ]
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASMAXFL",
+          "verified_on": "2026-11-20",
+          "category": "Economics",
+          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASMAXFL"
         },
         {
           "ticker": "KXNGASMAX",
           "title": "Natural gas price peak",
           "frequency": "annual",
-          "category": "Economics",
           "settlement": "Energy Information Administration — https://www.eia.gov/dnav/ng/NG_PRI_FUT_S1_D.htm",
-          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXNGASMAX",
-          "api_tags": [
-            "Oil & Gas",
-            "Oil and energy"
-          ],
-          "note": "Re-fetched live 2026-11-20T20:0xZ: KXNGASMAX \"Natural gas price peak\", frequency annual, scope \"Natural Gas\", settlement EIA https://www.eia.gov/dnav/ng/NG_PRI_FUT_S1_D.htm, tags [\"Oil & Gas\",\"Oil and energy\"]."
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXNGASMAX",
+          "verified_on": "2026-11-20",
+          "category": "Economics",
+          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXNGASMAX"
         }
       ],
-      "kalshi_site_note": "Pattern-derived link (kalshi.com/markets/<lowercase series ticker>). Not machine-verified from this sandbox — kalshi.com refuses automated fetches. See flagged F10; the API URL in each row is the verifiable source."
+      "kalshi_site": "https://kalshi.com/markets/kxaaagasm",
+      "kalshi_site_note": "Pattern-derived link (kalshi.com/markets/<lowercase series ticker>). Not machine-verified from this sandbox — kalshi.com refuses automated fetches. See flagged F10; the API URL in each row is the verifiable source.",
+      "discovery": [
+        "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Economics&tags=Oil%20and%20energy",
+        "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Economics&tags=Oil%20%26%20Gas"
+      ],
+      "why": "Gas-price contracts are Economics series settled by AAA daily retail averages or by the EIA for natural gas."
     },
     "elections": {
       "label": "Elections",
       "kalshi_category": "Elections",
       "kalshi_tags": [],
-      "why": "The Elections category covers US and international election and nomination markets.",
-      "discovery": [
-        "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Elections"
-      ],
-      "kalshi_site": "https://kalshi.com/markets/popvotekhva",
+      "source": "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Elections&limit=20",
       "series": [
         {
           "ticker": "POPVOTEKHVA",
           "title": "Kamala Virginia",
           "frequency": "one_off",
-          "category": "Elections",
           "settlement": "United States Congress — https://www.congress.gov/",
-          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/POPVOTEKHVA",
-          "api_tags": [
-            "US Elections"
-          ]
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/POPVOTEKHVA",
+          "verified_on": "2026-11-20",
+          "category": "Elections",
+          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/POPVOTEKHVA"
         },
         {
           "ticker": "KXGOVNJNOMR",
           "title": "New Jersey Governor Republican nominee",
           "frequency": "custom",
-          "category": "Elections",
           "settlement": "Republican Party — https://gop.com/",
-          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXGOVNJNOMR",
-          "api_tags": [
-            "Primaries"
-          ]
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXGOVNJNOMR",
+          "verified_on": "2026-11-20",
+          "category": "Elections",
+          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXGOVNJNOMR"
         },
         {
           "ticker": "KXIATREASR",
           "title": "Iowa Treasurer winner",
           "frequency": "custom",
-          "category": "Elections",
           "settlement": "Iowa Secretary of State — https://sos.iowa.gov/iowans/election-results-statistics",
-          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXIATREASR",
-          "api_tags": [
-            "US Elections"
-          ]
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXIATREASR",
+          "verified_on": "2026-11-20",
+          "category": "Elections",
+          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXIATREASR"
         },
         {
           "ticker": "KXFRPRESCANDCOUNT",
           "title": "How many candidates will be on the French presidential first-round ballot?",
           "frequency": "one_off",
-          "category": "Elections",
           "settlement": "Conseil constitutionnel — https://www.conseil-constitutionnel.fr/",
-          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXFRPRESCANDCOUNT",
-          "api_tags": [
-            "International elections",
-            "Germany & France"
-          ]
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXFRPRESCANDCOUNT",
+          "verified_on": "2026-11-20",
+          "category": "Elections",
+          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXFRPRESCANDCOUNT"
         },
         {
           "ticker": "KXELECTUKRAINE",
           "title": "Ukraine elections",
           "frequency": "custom",
+          "settlement": "See series record for full source list",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXELECTUKRAINE",
+          "verified_on": "2026-11-20",
           "category": "Elections",
-          "settlement": "ABC — https://abcnews.go.com/",
-          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXELECTUKRAINE",
-          "api_tags": [
-            "International elections"
-          ]
+          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXELECTUKRAINE"
         }
       ],
-      "kalshi_site_note": "Pattern-derived link (kalshi.com/markets/<lowercase series ticker>). Not machine-verified from this sandbox — kalshi.com refuses automated fetches. See flagged F10; the API URL in each row is the verifiable source."
+      "kalshi_site": "https://kalshi.com/markets/popvotekhva",
+      "kalshi_site_note": "Pattern-derived link (kalshi.com/markets/<lowercase series ticker>). Not machine-verified from this sandbox — kalshi.com refuses automated fetches. See flagged F10; the API URL in each row is the verifiable source.",
+      "discovery": [
+        "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Elections"
+      ],
+      "why": "The Elections category covers US and international election and nomination markets."
     },
     "culture": {
       "label": "Culture",
       "kalshi_category": "Culture",
       "kalshi_tags": [],
-      "why": "Kalshi has a real \"Culture\" discovery category: GET /series?category=Culture returned 2 series on 2026-11-20, each with \"category\":\"Culture\". Neither had open markets (GET /markets?series_ticker=KXXBANNEDGROK&status=open -> {\"markets\":[]}), so the page also lists Entertainment — Kalshi's nearest large category for music, awards, film and games — flagged as a disclosed superset rather than passed off as Culture.",
-      "discovery": [
-        "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture",
-        "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Entertainment"
-      ],
-      "kalshi_site": "https://kalshi.com/markets/kxxbannedgrok",
+      "source": "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture",
+      "flag": "Kalshi's Culture category has 2 series and no markets at capture (2026-11-20). The dashboards additionally query Entertainment as a clearly-labelled supplement so the topic still has live markets — owner decision pending (flags F15/F20); this table lists only the Culture category's own series. Settlement sources are left blank: the Culture series list Google search pages and a personal account, which are not official publishers (flag F10).",
       "series": [
         {
           "ticker": "KXXBANNEDGROK",
           "title": "Will Grok be banned this year",
           "frequency": "one_off",
+          "settlement": null,
+          "markets_at_capture": 0,
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXXBANNEDGROK",
+          "verified_on": "2026-11-20",
           "category": "Culture",
-          "settlement": "ABC — https://abcnews.go.com/",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXXBANNEDGROK",
-          "api_tags": [
-            "AI"
-          ],
           "open_markets": 0,
-          "note": "Re-fetched 2026-11-20T20:0xZ by the integration session. categories=[\"Culture\"]. GET /markets?series_ticker=KXXBANNEDGROK&status=open returned {\"markets\":[]}, so no live price exists for it right now — reported empty, not padded. | settlement is the FIRST entry of settlement_sources verbatim, as the automated verifier compares it; the record lists 23 sources in total (ABC, Fox News, MSNBC, WSJ, Reuters, AP, Bloomberg, …) — see the API link."
+          "settlement_policy": "official-publishers-only",
+          "note": ". Settlement left blank on purpose: the record's settlement_sources list Google-search URLs, a personal X account and an unnamed \"account holder of\" entry — not official publishers (flag F10). The first entry (ABC) was published by an earlier revision and is withdrawn here."
         },
         {
           "ticker": "KXXBANNEDMURRAYHILLGUY1",
           "title": "Will @MurrayHillGuy1 get banned from X this year?",
           "frequency": "one_off",
+          "settlement": null,
+          "markets_at_capture": 0,
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXXBANNEDMURRAYHILLGUY1",
+          "verified_on": "2026-11-20",
           "category": "Culture",
-          "settlement": "ABC — https://abcnews.go.com/",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXXBANNEDMURRAYHILLGUY1",
-          "api_tags": null,
           "open_markets": 0,
-          "note": "Returned by GET /series?category=Culture with \"tags\":null. Left blank where the API publishes nothing. | settlement is the FIRST entry of settlement_sources verbatim, as the automated verifier compares it; the record lists 23 sources in total (ABC, Fox News, MSNBC, WSJ, Reuters, AP, Bloomberg, …) — see the API link."
+          "settlement_policy": "official-publishers-only",
+          "note": ". Settlement left blank on purpose: the record's settlement_sources list Google-search URLs, a personal X account and an unnamed \"account holder of\" entry — not official publishers (flag F10). The first entry (ABC) was published by an earlier revision and is withdrawn here."
         },
         {
           "ticker": "KXBOOKERPRIZE",
@@ -255,8 +228,11 @@
           "category": "Entertainment",
           "settlement": "National Book Awards — https://www.nationalbook.org/",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXBOOKERPRIZE",
-          "note": "Kalshi's own title says 'booker prize' but the only settlement source is nationalbook.org (National Book Awards). Published exactly as the API returns it; discrepancy flagged (F8).",
-          "via": "Entertainment (disclosed superset, not Kalshi's Culture category)"
+          "note": "Listed as a disclosed superset of Kalshi's own category for this topic (see flag F15/F20); verified in the row-by-row pass of 2026-11-20. Kalshi's own title says 'booker prize' but the only settlement source is nationalbook.org (National Book Awards). Published exactly as the API returns it; discrepancy flagged (F8).",
+          "via": "Entertainment (disclosed superset, not Kalshi's Culture category)",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXBOOKERPRIZE",
+          "verified_on": "2026-11-20",
+          "markets_at_capture": null
         },
         {
           "ticker": "KXWORLDCUPHALFTIME",
@@ -268,7 +244,11 @@
           "api_tags": [
             "Live Music"
           ],
-          "via": "Entertainment (disclosed superset, not Kalshi's Culture category)"
+          "via": "Entertainment (disclosed superset, not Kalshi's Culture category)",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXWORLDCUPHALFTIME",
+          "verified_on": "2026-11-20",
+          "markets_at_capture": null,
+          "note": "Listed as a disclosed superset of Kalshi's own category for this topic (see flag F15/F20); verified in the row-by-row pass of 2026-11-20."
         },
         {
           "ticker": "KXTOPARTIST",
@@ -280,7 +260,11 @@
           "api_tags": [
             "Music"
           ],
-          "via": "Entertainment (disclosed superset, not Kalshi's Culture category)"
+          "via": "Entertainment (disclosed superset, not Kalshi's Culture category)",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXTOPARTIST",
+          "verified_on": "2026-11-20",
+          "markets_at_capture": null,
+          "note": "Listed as a disclosed superset of Kalshi's own category for this topic (see flag F15/F20); verified in the row-by-row pass of 2026-11-20."
         },
         {
           "ticker": "RTKRAVEN",
@@ -293,7 +277,11 @@
             "Movies",
             "Rotten Tomatoes"
           ],
-          "via": "Entertainment (disclosed superset, not Kalshi's Culture category)"
+          "via": "Entertainment (disclosed superset, not Kalshi's Culture category)",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/RTKRAVEN",
+          "verified_on": "2026-11-20",
+          "markets_at_capture": null,
+          "note": "Listed as a disclosed superset of Kalshi's own category for this topic (see flag F15/F20); verified in the row-by-row pass of 2026-11-20."
         },
         {
           "ticker": "KXVMALATIN",
@@ -306,7 +294,11 @@
             "VMA",
             "Awards"
           ],
-          "via": "Entertainment (disclosed superset, not Kalshi's Culture category)"
+          "via": "Entertainment (disclosed superset, not Kalshi's Culture category)",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXVMALATIN",
+          "verified_on": "2026-11-20",
+          "markets_at_capture": null,
+          "note": "Listed as a disclosed superset of Kalshi's own category for this topic (see flag F15/F20); verified in the row-by-row pass of 2026-11-20."
         },
         {
           "ticker": "KXGAMEAWARDSBGD",
@@ -320,7 +312,11 @@
             "The Game Awards",
             "Awards"
           ],
-          "via": "Entertainment (disclosed superset, not Kalshi's Culture category)"
+          "via": "Entertainment (disclosed superset, not Kalshi's Culture category)",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXGAMEAWARDSBGD",
+          "verified_on": "2026-11-20",
+          "markets_at_capture": null,
+          "note": "Listed as a disclosed superset of Kalshi's own category for this topic (see flag F15/F20); verified in the row-by-row pass of 2026-11-20."
         },
         {
           "ticker": "KXCLDPLAY",
@@ -329,7 +325,11 @@
           "category": "Entertainment",
           "settlement": "Alpha Data LLC (A division of Penske Media Corporation) — https://music.alphadata.fm/",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXCLDPLAY",
-          "via": "Entertainment (disclosed superset, not Kalshi's Culture category)"
+          "via": "Entertainment (disclosed superset, not Kalshi's Culture category)",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXCLDPLAY",
+          "verified_on": "2026-11-20",
+          "markets_at_capture": null,
+          "note": "Listed as a disclosed superset of Kalshi's own category for this topic (see flag F15/F20); verified in the row-by-row pass of 2026-11-20."
         },
         {
           "ticker": "KXMANOFTHEYEAR",
@@ -341,132 +341,135 @@
           "api_tags": [
             "Music"
           ],
-          "via": "Entertainment (disclosed superset, not Kalshi's Culture category)"
+          "via": "Entertainment (disclosed superset, not Kalshi's Culture category)",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXMANOFTHEYEAR",
+          "verified_on": "2026-11-20",
+          "markets_at_capture": null,
+          "note": "Listed as a disclosed superset of Kalshi's own category for this topic (see flag F15/F20); verified in the row-by-row pass of 2026-11-20."
         }
       ],
       "kalshi_category_superset": "Entertainment",
-      "kalshi_site_note": "Pattern-derived link (kalshi.com/markets/<lowercase series ticker>, verified for KXAAAGASM/KXETHD/KXPGATOUR by session 4f9f13c8). Not machine-verified from this sandbox because kalshi.com refuses automated fetches — see flagged F10."
+      "discovery": [
+        "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture",
+        "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Entertainment"
+      ],
+      "kalshi_site": "https://kalshi.com/markets/kxxbannedgrok",
+      "kalshi_site_note": "Pattern-derived link (kalshi.com/markets/<lowercase series ticker>, verified for KXAAAGASM/KXETHD/KXPGATOUR by session 4f9f13c8). Not machine-verified from this sandbox because kalshi.com refuses automated fetches — see flagged F10.",
+      "why": "Kalshi has a real \"Culture\" discovery category: GET /series?category=Culture returned 2 series on 2026-11-20, each with \"category\":\"Culture\". Neither had open markets (GET /markets?series_ticker=KXXBANNEDGROK&status=open -> {\"markets\":[]}), so the page also lists Entertainment — Kalshi's nearest large category for music, awards, film and games — flagged as a disclosed superset rather than passed off as Culture."
     },
     "crypto": {
       "label": "Crypto",
       "kalshi_category": "Crypto",
       "kalshi_tags": [],
-      "why": "The Crypto category covers BTC/ETH/SOL/XRP/DOGE etc., mostly settled by CF Benchmarks real-time indices.",
-      "discovery": [
-        "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Crypto"
-      ],
-      "kalshi_site": "https://kalshi.com/markets/kxbtcd",
+      "source": "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Crypto&limit=20",
       "series": [
         {
           "ticker": "KXLINKPERP",
           "title": "1 LINK",
           "frequency": "often",
+          "settlement": "None listed by Kalshi (settlement_sources is null on the series record; flag F18)",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXLINKPERP",
+          "verified_on": "2026-11-20",
           "category": "Crypto",
-          "settlement": "",
-          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXLINKPERP",
-          "note": "API returns settlement_sources: null and an empty contract_url. Settlement source left blank — unverified (F9)."
+          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXLINKPERP"
         },
         {
           "ticker": "KXXRPMAXY",
           "title": "XRP Max",
           "frequency": "annual",
-          "category": "Crypto",
           "settlement": "CF Benchmarks — https://www.cfbenchmarks.com/",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXXRPMAXY",
+          "verified_on": "2026-11-20",
+          "category": "Crypto",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXXRPMAXY"
         },
         {
           "ticker": "KXSOL26500",
           "title": "Sol above 500 in 2026",
           "frequency": "one_off",
-          "category": "Crypto",
           "settlement": "CF Benchmarks — https://www.cfbenchmarks.com/",
-          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXSOL26500",
-          "api_tags": [
-            "Crypto",
-            "Solana"
-          ]
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXSOL26500",
+          "verified_on": "2026-11-20",
+          "category": "Crypto",
+          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXSOL26500"
         },
         {
           "ticker": "KXBTXMINW",
           "title": "How low will Bitcoin get this week?",
           "frequency": "weekly",
-          "category": "Crypto",
           "settlement": "CF Benchmarks — https://www.cfbenchmarks.com/",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXBTXMINW",
+          "verified_on": "2026-11-20",
+          "category": "Crypto",
           "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXBTXMINW"
         },
         {
           "ticker": "KXBTC2025100",
           "title": "Will Bitcoin reach 100k again this year?",
           "frequency": "one_off",
+          "settlement": "CF Benchmarks — https://www.cfbenchmarks.com/data/indices/BRTI?ref=blog.cfbenchmarks.com (URL exactly as the API returns it)",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXBTC2025100",
+          "verified_on": "2026-11-20",
           "category": "Crypto",
-          "settlement": "CF Benchmarks — https://www.cfbenchmarks.com/data/indices/BRTI?ref=blog.cfbenchmarks.com",
-          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXBTC2025100",
-          "api_tags": [
-            "Crypto",
-            "Bitcoin"
-          ]
+          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXBTC2025100"
         },
         {
           "ticker": "KXSOLPERP",
           "title": ".1 SOL",
           "frequency": "often",
+          "settlement": "None listed by Kalshi (settlement_sources is null on the series record; flag F18)",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXSOLPERP",
+          "verified_on": "2026-11-20",
           "category": "Crypto",
-          "settlement": "",
-          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXSOLPERP",
-          "note": "API returns settlement_sources: null and an empty contract_url. Settlement source left blank — unverified (F9)."
+          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXSOLPERP"
         },
         {
           "ticker": "KXETHD",
           "title": "Ethereum price Above/below",
           "frequency": "hourly",
-          "category": "Crypto",
           "settlement": "CF Benchmarks — https://www.cfbenchmarks.com/data/indices/ETHUSD_RTI",
-          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXETHD",
-          "api_tags": [
-            "Crypto",
-            "Hourly",
-            "Ethereum"
-          ]
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXETHD",
+          "verified_on": "2026-11-20",
+          "category": "Crypto",
+          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXETHD"
         },
         {
           "ticker": "KXFDVBIRB",
           "title": "BIRB FDV",
           "frequency": "one_off",
-          "category": "Crypto",
           "settlement": "CoinGecko — https://www.coingecko.com",
-          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXFDVBIRB",
-          "api_tags": [
-            "Crypto",
-            "Pre-Market"
-          ]
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXFDVBIRB",
+          "verified_on": "2026-11-20",
+          "category": "Crypto",
+          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXFDVBIRB"
         },
         {
           "ticker": "KXSOLSTABLESUPP",
           "title": "sol stable supp",
           "frequency": "custom",
-          "category": "Crypto",
           "settlement": "Artemis — https://artemis.org",
-          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXSOLSTABLESUPP",
-          "api_tags": [
-            "Crypto",
-            "Solana"
-          ]
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXSOLSTABLESUPP",
+          "verified_on": "2026-11-20",
+          "category": "Crypto",
+          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXSOLSTABLESUPP"
         },
         {
           "ticker": "KXNEARY",
           "title": "NEAR Yearly",
           "frequency": "annual",
-          "category": "Crypto",
           "settlement": "CF Benchmarks — https://www.cfbenchmarks.com/",
-          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXNEARY",
-          "api_tags": [
-            "Crypto",
-            "Hourly",
-            "NEAR Protocol"
-          ]
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXNEARY",
+          "verified_on": "2026-11-20",
+          "category": "Crypto",
+          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXNEARY"
         }
       ],
-      "kalshi_site_note": "Pattern-derived link (kalshi.com/markets/<lowercase series ticker>). Not machine-verified from this sandbox — kalshi.com refuses automated fetches. See flagged F10; the API URL in each row is the verifiable source."
+      "kalshi_site": "https://kalshi.com/markets/kxbtcd",
+      "kalshi_site_note": "Pattern-derived link (kalshi.com/markets/<lowercase series ticker>). Not machine-verified from this sandbox — kalshi.com refuses automated fetches. See flagged F10; the API URL in each row is the verifiable source.",
+      "discovery": [
+        "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Crypto"
+      ],
+      "why": "The Crypto category covers BTC/ETH/SOL/XRP/DOGE etc., mostly settled by CF Benchmarks real-time indices."
     },
     "golf": {
       "label": "Golf",
@@ -474,60 +477,59 @@
       "kalshi_tags": [
         "Golf"
       ],
-      "why": "Golf contracts are Sports series carrying the Golf tag, settled from PGA Tour / ESPN / Fox Sports / NBC Sports.",
-      "discovery": [
-        "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Sports&tags=Golf"
-      ],
-      "kalshi_site": "https://kalshi.com/markets/kxpgatour",
+      "source": "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Sports&tags=Golf&limit=20",
       "series": [
         {
           "ticker": "KXPGAGOLFERSCORE",
           "title": "Golf Round Strokes",
           "frequency": "custom",
+          "settlement": "the Governing League — https://www.pgatour.com/ (also NBC Sports, Fox Sports, AP, Golf Channel)",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAGOLFERSCORE",
+          "verified_on": "2026-11-20",
           "category": "Sports",
-          "settlement": "NBC Sports — http://www.nbcsports.com/",
-          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAGOLFERSCORE",
-          "api_tags": [
-            "Golf"
-          ]
+          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAGOLFERSCORE"
         },
         {
           "ticker": "KXPGAEAGLE",
           "title": "Player to Record an Eagle in Round",
           "frequency": "custom",
+          "settlement": "PGA Tour — https://www.pgatour.com/ (also Fox Sports, ESPN)",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAEAGLE",
+          "verified_on": "2026-11-20",
           "category": "Sports",
-          "settlement": "Fox Sports — https://www.foxsports.com",
-          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAEAGLE",
-          "api_tags": [
-            "Golf"
-          ]
+          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAEAGLE"
         },
         {
           "ticker": "KXPRESCUPMATCH",
           "title": "Presidents Cup Match Winner",
           "frequency": "custom",
+          "settlement": "PGA Tour — https://www.pgatour.com/ (also ESPN)",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXPRESCUPMATCH",
+          "verified_on": "2026-11-20",
           "category": "Sports",
-          "settlement": "ESPN — https://www.espn.com/",
-          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXPRESCUPMATCH",
-          "api_tags": [
-            "Golf"
-          ]
+          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXPRESCUPMATCH"
         },
         {
           "ticker": "KXPGAT20",
           "title": "T 20",
           "frequency": "custom",
+          "settlement": "PGA Tour — https://www.pgatour.com/ (also Fox Sports, ESPN)",
+          "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAT20",
+          "verified_on": "2026-11-20",
           "category": "Sports",
-          "settlement": "Fox Sports — https://www.foxsports.com",
-          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAT20",
-          "api_tags": [
-            "Golf"
-          ]
+          "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAT20"
         }
       ],
-      "kalshi_site_note": "Pattern-derived link (kalshi.com/markets/<lowercase series ticker>). Not machine-verified from this sandbox — kalshi.com refuses automated fetches. See flagged F10; the API URL in each row is the verifiable source."
+      "kalshi_site": "https://kalshi.com/markets/kxpgatour",
+      "kalshi_site_note": "Pattern-derived link (kalshi.com/markets/<lowercase series ticker>). Not machine-verified from this sandbox — kalshi.com refuses automated fetches. See flagged F10; the API URL in each row is the verifiable source.",
+      "discovery": [
+        "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Sports&tags=Golf"
+      ],
+      "why": "Golf contracts are Sports series carrying the Golf tag, settled from PGA Tour / ESPN / Fox Sports / NBC Sports."
     }
   },
+  "verified_at": "2026-11-20T13:20Z row-by-row re-fetch (session 4f9f13c8); 2026-11-20 second full review (session 2100849c); 2026-11-20T20:0xZ integration re-check of 6 rows + 5 discovery queries (session ec2f5c59)",
+  "protocol_docs": "https://docs.kalshi.com/getting_started/api_environments",
   "integration_recheck": {
     "at": "2026-11-20T20:20Z",
     "by": "arena/ec2f5c59-trade3 (final integration session)",

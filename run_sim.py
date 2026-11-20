@@ -1,167 +1,85 @@
-#!/usr/bin/env python3
-"""Run a paper-trading simulation against the Kalshi demo environment.
+"""Run a live paper-trading simulation against Kalshi demo (no keys needed).
 
-What it does, per poll:
-  1. GET /events?status=open and GET /markets?status=open  (public, no key)
-  2. keep only the five topics, classified by event category + series map
-  3. detect >= $0.10 swings against the previous poll, apply the high-ROI screen
-  4. open paper trades for each strategy, mark open positions
-  5. after the last poll, settle against GET /markets?status=settled `result`
-
-Writes sim_output.json plus a per-trade CSV. No orders are placed: real demo
-execution lives behind kalshi_client.place_order(dry_run=False) and requires
-KALSHI_ALLOW_ORDERS=1 with your own demo key.
+Polls public market data for the five topics, emits >= $0.10 swing alerts,
+applies the high-ROI filter, and paper-trades each strategy. Writes
+`sim_output.json` (portfolio summary + alerts + trades).
 
 Usage:
-  python run_sim.py --polls 6 --interval 20
-  python run_sim.py --base prod --polls 3 --interval 15 --contracts 5
+    python run_sim.py [--base demo|prod] [--polls 12] [--interval 30]
+                      [--strategy momentum|mean_reversion|favorite_longshot]
+
+Live demo *execution* (real demo orders) requires KALSHI_API_KEY_ID +
+KALSHI_PRIVATE_KEY_PATH; this script never places orders.
 """
 from __future__ import annotations
 
 import argparse
 import json
 import time
-from pathlib import Path
 
-from backtest import PaperPortfolio, run_backtest, screen_summary
-from kalshi_client import (DEMO_BASE, DEMO_BASE_ALT, PROD_BASE, PROD_BASE_ALT,
-                           TOPIC_FILTERS, KalshiClient, KalshiError, build_topic_series,
-                           classify, dollar_volume, last_price)
-from strategies import ALERT_THRESHOLD, STRATEGIES, STRATEGY_RULES, drift, is_high_roi
+from backtest import PaperPortfolio, median_dollar_vol
+from kalshi_client import DEMO_BASE, PROD_BASE, KalshiClient, dollar_volume, fetch_topic_markets
+from strategies import STRATEGIES, is_high_roi, last_price
 
+TOPICS = ["gas", "elections", "culture", "crypto", "golf"]
 
-def build_client(base: str) -> KalshiClient:
-    if base == "prod":
-        return KalshiClient(base_url=PROD_BASE)
-    return KalshiClient(base_url=DEMO_BASE)
+# Threshold comparison in integer 1/10000-dollar space: floating-point subtraction can
+# turn an exactly-$0.10 move into 0.09999..., which would silently drop the alert.
+def _moved_at_least_dime(old: float, new: float) -> bool:
+    return abs(round(new * 10000) - round(old * 10000)) >= 1000
 
 
-def fetch_scope(client: KalshiClient, topic_series: dict[str, set[str]]) -> list[dict]:
-    """Open contracts restricted to the five topics."""
-    events = client.open_events(max_pages=3)
-    markets = client.open_markets(max_pages=4)
-    return classify(markets, events, topic_series)
-
-
-def settle_rows(client: KalshiClient, series: list[str], per_series: int = 20) -> list[dict]:
-    out: list[dict] = []
-    for ticker in series[:20]:
-        try:
-            page = client.markets(series_ticker=ticker, status="settled", limit=per_series,
-                                  mve_filter=None)
-            out.extend(page.get("markets", []))
-        except KalshiError:
-            continue
-    return out
-
-
-def main() -> int:
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+def main() -> None:
+    ap = argparse.ArgumentParser()
     ap.add_argument("--base", choices=["demo", "prod"], default="demo")
     ap.add_argument("--polls", type=int, default=6)
-    ap.add_argument("--interval", type=int, default=20)
-    ap.add_argument("--contracts", type=int, default=10)
-    ap.add_argument("--cash", type=float, default=1000.0)
-    ap.add_argument("--out", default="sim_output.json")
-    ap.add_argument("--csv", default="sim_trades.csv")
+    ap.add_argument("--interval", type=int, default=30)
+    ap.add_argument("--strategy", default="momentum", choices=list(STRATEGIES))
     args = ap.parse_args()
 
-    client = build_client(args.base)
-    try:
-        status = client.exchange_status()
-    except Exception as exc:                                  # noqa: BLE001 - surface, don't crash
-        print(f"cannot reach {client.base_url}: {exc}")
-        print(f"documented alternate host: {DEMO_BASE_ALT if args.base == 'demo' else PROD_BASE_ALT}")
-        return 2
-    print(f"exchange: {json.dumps(status)}")
-    print(f"base: {client.base_url}")
-
-    topic_series = build_topic_series(client)
-    print("series discovered per topic: " + ", ".join(f"{k}={len(v)}" for k, v in topic_series.items()))
-
-    snapshots: list[dict] = []
-    alerts: list[dict] = []
-    prev: dict[str, float] = {}
-    last_markets: dict[str, dict] = {}
-
+    client = KalshiClient(base_url=DEMO_BASE if args.base == "demo" else PROD_BASE)
+    print("exchange:", client.exchange_status())
+    pf = PaperPortfolio()
+    prev: dict = {}
+    alerts: list = []
+    entered: set = set()
     for poll in range(args.polls):
         ts = int(time.time())
-        try:
-            markets = fetch_scope(client, topic_series)
-        except Exception as exc:                              # noqa: BLE001
-            print(f"poll {poll}: fetch failed: {exc}")
-            markets = []
-
-        moves: dict[str, float] = {}
-        for m in markets:
-            px = last_price(m)
-            if px is None:
+        all_markets: list = []
+        for topic in TOPICS:
+            try:
+                ms = fetch_topic_markets(client, topic)
+            except Exception as e:  # keep sim alive; surface the error
+                print(f"[{topic}] fetch failed: {e}")
                 continue
+            all_markets.extend(ms)
+            print(f"poll {poll} [{topic}] {len(ms)} open markets; top: "
+                  f"{ms[0]['ticker'] if ms else '-'} ${dollar_volume(ms[0]):,.0f}" if ms else f"poll {poll} [{topic}] none")
+        med = median_dollar_vol(all_markets)
+        for m in all_markets:
+            p = last_price(m)
             old = prev.get(m["ticker"])
-            if old is not None:
-                delta = px - old
-                moves[m["ticker"]] = delta
-                if abs(delta) >= ALERT_THRESHOLD - 1e-9:
-                    ok, reasons = is_high_roi(m, delta)
-                    alerts.append({
-                        "ts": ts, "ticker": m["ticker"], "topic": m.get("_topic"),
-                        "event": m.get("event_ticker"), "from": round(old, 4),
-                        "to": round(px, 4), "delta": round(delta, 4),
-                        "high_roi": ok, "filtered_by": reasons,
-                        "dollar_volume": round(dollar_volume(m), 2),
-                    })
-            prev[m["ticker"]] = px
-            last_markets[m["ticker"]] = m
-
-        snapshots.append({"ts": ts, "markets": markets})
-        by_topic: dict[str, int] = {}
-        for m in markets:
-            by_topic[m.get("_topic", "-")] = by_topic.get(m.get("_topic", "-"), 0) + 1
-        screen = screen_summary(markets, moves)
-        print(f"poll {poll}: {len(markets)} contracts {by_topic} · "
-              f"{len(alerts)} alerts so far · screen pass {screen['passed']}/{screen['checked']}")
+            if old is not None and _moved_at_least_dime(old, p):
+                alert = {"ts": ts, "ticker": m["ticker"], "topic": m.get("_topic"),
+                         "from": old, "to": p, "delta": round(p - old, 4),
+                         "high_roi": is_high_roi(m, old, med)}
+                alerts.append(alert)
+                print("ALERT", alert)
+            if m["ticker"] not in entered:
+                side = STRATEGIES[args.strategy](m, old)
+                if side and pf.open_position(m, args.strategy, side, 10, ts):
+                    entered.add(m["ticker"])
+            prev[m["ticker"]] = p
         if poll < args.polls - 1:
             time.sleep(args.interval)
-
-    series = sorted({m.get("_series") for m in last_markets.values() if m.get("_series")})
-    settled = settle_rows(client, series)
-    print(f"settled records fetched: {len(settled)} across {len(series)} series")
-
-    results: dict = {}
-    portfolios: dict[str, PaperPortfolio] = {}
-    for name in STRATEGIES:
-        pf = run_backtest(snapshots, strategy=name, contracts=args.contracts,
-                          starting_cash=args.cash, settled_markets=settled)
-        portfolios[name] = pf
-        results[name] = pf.summary()
-
-    payload = {
-        "generated": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        "base": client.base_url,
-        "topics": list(TOPIC_FILTERS),
-        "polls": args.polls,
-        "interval_seconds": args.interval,
-        "contracts_per_trade": args.contracts,
-        "alert_threshold": ALERT_THRESHOLD,
-        "alerts": alerts,
-        "alerts_high_roi": [a for a in alerts if a["high_roi"]],
-        "strategy_rules": STRATEGY_RULES,
-        "results": results,
-        "contracts_seen": len(last_markets),
-        "settled_records": len(settled),
-    }
-    Path(args.out).write_text(json.dumps(payload, indent=2))
-
-    # one CSV per strategy keeps the blotter readable
-    for name, pf in portfolios.items():
-        pf.write_csv(Path(args.csv).with_name(f"{Path(args.csv).stem}-{name}.csv"))
-
-    for name, summary in results.items():
-        print(f"\n{name}: {json.dumps(summary, indent=2)}")
-    print(f"\nwrote {args.out} and {Path(args.csv).stem}-*.csv "
-          f"({len(alerts)} alerts, {sum(s['settled_trades'] for s in results.values())} settled trades)")
-    return 0
+    out = {"base": args.base, "strategy": args.strategy, "alerts": alerts,
+           "portfolio": pf.summary(),
+           "trades": [t.__dict__ for t in pf.trades]}
+    with open("sim_output.json", "w") as f:
+        json.dump(out, f, indent=2)
+    print(json.dumps(out["portfolio"], indent=2))
+    print(f"wrote sim_output.json ({len(alerts)} alerts, {len(pf.trades)} paper trades)")
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    main()

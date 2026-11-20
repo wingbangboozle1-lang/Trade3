@@ -145,6 +145,8 @@ def check_data() -> None:
             if missing:
                 errors.append(f"series.json {topic_id}/{row.get('ticker','?')}: missing {sorted(missing)}")
             src = row.get("source", "")
+            if row.get("source_url") and row["source_url"] != src:
+                errors.append(f"series.json {row.get('ticker','?')}: `source` and `source_url` disagree")
             if not src.startswith("https://external-api."):
                 errors.append(f"series.json {row.get('ticker','?')}: source must be an official API URL, got {src!r}")
             # A row must carry the topic's own category, or — only when the topic declares a

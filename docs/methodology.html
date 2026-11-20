@@ -290,6 +290,11 @@ KALSHI_PRIVATE_KEY_PATH=./demo_private_key.pem
     <ul class="muted">
       <li><b>2026-11-20 13:20Z</b> — session <code>4f9f13c8</code>: re-fetched all 37 published series rows
         individually, fixed the gas tag filter, the client base-URL bug and the V2 order body.</li>
+      <li><b>2026-11-20</b> — sessions <code>b4e5648a</code> and <code>2100849c</code> (merged to <code>main</code> as PRs
+        #9–#12): re-read all 31 published rows plus Build B's 10 market rows, corrected the Culture mapping
+        independently, left the Culture settlement sources blank because the record lists search pages and a personal
+        account rather than official publishers (F10), found reversed yes-ask/no-bid values in a golf snapshot (F14),
+        and added F9–F21.</li>
       <li><b>2026-11-20 20:0xZ</b> — integration session <code>ec2f5c59</code>: re-read 6 rows plus 5 discovery
         queries live; corrected the Culture mapping (F1); documented which query parameters the API honours
         (<a href="#series-params">above</a>); added the trade-tape catalyst panel,

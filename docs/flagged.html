@@ -3,211 +3,65 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Flagged for review — Trade3 · Kalshi</title>
-<meta name="description" content="Items that could not be confirmed from an official source, judgement calls, and open questions — published with links so they can be reviewed after launch.">
+<title>Flagged for Review — Trade3 Kalshi</title>
 <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
 <header class="top">
-  <div class="brand">Trade3 <span>· Flagged</span></div>
+  <div class="brand">Trade3 <span>· Flagged for Review</span></div>
   <nav class="main">
     <a href="index.html">Home</a>
-    <a href="executive-summary.html">Summary</a>
-    <a href="dashboard.html">Dashboard</a>
-    <a href="index.html#topics">Topics</a>
-    <a href="portfolio.html">Portfolio</a>
-    <a href="methodology.html">Method</a>
-    <a href="verification.html">Verification</a>
-    <a href="flagged.html" class="active">Flagged</a>
-    <a href="dashboard-site/index.html">Audit edition</a>
+    <a href="dashboard.html">Live Dashboard</a>
+    <a href="portfolio.html">Portfolio &amp; Strategies</a>
+    <a href="topics/gas.html">Gas</a>
+    <a href="topics/elections.html">Elections</a>
+    <a href="topics/culture.html">Culture</a>
+    <a href="topics/crypto.html">Crypto</a>
+    <a href="topics/golf.html">Golf</a>
+    <a href="methodology.html">Methodology</a>
+    <a href="flagged.html" class="active">Flagged for Review</a>
   </nav>
 </header>
-
-<main class="stack">
-
-  <section class="card">
-    <h1>Flagged for review</h1>
-    <p class="muted">
-      Nothing on this page blocks the site. It lists the places where a value could not be confirmed from an
-      official source, where a judgement call was unavoidable, or where a Kalshi record contradicts itself.
-      Unconfirmed values are left blank on the site — never filled in by inference.
-    </p>
-  </section>
-
-  <section class="card">
-    <div class="table-wrap"><table>
-      <thead><tr><th>#</th><th>Item</th><th>What is true</th><th>What is unconfirmed / my call</th><th>Source</th><th>Status</th></tr></thead>
+<main>
+  <div class="card">
+    <h1>Flagged for Review</h1>
+    <p>Items that could not be verified from an official source, or that need a human decision. Nothing here blocks the site. Values are left blank where unverified — never inferred. Last re-checked against the live Kalshi demo API on 2026-11-20 (session b4e5648a).</p>
+    <p><b>What was re-checked:</b> 31 series rows (gas, elections, culture, crypto, golf) each read from GET /series/{ticker}; 2 Culture series; 9 Build B market rows read from GET /markets/{ticker}; the exchange status; the Kalshi fee schedule PDF (effective July 7, 2026).</p>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <table>
+      <thead><tr><th>#</th><th>Item</th><th>Why flagged</th><th>Source / link</th><th>Status</th></tr></thead>
       <tbody>
-        <tr id="F1">
-          <td>F1</td>
-          <td>“Culture” as a topic — <b>corrected 2026-11-20 by the integration session</b></td>
-          <td>An earlier revision of this page claimed Kalshi has no <code>Culture</code> category and mapped the topic to
-              <code>Entertainment</code>. That claim was <b>wrong</b>. <code>GET /series?category=Culture</code> answers
-              with 2 series, each carrying <code>"category":"Culture"</code> and <code>"categories":["Culture"]</code>
-              (<code>KXXBANNEDGROK</code>, <code>KXXBANNEDMURRAYHILLGUY1</code>), re-read live at 20:0x UTC.
-              Neither had open markets: <code>GET /markets?series_ticker=KXXBANNEDGROK&amp;status=open</code> →
-              <code>{"markets":[]}</code>.</td>
-          <td>The site now maps Culture to Kalshi's real <code>Culture</code> category and lists Entertainment as a
-              clearly labelled <i>superset</i> (the 8 rows that came from it say so in their <code>via</code> field), so the
-              page is not empty while the real category stays visible. If you want Culture to mean only the 2 official
-              series, delete <code>extraCategories</code> for the topic in <code>docs/assets/app.js</code> — one line.</td>
-          <td><a href="https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture" target="_blank" rel="noopener">GET /series?category=Culture</a> ·
-              <a href="https://external-api.demo.kalshi.co/trade-api/v2/markets?series_ticker=KXXBANNEDGROK&amp;status=open" target="_blank" rel="noopener">open-market check</a></td>
-          <td><span class="pill ok">resolved by live re-check</span></td>
-        </tr>
-        <tr id="F2">
-          <td>F2</td>
-          <td>Why a contract jumped ≥ $0.10</td>
-          <td>Kalshi's public API exposes prices, books, trades and settlement sources — no news feed.</td>
-          <td>Causation cannot be established from official sources, so alerts link the API record, the Kalshi page and the settlement source instead of naming a cause. Automated attribution would need a news API and would still be inference.</td>
-          <td><a href="https://docs.kalshi.com/getting_started/quick_start_market_data" target="_blank" rel="noopener">Market data docs</a></td>
-          <td><span class="pill warn">unverified by design</span></td>
-        </tr>
-        <tr id="F3">
-          <td>F3</td>
-          <td>Live WebSocket streaming and real demo orders</td>
-          <td>Both are documented and supported; both require an API key, and the WebSocket requires the handshake itself to be signed.</td>
-          <td>A public static page cannot hold a key without exposing it, so the site polls REST and simulates fills. The signing client in the repo is ready; a small relay you run would close the gap.</td>
-          <td><a href="https://docs.kalshi.com/getting_started/quick_start_websockets" target="_blank" rel="noopener">WebSockets</a> · <a href="https://docs.kalshi.com/getting_started/api_keys" target="_blank" rel="noopener">API keys</a></td>
-          <td><span class="pill warn">needs your key</span></td>
-        </tr>
-        <tr id="F4">
-          <td>F4</td>
-          <td>“Highest dollar amount” ranking</td>
-          <td>Kalshi returns <code>volume_fp</code> (contracts), <code>open_interest_fp</code> and prices — there is no dollar-volume field.</td>
-          <td>Events are ranked by contracts × last price. Ranking by raw contract count or by open interest would produce a different order, and neither is more “official”.</td>
-          <td><a href="https://docs.kalshi.com/api-reference/market/get-markets" target="_blank" rel="noopener">Get Markets</a></td>
-          <td><span class="pill warn">approximation</span></td>
-        </tr>
-        <tr id="F5">
-          <td>F5</td>
-          <td>High-ROI screen thresholds</td>
-          <td>The five rules are published in full and applied exactly as documented.</td>
-          <td>Whether those thresholds isolate genuine opportunity is untested. They are an opinion, encoded and labelled as such — not a validated model.</td>
-          <td><a href="methodology.html#roi">Method → ROI screen</a></td>
-          <td><span class="pill warn">heuristic</span></td>
-        </tr>
-        <tr id="F6">
-          <td>F6</td>
-          <td>Strategy results</td>
-          <td>Four rules, fixed fill model (buy the ask), settlement from the exchange's <code>result</code>.</td>
-          <td>Results shown are from demo markets, which Kalshi warns may not reflect real markets. Treat them as a test of the plumbing, not evidence of an edge.</td>
-          <td><a href="https://docs.kalshi.com/getting_started/demo_env" target="_blank" rel="noopener">Demo environment</a></td>
-          <td><span class="pill warn">not evidence</span></td>
-        </tr>
-        <tr id="F7">
-          <td>F7</td>
-          <td>Browser access to the Kalshi API (CORS)</td>
-          <td>Kalshi's docs include browser <code>fetch()</code> examples for the public endpoints.</td>
-          <td>Whether a specific network permits the cross-origin call can only be confirmed from that browser. The dashboard reports the failure and the Method page offers a proxy setting rather than pretending data exists.</td>
-          <td><a href="https://docs.kalshi.com/getting_started/quick_start_market_data" target="_blank" rel="noopener">JS fetch examples</a></td>
-          <td><span class="pill warn">verify in your browser</span></td>
-        </tr>
-        <tr id="F8">
-          <td>F8</td>
-          <td><code>KXBOOKERPRIZE</code> — title vs settlement source</td>
-          <td>Kalshi titles the series “who will win the booker prize”. Its only settlement source is <code>nationalbook.org</code> (National Book Awards), and the contract terms file is <code>BOOKERAWARDS.pdf</code>.</td>
-          <td>These are two different prizes. The row is published exactly as the API returns it; which name is correct cannot be settled from the API, so it is left as-is and flagged here.</td>
-          <td><a href="https://external-api.demo.kalshi.co/trade-api/v2/series/KXBOOKERPRIZE" target="_blank" rel="noopener">API record</a></td>
-          <td><span class="pill warn">Kalshi metadata conflict</span></td>
-        </tr>
-        <tr id="F9">
-          <td>F9</td>
-          <td><code>KXLINKPERP</code> and <code>KXSOLPERP</code> — no settlement source</td>
-          <td>Both are Crypto series in the live catalogue, but the API returns <code>settlement_sources: null</code> and an empty <code>contract_url</code>.</td>
-          <td>Their settlement source is therefore blank on the topic page — it is not inferred from the title. If these turn out to be perpetuals rather than event contracts, they may not belong in the topic list at all.</td>
-          <td><a href="https://external-api.demo.kalshi.co/trade-api/v2/series/KXLINKPERP" target="_blank" rel="noopener">KXLINKPERP</a> · <a href="https://external-api.demo.kalshi.co/trade-api/v2/series/KXSOLPERP" target="_blank" rel="noopener">KXSOLPERP</a></td>
-          <td><span class="pill warn">blank — unverified</span></td>
-        </tr>
-        <tr id="F10">
-          <td>F10</td>
-          <td>Sandbox egress restriction during the build</td>
-          <td>The environment this site was built in could reach the Kalshi API only through its page-fetch proxy, not from the shell.</td>
-          <td>Consequence: every API value was read through an official endpoint and pasted from the response, but automated live re-runs of <code>scripts/verify_series.py</code> must happen from an unrestricted machine. The script is included so you can repeat the check in one command.</td>
-          <td><code>scripts/verify_series.py</code> (in the repo root)</td>
-          <td><span class="pill warn">environmental</span></td>
-        </tr>
-        <tr id="F11">
-          <td>F11</td>
-          <td>Unknown query parameters are ignored, not rejected</td>
-          <td>Proved on the demo API this session: <code>GET /markets/trades?market_ticker=&lt;t&gt;</code> returned 200 with trades
-              from <i>other</i> markets, because the documented filter is <code>ticker</code> and <code>market_ticker</code> is not a
-              parameter of that endpoint. Likewise <code>GET /series?limit=3</code> returned far more than 3 rows —
-              Get Series List documents only <code>category</code>, <code>tags</code>, <code>include_product_metadata</code>,
-              <code>include_volume</code>, <code>min_updated_ts</code> (no <code>limit</code>/<code>cursor</code> at all).</td>
-          <td>Risk to any integration: a mistyped filter looks like a working, filtered query. Mitigated here by
-              filtering the response client-side as well (<code>fetchTrades()</code> in <code>docs/assets/app.js</code> keeps only
-              rows whose <code>ticker</code> matches, and the UI prints how many prints were discarded). Not a Kalshi bug
-              per se — but worth knowing, and worth reporting to Kalshi as a footgun.</td>
-          <td><a href="https://docs.kalshi.com/api-reference/market/get-trades" target="_blank" rel="noopener">Get Trades (OpenAPI)</a> ·
-              <a href="https://docs.kalshi.com/api-reference/market/get-series-list" target="_blank" rel="noopener">Get Series List (OpenAPI)</a></td>
-          <td><span class="pill warn">API footgun — mitigated</span></td>
-        </tr>
-        <tr id="F12">
-          <td>F12</td>
-          <td><code>kalshi.com</code> page links could not be machine-verified</td>
-          <td>Every API row links to a <code>…/trade-api/v2/…</code> record, which answers from this environment.
-              Links to Kalshi's human site (<code>kalshi.com/markets/&lt;series&gt;</code>) could not be re-read here:
-              the fetch path returned an error for every <code>kalshi.com</code> page tried, while <code>external-api.demo.kalshi.co</code>
-              and <code>docs.kalshi.com</code> answered fine.</td>
-          <td>Those links are kept (they follow the URL pattern an earlier session verified by hand) but are labelled
-              <i>pattern-derived, not machine-verified</i> wherever they appear, and never used as a data source — only
-              as a convenience. Every published <b>value</b> still cites an API or docs URL that answers.</td>
-          <td><a href="https://docs.kalshi.com/getting_started/demo_env" target="_blank" rel="noopener">docs.kalshi.com/getting_started/demo_env</a></td>
-          <td><span class="pill warn">environmental</span></td>
-        </tr>
-        <tr id="F13">
-          <td>F13</td>
-          <td>Most demo contracts are empty and titles carry markdown</td>
-          <td>Live sample (<code>GET /markets?series_ticker=KXBTCD&amp;status=open</code>, 20:0x UTC): the three newest hourly
-              Bitcoin contracts all have <code>last_price_dollars "0.0000"</code>, <code>volume_fp "0.00"</code>,
-              <code>open_interest_fp "0.00"</code>. <code>GET /markets?series_ticker=KXAAAGASM</code> shows the same for two of four
-              strikes, while <code>KXAAAGASM-26NOV30-4.80</code> carries <code>volume_fp "55571.52"</code>. Titles arrive as
-              <code>Will average **gas prices** be above $5.00?</code> — markdown inside a JSON string.</td>
-          <td>Consequences, both handled: (1) “highest dollar amount” is dominated by a handful of contracts, so many
-              topic tables will legitimately be near-empty in demo; (2) the dashboard strips <code>**</code>/<code>*</code>/backticks
-              with <code>cleanTitle()</code> for display only — the API wording is never edited in the data files.</td>
-          <td><a href="https://external-api.demo.kalshi.co/trade-api/v2/markets?series_ticker=KXAAAGASM&amp;status=open" target="_blank" rel="noopener">gas markets</a> ·
-              <a href="https://external-api.demo.kalshi.co/trade-api/v2/markets?series_ticker=KXBTCD&amp;status=open" target="_blank" rel="noopener">BTC markets</a></td>
-          <td><span class="pill ok">handled, disclosed here</span></td>
-        </tr>
-        <tr id="F14">
-          <td>F14</td>
-          <td>GitHub Pages still cannot be switched on by automation</td>
-          <td><code>POST</code> and <code>PUT /repos/wingbangboozle1-lang/Trade3/pages</code> both return
-              <code>403 Resource not accessible by integration</code> for every token this environment is given, and
-              <code>GET /pages</code> returns <code>404</code> (no site exists). <code>actions/configure-pages@v5</code> with
-              <code>enablement: true</code> fails the same way — this is exactly what killed the four deploy runs so far.</td>
-          <td>The deploy job now probes <code>GET /pages</code> first and stops with a written instruction instead of a raw 403,
-              and every check still runs in the <code>verify</code> job, so the site is provably sound while unpublished.
-              <b>One owner click is required</b>: Repo → Settings → Pages → Build and deployment → Source:
-              <b>GitHub Actions</b> → Save. Then re-run the workflow; it will publish <code>docs/</code>.</td>
-          <td><a href="https://docs.github.com/en/rest/pages/pages" target="_blank" rel="noopener">GitHub Pages REST API</a> ·
-              <a href="https://github.com/wingbangboozle1-lang/Trade3/actions/workflows/pages.yml" target="_blank" rel="noopener">workflow runs</a></td>
-          <td><span class="pill warn">needs owner action</span></td>
-        </tr>
+        <tr id="F1"><td>F1</td><td>“Culture” topic mapping</td><td>Corrected 2026-11-20. Earlier text said Kalshi has no Culture category. The live API has one: Kalshi&#39;s Culture category returns two series. The Culture topic now uses that category, not Entertainment.</td><td><a href="https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture" target="_blank" rel="noopener">Series by category: Culture ↗</a></td><td><span class="pill live">Corrected</span></td></tr>
+        <tr id="F2"><td>F2</td><td>News / catalyst attribution for ≥ $0.10 jumps</td><td>Kalshi API provides no news feed. Dashboard links settlement sources only; any causal claim would be unverified. Provide a news API if you want auto-attribution.</td><td><a href="https://docs.kalshi.com/getting_started/quick_start_market_data" target="_blank" rel="noopener">Market data docs</a></td><td><span class="pill warn">Unverified by design</span></td></tr>
+        <tr id="F3"><td>F3</td><td>Live demo execution + WebSocket streaming</td><td>Both require your demo API key + private key (never in repo). Site defaults to simulated trades + REST polling. Add keys locally to enable.</td><td><a href="https://docs.kalshi.com/getting_started/quick_start_authenticated_requests" target="_blank" rel="noopener">Authenticated requests</a> · <a href="https://docs.kalshi.com/getting_started/quick_start_websockets" target="_blank" rel="noopener">WebSockets</a></td><td><span class="pill warn">Needs your keys</span></td></tr>
+        <tr id="F4"><td>F4</td><td>“Highest dollar amount” definition</td><td>Kalshi has no dollar-volume field. Ranking uses volume × price (documented). Confirm this matches your intent vs. raw contract volume or open interest.</td><td><a href="https://docs.kalshi.com/api-reference/market/get-markets" target="_blank" rel="noopener">Get Markets</a></td><td><span class="pill warn">Needs review</span></td></tr>
+        <tr id="F5"><td>F5</td><td>High-ROI filter thresholds</td><td>Heuristic thresholds ($0.15–$0.85, median volume, spread, move) are explicit but unvalidated. Tune with backtest results before trusting.</td><td><a href="portfolio.html">Portfolio backtest</a></td><td><span class="pill warn">Heuristic</span></td></tr>
+        <tr id="F6"><td>F6</td><td>Browser CORS for live API</td><td>Public REST is browser-fetchable per Kalshi's own JS examples, but if your browser blocks it, the dashboard shows an error instead of data. Verify on GitHub Pages HTTPS.</td><td><a href="https://docs.kalshi.com/getting_started/quick_start_market_data" target="_blank" rel="noopener">JS fetch examples</a></td><td><span class="pill warn">Verify in browser</span></td></tr>
+        <tr id="F7"><td>F7</td><td>Static price/volume values</td><td>Intentionally blank in static tables — live values are fetched at runtime and never snapshotted as facts. Any future snapshot must carry its fetch timestamp + API link.</td><td><a href="data/series.json">series.json</a></td><td><span class="pill live">By design</span></td></tr>
+        <tr id="F8"><td>F8</td><td>GitHub Pages is not enabled on this repository</td><td>Re-tested 2026-11-20: POST /repos/…/pages returns 403 “Resource not accessible by integration” for the build token. Owner action: Settings → Pages → Build and deployment → Source: <b>GitHub Actions</b> → Save. The workflow in .github/workflows/pages.yml then deploys /docs.</td><td><a href="https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site" target="_blank" rel="noopener">GitHub docs: publishing source ↗</a></td><td><span class="pill bad">Owner action</span></td></tr>
+        <tr id="F9"><td>F9</td><td>Culture has no markets</td><td>Kalshi&#39;s Culture category has two series (KXXBANNEDGROK and KXXBANNEDMURRAYHILLGUY1). KXXBANNEDGROK has no open markets; KXXBANNEDMURRAYHILLGUY1 has no markets at all. The Culture page therefore shows zero live rows, by design.</td><td><a href="https://external-api.demo.kalshi.co/trade-api/v2/markets?series_ticker=KXXBANNEDMURRAYHILLGUY1" target="_blank" rel="noopener">Markets for KXXBANNEDMURRAYHILLGUY1 ↗</a></td><td><span class="pill warn">Needs review</span></td></tr>
+        <tr id="F10"><td>F10</td><td>Some Culture settlement sources are not official publishers</td><td>The Culture series list Google search pages as settlement sources (for example “Ars Technica”), a personal X account (“Elon Musk”) and an unnamed “account holder of ” entry. A search page cannot be confirmed as an official source, so these are not shown as settlement sources here.</td><td><a href="https://external-api.demo.kalshi.co/trade-api/v2/series/KXXBANNEDGROK" target="_blank" rel="noopener">Series record KXXBANNEDGROK ↗</a></td><td><span class="pill warn">Needs review</span></td></tr>
+        <tr id="F11"><td>F11</td><td>Contract PDFs point to a staging S3 bucket</td><td>The contract_url for KXAAAGASM, KXPGATOUR, KXBTCD and many other series points to kalshi-public-docs-<b>staging</b>.s3.us-east-1.amazonaws.com. Some series use assets.kalshi.com. Raised for Kalshi to confirm which host is intended.</td><td><a href="https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASM" target="_blank" rel="noopener">Series record KXAAAGASM ↗</a></td><td><span class="pill warn">Needs review</span></td></tr>
+        <tr id="F12"><td>F12</td><td>The tags-by-category map has no Culture key</td><td>GET /search/tags_by_categories has 19 keys and none is “Culture”, even though series with category Culture exist. Routing by the tags map alone would miss Culture; this build uses the series category field.</td><td><a href="https://external-api.demo.kalshi.co/trade-api/v2/search/tags_by_categories" target="_blank" rel="noopener">Tags by categories (live) ↗</a></td><td><span class="pill warn">Documented</span></td></tr>
+        <tr id="F13"><td>F13</td><td>“Oil &amp; Gas” is a tag under two categories</td><td>The tags map lists “Oil &amp; Gas” under Commodities and “Oil and energy” under Economics. The natural-gas series KXNATGASD sits under Entertainment with tag “Oil &amp; Gas”. The gas topic uses category Economics plus its tags, so KXNATGASD is not in the gas topic.</td><td><a href="https://external-api.demo.kalshi.co/trade-api/v2/series?category=Entertainment&limit=20" target="_blank" rel="noopener">Entertainment series (KXNATGASD appears) ↗</a></td><td><span class="pill warn">Handled by routing</span></td></tr>
+        <tr id="F14"><td>F14</td><td>Snapshot errors found and corrected (Build B golf rows)</td><td>In the 2026-11-20 re-check, KXPGATOUR-THRC26-BHAA and KXPGATOUR-THRC26-RSTR had yes-ask and no-bid reversed in the Build B snapshot. The live record is yes_ask 1.0000 and no_bid 0.0000. Corrected in Build B; the other Build B market rows matched, except KXELONMARS-99 volume and open interest, which had drifted.</td><td><a href="https://external-api.demo.kalshi.co/trade-api/v2/markets/KXPGATOUR-THRC26-BHAA" target="_blank" rel="noopener">Market record KXPGATOUR-THRC26-BHAA ↗</a></td><td><span class="pill live">Corrected</span></td></tr>
+        <tr id="F15"><td>F15</td><td>Decision: should Culture include Kalshi&#39;s Entertainment category?</td><td>The brief asks for “culture”. Kalshi&#39;s Culture category has no markets. Entertainment is much larger (music, awards, film, TV, streaming charts) and would fill the page, but it is broader than Kalshi&#39;s Culture category, As of the second review it IS queried as a clearly-labelled supplement in both builds (Culture category first); removing it is a one-line change in assets/app.js if the stricter scope is preferred.</td><td><a href="https://external-api.demo.kalshi.co/trade-api/v2/series?category=Entertainment&limit=20" target="_blank" rel="noopener">Entertainment series ↗</a></td><td><span class="pill warn">Owner decision</span></td></tr>
+        <tr id="F16"><td>F16</td><td>Series lists are page-limited</td><td>Series queries are paginated: GET /series?category=Sports&amp;tags=Golf&amp;limit=20 returns hasMore true. The dashboard reads the first page per topic and tag, so some golf or entertainment series may not appear.</td><td><a href="https://external-api.demo.kalshi.co/trade-api/v2/series?category=Sports&tags=Golf&limit=20" target="_blank" rel="noopener">Golf series query ↗</a></td><td><span class="pill warn">Coverage limit</span></td></tr>
+        <tr id="F17"><td>F17</td><td>Settlement URLs include tracking parameters</td><td>Some settlement URLs returned by the API carry a ?ref= parameter (for example the CF Benchmarks BRTI URL on KXBTC2025100 and KXBTCD). The series table shows them exactly as returned.</td><td><a href="https://external-api.demo.kalshi.co/trade-api/v2/series/KXBTC2025100" target="_blank" rel="noopener">Series record KXBTC2025100 ↗</a></td><td><span class="pill live">Informational</span></td></tr>
+        <tr id="F18"><td>F18</td><td>Two crypto series list no settlement source</td><td>KXLINKPERP and KXSOLPERP return settlement_sources null and an empty contract_url. The table shows “None listed by Kalshi”, not an invented source.</td><td><a href="https://external-api.demo.kalshi.co/trade-api/v2/series/KXLINKPERP" target="_blank" rel="noopener">Series record KXLINKPERP ↗</a> · <a href="https://external-api.demo.kalshi.co/trade-api/v2/series/KXSOLPERP" target="_blank" rel="noopener">KXSOLPERP ↗</a></td><td><span class="pill warn">Needs review</span></td></tr>
+        <tr id="F20"><td>F20</td><td>Culture routing in the Build B server is broader than the Culture category</td><td>The server classifier (server/topics.js) also routes markets into Culture by tags (ai, entertainment, awards, music, movies, tv) and title keywords, and the collector fetches Entertainment. So Build B&#39;s Culture page can include markets whose official category is not Culture. Build A now also queries Entertainment as a supplement (matching Build B). Owner decision on the final scope.</td><td><a href="https://external-api.demo.kalshi.co/trade-api/v2/series?category=Entertainment&amp;limit=20" target="_blank" rel="noopener">Entertainment series ↗</a></td><td><span class="pill warn">Owner decision</span></td></tr>
+        <tr id="F19"><td>F19</td><td>Sandbox could not reach Kalshi from the shell</td><td>From the build sandbox, curl to external-api.demo.kalshi.co fails at TLS (SSL_ERROR_SYSCALL). Values in this repo were read through the fetch tool instead, and the live dashboard fetches in the user’s browser.</td><td><a href="https://external-api.demo.kalshi.co/trade-api/v2/exchange/status" target="_blank" rel="noopener">Exchange status (live) ↗</a></td><td><span class="pill live">Environment</span></td></tr>
+        <tr id="F21"><td>F21</td><td>Demo-UI market URL pattern unverified</td><td>Convenience links to <code>demo.kalshi.co/markets/{ticker}</code> could not be verified from an official source (the demo site is a client-side app; automated fetch failed; no docs state the pattern). Market links now use the verified API-record URL (<code>…/trade-api/v2/markets/{ticker}</code>) instead.</td><td><a href="https://docs.kalshi.com/api-reference/market/get-market" target="_blank" rel="noopener">Get Market (verified) ↗</a></td><td><span class="pill warn">Unverified URL pattern</span></td></tr>
+        <tr id="F22"><td>F22</td><td>Query filters are advisory: unknown or undocumented parameters are ignored, not rejected</td><td>Measured 2026-11-20 by the integration session: <code>GET /markets/trades?market_ticker=&lt;t&gt;</code> answered 200 with prints from <i>other</i> markets (the documented filter on that endpoint is <code>ticker</code>), and <code>GET /series?category=Entertainment&amp;limit=3</code> returned far more than three records, while the Get Series List OpenAPI block documents no <code>limit</code>/<code>cursor</code> at all. A separate review reported <code>?category=Sports&amp;tags=Golf&amp;limit=20</code> answering with <code>hasMore: true</code>; that field could not be re-derived from this sandbox, so the two observations are published side by side rather than reconciled by assertion. What both agree on, and what this build implements: <b>never trust a server-side filter alone</b>. The tape panel re-filters by <code>ticker</code> in the browser and prints how many records it discarded, and topic membership is tested against each series&#39; own <code>categories</code> array.</td><td><a href="https://docs.kalshi.com/api-reference/market/get-trades" target="_blank" rel="noopener">Get Trades</a> · <a href="https://docs.kalshi.com/api-reference/market/get-series-list" target="_blank" rel="noopener">Get Series List</a> · see also F16</td><td><span class="pill warn">API footgun — mitigated</span></td></tr>
+        <tr id="F23"><td>F23</td><td>Titles arrive with markdown, and many demo books are empty</td><td>Live <code>GET /markets?series_ticker=KXAAAGASM&amp;status=open</code>: <code>title: "Will average **gas prices** be above $5.00?"</code> — Kalshi ships emphasis markers inside a JSON string. Same call: two of four strikes had <code>volume_fp "0.00"</code> and <code>last_price_dollars "0.0000"</code> while <code>KXAAAGASM-26NOV30-4.80</code> carried 55,571.52 contracts at $0.03; <code>GET /markets?series_ticker=KXBTCD&amp;status=open</code> had all three hourly strikes at $0.0000 with zero volume. A market record also carries <b>no</b> <code>liquidity</code> field and <b>no</b> <code>category</code>, so depth must come from the order book and category from the parent event.</td><td>Handled: <code>cleanTitle()</code> strips <code>**</code>/<code>*</code>/backticks for <b>display only</b> — stored rows keep the API&#39;s exact wording so they still match their proof. Empty books are shown as empty. The <code>liquidity</code>/category absence is documented on the Method page.</td><td><a href="https://external-api.demo.kalshi.co/trade-api/v2/markets?series_ticker=KXAAAGASM&amp;status=open" target="_blank" rel="noopener">gas markets</a> · <a href="https://external-api.demo.kalshi.co/trade-api/v2/markets?series_ticker=KXBTCD&amp;status=open" target="_blank" rel="noopener">BTC markets</a></td><td><span class="pill live">Handled, disclosed</span></td></tr>
+        <tr id="F24"><td>F24</td><td>Links to Kalshi&#39;s human site could not be machine-verified from the build environment</td><td>Companion to F21: the same fetch path that answered <code>external-api.demo.kalshi.co</code> and <code>docs.kalshi.com</code> returned an error for <b>every</b> <code>kalshi.com</code> page tried (both the category hubs an earlier build linked and the market-page pattern). No kalshi.com URL in this repository was therefore re-verified during integration, and the earlier build&#39;s claim that the pattern was &quot;verified for KXAAAGASM/KXETHD/KXPGATOUR/KXPRESNOMD&quot; rests on a manual fetch that cannot be reproduced here.</td><td>Every published <b>value</b> cites an API or docs URL that answers. <code>kalshi.com/markets/&lt;series&gt;</code> links survive only as convenience links and are labelled pattern-derived wherever they appear (tooltips plus the <code>kalshi_site_note</code> field in <code>series.json</code>).</td><td><a href="https://docs.kalshi.com/getting_started/api_environments" target="_blank" rel="noopener">API Environments</a> · <a href="data/live-verification-2026-11-20.json">live evidence file</a></td><td><span class="pill warn">Environment</span></td></tr>
+        <tr id="F25"><td>F25</td><td>Two integration sessions, same day, same corrections — independently</td><td>While this branch was in review, seven other PRs merged to <code>main</code>, including two that reached the same Culture correction and the same &quot;use the API-record URL, not an unverifiable UI pattern&quot; decision from different directions. Both branches also rewrote <code>docs/assets/app.js</code>, the topic map, the flags table and the Python simulation layer with different APIs, so a text-level merge would have produced a file that satisfies neither.</td><td>Resolution actually applied, recorded in <code>COORDINATION.md</code>: keep this branch&#39;s page/gate architecture (it is the only branch carrying the row-by-row verifier, <code>check_site.py</code>, <code>logic.test.mjs</code>, <code>render.test.mjs</code>, <code>verification.html</code>, <code>.nojekyll</code> and the topic pages), keep <code>main</code>&#39;s data values and its 21-flag ledger, keep <code>main</code>&#39;s Python layer (its exact-tick comparison is strictly better than float epsilon), and re-add this branch&#39;s unique work on top: the catalyst tape panel, <code>cleanTitle()</code>, the honoured-parameters section, the scheduled row re-verification workflow, and the snapshot capture tool with offline tests. <code>series.json</code> now carries <b>both</b> field names (<code>source</code> and <code>source_url</code>) so either site can read it; a gate rejects them disagreeing.</td><td><a href="https://github.com/wingbangboozle1-lang/Trade3/pulls?q=is%3Apr+sort%3Aupdated-desc" target="_blank" rel="noopener">PR history</a> · <code>COORDINATION.md</code></td><td><span class="pill info">Merged, no work lost</span></td></tr>
       </tbody>
-    </table></div>
-  </section>
-
-  <section class="card">
-    <h2>How to resolve any of these</h2>
-    <ul class="muted">
-      <li><b>F1</b> — tell me the exact scope for “culture” and I will narrow the category and tags.</li>
-      <li><b>F2</b> — provide a news API key (or accept links only) and I will wire attribution with explicit sourcing.</li>
-      <li><b>F3</b> — give the relay a home and supply a demo key; streaming and execution follow.</li>
-      <li><b>F4, F5</b> — choose the ranking metric and trade the threshold knobs with me.</li>
-      <li><b>F8, F9</b> — confirm with Kalshi support which metadata is authoritative before we publish a resolution for those series.</li>
-    </ul>
-    <p class="dim">Everything else on the site is traceable to an official document or an API record — see the
-      <a href="verification.html">verification log</a>.</p>
-  </section>
-
+    </table>
+  </div>
+<p style="margin:10px 0 0"><a href="dashboard-site/index.html">Source-audited build: executive summary, per-topic findings, requirements traceability and flagged review →</a></p>
 </main>
-<footer>
-  Trade3 · <a href="index.html">Home</a> · <a href="methodology.html">Methodology</a> ·
-  <a href="verification.html">Verification</a><br>
-  Flagged items do not affect the reliability of values that are published with a source link.
-</footer>
+<footer><a href="index.html">← Home</a> · <a href="methodology.html">Methodology</a></footer>
 </body>
 </html>

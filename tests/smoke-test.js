@@ -62,6 +62,13 @@ await test('official Kalshi metadata classifies before keywords', () => {
   assert.equal(crypto.topicId, 'crypto');
   assert.equal(crypto.reason, 'kalshi_series_category');
 
+  const culture = classifyMarket(
+    { title: 'Will Grok be banned this year', ticker: 'KXXBANNEDGROK-1' },
+    { seriesTicker: 'KXXBANNEDGROK', category: 'Culture', tags: ['AI'] },
+  );
+  assert.equal(culture.topicId, 'culture');
+  assert.equal(culture.reason, 'kalshi_series_category');
+
   const gas = classifyMarket({ title: 'Will average gas prices be above $5.00?', ticker: 'KXAAAGASM-1' }, { seriesTicker: 'KXAAAGASM', category: 'Economics', tags: ['Oil & Gas', 'Oil and energy'], scope: 'Gasoline' });
   assert.equal(gas.topicId, 'gas', 'gas must come from the Oil & Gas tag, not a Gas category');
   assert.ok(['kalshi_series_tag', 'kalshi_product_scope'].includes(gas.reason));

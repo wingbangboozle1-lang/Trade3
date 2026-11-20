@@ -33,8 +33,14 @@ const fmtTime = (ts) => (ts ? new Date(ts).toLocaleTimeString([], { hour: '2-dig
 const fmtDateTime = (ts) => (ts ? new Date(ts).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—');
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-/** Build a link back to the official Kalshi page for a market. */
-const kalshiUrl = (ticker) => `https://demo.kalshi.co/markets/${encodeURIComponent(ticker)}`;
+/** Build a link back to the official Kalshi record for a market.
+ *  Uses the verified API-record URL (GET /markets/{ticker}); the demo web-UI pattern
+ *  (demo.kalshi.co/markets/{ticker}) could not be verified from an official source and
+ *  is flagged as unverified on the Flagged for Review page (F8/F9). */
+const kalshiUrl = (ticker, env = 'demo') =>
+  env === 'demo'
+    ? `https://external-api.demo.kalshi.co/trade-api/v2/markets/${encodeURIComponent(ticker)}`
+    : `https://external-api.kalshi.com/trade-api/v2/markets/${encodeURIComponent(ticker)}`;
 
 // ---------------------------------------------------------------- data fetch
 async function fetchJson(url, opts) {
@@ -207,7 +213,7 @@ function alertRow(a, model) {
       <span>${fmtPrice(a.fromPrice)} → ${fmtPrice(a.toPrice)}</span>
       <span class="basis" title="${a.basis === 'day' ? "Kalshi's previous_price_dollars (a day ago)" : 'previous poll'}">${a.basis}</span>
       ${a.liquidity?.dollars != null ? `<span>book ${fmtMoney(a.liquidity.dollars)}</span>` : ''}
-      <a class="ext" href="${esc(a.kalshiUrl || kalshiUrl(a.ticker))}" target="_blank" rel="noopener" title="Open this market on Kalshi demo">Kalshi ↗</a>
+      <a class="ext" href="${esc(a.kalshiUrl || kalshiUrl(a.ticker))}" target="_blank" rel="noopener" title="Open the official Kalshi API record for this market">API ↗</a>
     </div>
     ${model && a.roiFactors ? `<div class="factors">edge ${fmtPrice(a.roiFactors.netEdgePerContract)}/ct · fee ${fmtPrice(a.roiFactors.feePerContract)} (M×0.07×P×(1−P)) · spread cost ${fmtPrice(a.roiFactors.spreadCostPerContract)}</div>` : ''}
   </div>`;
@@ -331,7 +337,7 @@ function renderPortfolio() {
   } else if (!acct.available) {
     acctEl.innerHTML = `<div class="empty">Not connected. <strong>${esc(acct.reason ?? '')}</strong><br/>
       To read the real demo balance and positions, set <code>KALSHI_API_KEY_ID</code> and <code>KALSHI_PRIVATE_KEY_PATH</code> and restart the collector.
-      Keys are created in the Kalshi demo UI under Account &amp; Settings → API Keys, and demo keys never work against production.
+      Keys are created in the Kalshi demo UI under Account &amp; security → API Keys (per docs.kalshi.com/getting_started/quick_start_authenticated_requests), and demo keys never work against production.
       <a href="https://docs.kalshi.com/getting_started/api_keys" target="_blank" rel="noopener">Official API key docs ↗</a></div>`;
   } else {
     const bal = acct.balance ?? {};
@@ -400,7 +406,7 @@ function renderResolutions() {
       <td><span class="result ${r.result}">${esc(r.result.toUpperCase())}</span></td>
       <td class="num">${fmtPrice(r.lastPrice)}</td>
       <td>${fmtDateTime(r.closeTime)}</td>
-      <td><a href="${esc(r.kalshiUrl || kalshiUrl(r.ticker))}" target="_blank" rel="noopener">Kalshi ↗</a></td>
+      <td><a href="${esc(r.kalshiUrl || kalshiUrl(r.ticker))}" target="_blank" rel="noopener">API ↗</a></td>
     </tr>`).join('') : '<tr><td colspan="7" class="empty">No resolutions captured yet. Settled markets in the five topics appear here as the collector sees them.</td></tr>'}</tbody>`;
 }
 

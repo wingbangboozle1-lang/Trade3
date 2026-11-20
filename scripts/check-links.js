@@ -95,7 +95,12 @@ for (const script of pageScripts) {
     return refs.some((ref) => ref.split('/').slice(-3).join('/') === relToDocs.split('/').slice(-3).join('/'));
   });
   if (!host) {
-    warnings.push(`${normalized}: no HTML page appears to load this script`);
+    // A helper module imported by another page script (e.g. pages/common.js) is loaded
+    // through that script, so it is not a warning. Its own DOM lookups are still checked.
+    const importedByModule = pageScripts.some(
+      (other) => other !== script && fs.readFileSync(other, 'utf8').includes(path.basename(script)),
+    );
+    if (!importedByModule) warnings.push(`${normalized}: no HTML page appears to load this script`);
     continue;
   }
   const hostIds = idsByPage.get(path.relative(DOCS, host)).ids;
