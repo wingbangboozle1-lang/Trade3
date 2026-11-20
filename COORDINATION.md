@@ -201,4 +201,15 @@ Other sessions' files are not touched: no other session has an open claim.
 ### Handoff / conflict log (this session)
 
 - No other session active. Earlier `arena/*` branches were already merged. No file of another session was rewritten; the Build B `data.js` and `flagged.js` edits were limited to the rows and flags listed above.
+- **Merge conflict (logged, resolved without discarding other work).** While this branch was being rebased, `origin/main`
+  had gained PRs #6–#8 from sessions `arena/dd384643-trade3` and `arena/62559215-trade3`, which made the same Culture
+  correction in the same files (`docs/assets/app.js`, `docs/data/series.json`, `docs/index.html`, `docs/methodology.html`,
+  `docs/flagged.html`, `VERIFICATION.md`, `EXECUTIVE_SUMMARY.md`). Resolution: kept upstream's `index.html` and
+  `methodology.html` (per-row source links, Culture correction) and `topic.js` (unverified-settlement rendering); kept this
+  branch's per-row `source_url` and `verified_on` fields, Culture settlement left blank (matches upstream), flag F10 text, and
+  the full flag table (F1–F20); kept upstream's `package.json` and `tests/smoke-test.js` changes. Nothing upstream was deleted.
+  Upstream `README.md` edits merged cleanly.
+- New finding during the merge review: Build B's classifier also routes by tags and title keywords into Culture (flag F20).
+  The earlier F9 sentence saying it "does not borrow markets from other categories" was **wrong for Build B** and has been
+  corrected.
 - Pages: the token cannot enable GitHub Pages. The workflow now runs the upload and deploy even if enablement fails, and writes an owner-action message to the job summary.
