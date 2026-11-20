@@ -112,3 +112,40 @@ this token. The other session's seven flags are reproduced on the same page, wit
 - Integration approach: `git merge origin/main` on `integrate`; this build's site moved under `docs/dashboard-site/`
   so the existing `docs/*` pages, `docs/assets/*`, `docs/topics/*` and the Python tooling are preserved untouched.
 - Cross-links added both ways so neither build is orphaned.
+
+---
+
+# Session `arena/b28d6df0-trade3` — re-verification and deploy check (2026-11-20)
+
+**Claim:** re-verify existing outputs, check the live deploy, record the result. No table data, site pages, or
+`docs/data/series.json` were changed in this session.
+
+## Checks performed this session
+
+| Check | Source | Result |
+|---|---|---|
+| Local link check | `node scripts/check-links.js` | 0 broken links; one warning: `docs/dashboard-site/assets/pages/common.js` is not loaded by any HTML page (flag, not blocking) |
+| Site render harness | `node tests/site-render-test.js` | 13/13 pass |
+| Engine and route tests | `node tests/smoke-test.js` | 13/13 pass |
+| Demo REST base URL | https://docs.kalshi.com/getting_started/demo_env | Confirmed `https://external-api.demo.kalshi.co/trade-api/v2` (recommended) and `https://demo-api.kalshi.co/trade-api/v2` (also supported); the same page states demo prices "may not be reflective of those in real markets" |
+| Gas category lookup | `GET https://external-api.demo.kalshi.co/trade-api/v2/series?category=Gas` | `{"series":null}` — matches flag F1 from the earlier build |
+| GitHub Pages state | `gh api repos/wingbangboozle1-lang/Trade3/pages` | HTTP 404 — Pages not enabled |
+| Pages enablement attempt | `gh api -X POST repos/wingbangboozle1-lang/Trade3/pages -f build_type=workflow` | HTTP 403 "Resource not accessible by integration" (token has admin on the repo but no Pages scope) |
+| Deploy workflow history | `gh run list` | Last 4 "Deploy site to GitHub Pages" runs on `main` (PRs #1–#4) failed at Pages setup |
+
+## Environment limits (recorded, not worked around)
+
+- Sandbox egress does not include `kalshi.co`, `kalshi.com`, or `github.io`. `curl` to the Kalshi demo API and to
+  the Pages URL both return no HTTP response (`000`) from the shell. Live market values could not be re-pulled here.
+- Only `fetch_page` reached the Kalshi endpoints; it was used for the two checks above.
+
+## Status
+
+- Site code: verified locally (links, render, engine tests). Not deployed.
+- Deploy: **BLOCKED** on Pages enablement, which needs an owner action (or a token with Pages admin scope):
+  Repo → Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save. After that, re-run
+  the "Deploy site to GitHub Pages" workflow. Expected URL: https://wingbangboozle1-lang.github.io/Trade3/
+- Merge: **not performed**. The merge gate requires a confirmed Pages deploy, which has not happened.
+  No PR was merged in this session.
+- Flagged for review (unchanged): F1 Gas/Golf categories absent from the API (Gas routed via `Economics` +
+  `Oil & Gas` tags); demo prices are not production prices; the Pages-enablement blocker above.
