@@ -365,6 +365,12 @@ unverified demo-UI URL pattern (F8 Build A / F21 Build B), "Account & Settings" 
 ## Merge record (this session)
 
 - PR link: https://github.com/wingbangboozle1-lang/Trade3/pull/11
-- Merge result: MERGED 2026-11-20 (see PR #11 for the merge commit).
-- Pages: deploy workflow `Deploy site to GitHub Pages` runs on merge to `main`; enablement remains an owner setting if
-  the token lacks Pages scope (upstream F8) — deployment result recorded below after the merge.
+- Merge result: **MERGED 2026-11-20T20:22:39Z** (merge commit `da0bbca`).
+- Pages deploy (workflow run 44810805045, triggered by the merge): job **"Verify site" = success** (link check, render
+  harness, engine tests all passed on the merged tree); job **"Deploy" = failure at Pages enablement only** —
+  `POST /pages` returns 403 "Resource not accessible by integration" both from this session's token and from the
+  Actions token. This reproduces upstream flag F8: enabling Pages is a one-time **owner action** (Settings → Pages →
+  Build and deployment → Source: GitHub Actions → Save), after which re-running the workflow deploys `docs/` as-is.
+  Retried via API POST twice and via the Actions `enablement: true` path; no programmatic route exists from this
+  session. The site itself is verified and the artifact uploads cleanly.
+- Workflow hardened so the run summary always explains the owner action (both failure points covered).

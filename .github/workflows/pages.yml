@@ -70,6 +70,9 @@ jobs:
       - id: deployment
         uses: actions/deploy-pages@v4
       - name: Explain a Pages enablement failure
+        # Covers both failure points: configure-pages (create site) and deploy-pages
+        # (deploy requires an existing Pages site). Either way the fix is the same
+        # one-time owner setting, and the artifact upload has already succeeded.
         if: failure() && steps.configure.outcome == 'failure'
         run: |
           {
@@ -78,4 +81,15 @@ jobs:
             echo "The site in /docs was verified and uploaded, but GitHub Pages could not be enabled automatically."
             echo "Owner action (one time): **Settings -> Pages -> Build and deployment -> Source: GitHub Actions -> Save**."
             echo "After that, re-run this workflow or push to main."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Explain a deploy failure when enablement was skipped
+        if: failure() && steps.configure.outcome == 'skipped'
+        run: |
+          {
+            echo "## GitHub Pages deploy could not run"
+            echo ""
+            echo "The artifact was verified and uploaded, but the deployment step needs a Pages site to exist."
+            echo "Owner action (one time): **Settings -> Pages -> Build and deployment -> Source: GitHub Actions -> Save**."
+            echo "Then re-run this workflow (Actions -> Deploy site to GitHub Pages -> Run workflow) or push to main."
           } >> "$GITHUB_STEP_SUMMARY"
