@@ -1,8 +1,14 @@
+node_modules/
+tests/.tmp-data/
+*.tmp
+.DS_Store
+
+# Runtime state written by the collector (never committed)
+data/paper-state.json
+data/resolutions.json
+data/series-categories.json
+
+# Python
 __pycache__/
 *.pyc
-.env
-kalshi-key.pem
-*.key
-sim_output.json
-.DS_Store
-node_modules/
+.venv/

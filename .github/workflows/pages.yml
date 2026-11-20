@@ -1,8 +1,23 @@
-name: Deploy GitHub Pages
+# Publishes the static site in /docs to GitHub Pages.
+#
+# The site is plain HTML/CSS/ES modules with no build step, so this workflow only
+# verifies then uploads /docs. A broken site never deploys.
+#
+# If Actions/Pages are not available, the alternative is
+# Settings → Pages → Source: "Deploy from a branch" → main / docs.
+
+name: Deploy site to GitHub Pages
 
 on:
   push:
-    branches: ["main"]
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'app/**'
+      - 'server/**'
+      - 'tests/**'
+      - 'scripts/**'
+      - '.github/workflows/pages.yml'
   workflow_dispatch:
 
 permissions:
@@ -11,24 +26,37 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
-  cancel-in-progress: false
+  group: pages
+  cancel-in-progress: true
 
 jobs:
+  verify:
+    name: Verify site
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Link check
+        run: node scripts/check-links.js
+      - name: Render harness
+        run: node tests/site-render-test.js
+      - name: Engine and route tests
+        run: node tests/smoke-test.js
+
   deploy:
+    name: Deploy
+    needs: verify
+    runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
         with:
-          path: "docs"
-      - name: Deploy to GitHub Pages
-        id: deployment
+          path: docs
+      - id: deployment
         uses: actions/deploy-pages@v4

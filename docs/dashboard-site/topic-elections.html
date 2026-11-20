@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Elections — Kalshi Demo Dashboard</title>
+<meta name="description" content="Elections markets on the Kalshi demo exchange, with the official metadata that routes them here and links to every source." />
+<link rel="stylesheet" href="assets/site.css" />
+<script src="assets/shell.js" defer></script>
+<script type="module" src="assets/pages/topic.js" defer></script>
+<script>window.TOPIC_ID = "elections";</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<main id="main">
+
+  <p class="eyebrow">Topic</p>
+  <h1>Elections</h1>
+  <p class="lede">Elections, primaries, governorships and international races. Elections is a first-class Kalshi category.</p>
+
+  <h2>How markets reach this page</h2>
+  <div class="card"><p>Routed by <strong>official category</strong> <code>Elections</code>, or by tags such as <code>Governor</code>,
+   <code>US Elections</code>, <code>Primaries</code> or <code>International Elections</code>.</p>
+   <p>Note that many election markets carry long lists of trading prohibitions — for example holders of federal or
+   statewide office, paid campaign staff, and anyone working in vote tallying cannot trade them. Those prohibitions
+   are contractual, not advisory.</p></div>
+
+  <div class="callout warn"><strong>What to expect in the demo.</strong><p>Several Elections series had no open markets at capture time (for example GOVPARTYVA, the Virginia Governor series). Open election markets were found under the NATO Secretary General event instead.</p></div>
+
+  <h2>Captured markets</h2>
+  <div id="topicMarkets"></div>
+  <p class="source-note" id="topicNote"></p>
+
+  <h2>Series metadata</h2>
+  <div id="topicSeries"></div>
+
+  <h2>Why a swing alert may not fire here</h2>
+  <p>
+    The alert rule is absolute: a move of $0.10 or more, either direction. If a market sits at $0.00 with an empty
+    book, its price cannot move, so no alert is possible. That is a property of the demo environment, which Kalshi
+    warns is not representative of real markets. The dashboard shows its data mode at all times so an empty feed is
+    never mistaken for a working live feed.
+  </p>
+  <p><a class="btn" href="index.html">← Back to the dashboard summary</a> <a class="btn" href="topics.html">All topics</a></p>
+
+<p class="source-note" style="margin-top:28px">Part of the same repository: <a href="../index.html">main site home</a> · <a href="../dashboard.html">live dashboard (other build)</a> · <a href="../flagged.html">their flagged page</a></p>
+</main>
+</body>
+</html>

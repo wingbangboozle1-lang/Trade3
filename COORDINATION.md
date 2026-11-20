@@ -36,3 +36,79 @@
   Source: **GitHub Actions** → Save. The existing `pages.yml` workflow will then deploy `docs/`
   automatically on the next push (or via Actions → "Deploy GitHub Pages" → Run workflow).
   Expected URL: https://wingbangboozle1-lang.github.io/Trade3/
+
+
+---
+
+# Session `arena/63ad86b3-trade3` — app + source-audited site (integration record)
+
+**Status:** merged into `main` as part of the integration described below.
+
+## Claim (logged when the session started)
+
+| Task | Status | Owner | File scope |
+|---|---|---|---|
+| App build: Node collector + WebSocket-ready client, swing engine (≥ $0.10), dual alert feeds, charts, order-book liquidity, resolution tracker, paper strategies | done | `arena/63ad86b3-trade3` | `server/**`, `app/**`, `scripts/**`, `tests/**`, `package.json`, `.github/**` |
+| Source-audited site: executive summary, per-topic findings, requirements traceability, sources, flagged review | done | `arena/63ad86b3-trade3` | `docs/dashboard-site/**` |
+
+**Scope conflict, resolved without discarding work.** When this session read `COORDINATION.md`, session
+`486ef55c` had claimed *all new files* and this board did not yet exist on the branch. Rather than overwrite
+anything, this session built its work in a self-contained subtree (`docs/dashboard-site/`) plus its own
+non-overlapping top-level directories, then merged `origin/main` (which already contained the `73b9db7f` build)
+and integrated by **prefixing** instead of replacing. No file from another session was deleted or rewritten in
+substance.
+
+## Verification performed in this session
+
+| Check | Source | Result |
+|---|---|---|
+| Demo REST/WS base URLs | docs.kalshi.com/getting_started/demo_env | Confirmed both recommended and alternate hosts |
+| Demo vs production credentials | docs.kalshi.com/getting_started/api_environments | Confirmed separate, not shared |
+| Demo exchange live | `GET /exchange/status` (demo) | `exchange_active: true`, `trading_active: true`, shards 0–3 |
+| No `Gas` / `Golf` category | `GET /series?category=Gas`, `?category=Golf` | **Both return `{"series":null}`** — logged as flag F1 |
+| Gas routing metadata | `GET /series/KXAAAGASM` | category `Economics`, tags `["Oil & Gas","Oil and energy"]`, scope `Gasoline`, settles on AAA |
+| Golf routing metadata | `GET /series/KXPGATOUR` | category `Sports`, tags `["Golf"]` |
+| Crypto routing metadata | `GET /series/KXBTCD` | category `Crypto`, tags `["Crypto","Hourly","Bitcoin"]`, settles on CF Benchmarks BRTI |
+| Culture category **does** exist | `GET /series?category=Culture` | Two series returned with `"category":"Culture"` — this **corrects** the earlier build's F1 claim that Culture must be proxied via Entertainment |
+| Culture has no open markets | `GET /markets?series_ticker=KXXBANNEDGROK&status=open` | Empty `markets` list — reported as empty, not padded |
+| Elections series with no open markets | `GET /markets?series_ticker=GOVPARTYVA&status=open` | Empty list; open Elections markets found under `KXNEXTNATOSECGEN-99` instead |
+| Fee formula | kalshi.com/docs/kalshi-fee-schedule.pdf | `fees = round up(M × 0.07 × C × P × (1 − P))`; checked against all 21 rows of the published table, max residual 1.75¢ at $0.05 |
+| Settlement payout | docs.kalshi.com/getting_started/market_settlement | Winning side receives $1/contract; only net positions settle; no settlement fee |
+| Order endpoints | docs.kalshi.com/api-reference/orders/create-order-v2 | Legacy `/portfolio/orders` → `410 deprecated_v1_order_endpoint`; use `/portfolio/events/orders` |
+| Order book derivation | docs.kalshi.com/getting_started/orderbook_responses | Bids only; best YES ask = 1 − best NO bid |
+
+## Tests written and passing
+
+- `node tests/smoke-test.js` — **13/13**. Covers the inclusive $0.10 threshold in both directions, both alert bases,
+  five-topic routing, official-metadata precedence, score bounds, the fee formula against the published table,
+  deterministic strategy routing, settlement arithmetic, per-strategy analytics, all three chart windows, the
+  collector pipeline, every HTTP route, and both `snapshot` and synthetic `demo` data modes.
+- `node tests/site-render-test.js` — **13/13**. Executes every page module against a DOM shim and fails on empty
+  renders, stray `undefined`, tables without a source link, and missing page metadata.
+- `node scripts/check-links.js` — **0 broken local links**, 0 broken anchors, 0 unresolved imports, 0 missing DOM
+  targets across all pages in `docs/`.
+
+## Environment irregularity (recorded, not worked around silently)
+
+Kalshi's hosts are **unreachable from this sandbox's shell**: `curl` to
+`https://external-api.demo.kalshi.co/trade-api/v2/exchange/status` fails with
+`OpenSSL SSL_connect: SSL_ERROR_SYSCALL` — TCP connects, TLS is reset. Egress is allowlisted to github.com,
+api.github.com, pypi.org and registry.npmjs.org. Reproduced with default options, `--http1.1`, and explicit IPv4.
+
+Consequence: every published value was read through a page-fetch path that *can* reach the API, and the app ships
+three explicit data modes (`live`, `snapshot`, `demo`) with an unmistakable banner so a synthetic preview can never
+be mistaken for market data.
+
+## Flags raised by this session
+
+Published on `docs/dashboard-site/flagged.html` with evidence links: missing Gas/Golf categories; demo prices are
+not production prices; sandbox egress; the fee schedule's undocumented "round up" step; news attribution not
+implemented; legacy order endpoints removed; placeholder-looking demo metadata; GitHub Pages cannot be enabled by
+this token. The other session's seven flags are reproduced on the same page, with one correction (Culture).
+
+## Merge record for this session
+
+- Branch: `arena/63ad86b3-trade3` → merged into `main`.
+- Integration approach: `git merge origin/main` on `integrate`; this build's site moved under `docs/dashboard-site/`
+  so the existing `docs/*` pages, `docs/assets/*`, `docs/topics/*` and the Python tooling are preserved untouched.
+- Cross-links added both ways so neither build is orphaned.
