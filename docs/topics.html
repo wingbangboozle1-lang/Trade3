@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Topics — gas prices, elections, culture, crypto, golf</title>
+<meta name="description" content="How each of the five requested topics is defined on Kalshi, with the official metadata that routes markets into it." />
+<link rel="stylesheet" href="assets/site.css" />
+<script src="assets/shell.js" defer></script>
+<script type="module" src="assets/pages/topics.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<main id="main">
+
+  <h1>Topics</h1>
+  <p class="lede">
+    You asked for five topics only: gas prices, elections, culture, crypto and golf. Keeping them separate is easy;
+    defining them honestly is not, because Kalshi's category vocabulary does not contain “gas” or “golf” at all.
+    Each page below states exactly which official fields route a market into that topic.
+  </p>
+
+  <div class="callout bad">
+    <strong>The routing problem, stated plainly.</strong>
+    <code>GET /series?category=Gas</code> and <code>?category=Golf</code> both return
+    <code>{"series":null}</code>. Gas markets actually sit in category <em>Economics</em> with the tag
+    <code>Oil &amp; Gas</code> and a product scope of <code>Gasoline</code>. Golf markets sit in category
+    <em>Sports</em> with the tag <code>Golf</code>. Anything that filters on a “Gas” or “Golf” category shows an
+    empty page. Verify it yourself:
+    <a href="https://external-api.demo.kalshi.co/trade-api/v2/series?category=Gas" target="_blank" rel="noopener">?category=Gas</a> ·
+    <a href="https://external-api.demo.kalshi.co/trade-api/v2/series?category=Golf" target="_blank" rel="noopener">?category=Golf</a>.
+  </div>
+
+  <h2>The five topics</h2>
+  <div id="topicTable"></div>
+
+  <h2>Routing rules, in priority order</h2>
+  <div class="card">
+    <ol>
+      <li><strong>Official product scope or tag</strong> — <code>Gasoline</code> scope, or a <code>Golf</code> /
+        <code>Oil &amp; Gas</code> tag. These decide gas and golf, because their Kalshi categories are far too broad.</li>
+      <li><strong>Official series category</strong> — <code>Crypto</code>, <code>Elections</code> and
+        <code>Culture</code> map one-to-one to a topic.</li>
+      <li><strong>Other official tags</strong> — for example a <code>Governor</code> tag under an Elections category.</li>
+      <li><strong>Whole-word keyword fallback</strong> on the market title, used only when official metadata is
+        missing. Whole-word matching exists because naive substring matching produced real false positives:
+        “Best Picture” contains “art”, and “participation” contains “par”.</li>
+      <li><strong>Series ticker prefix</strong> — for example <code>KXPGATOUR…</code> or <code>KXAAAGASM…</code>.</li>
+    </ol>
+    <p style="margin-bottom:0">
+      If nothing matches, the market is dropped from the dashboard. Nothing is ever forced into a topic bucket, and
+      every routed market records <em>which</em> rule matched so you can audit it.
+    </p>
+  </div>
+
+  <h2>Topic pages</h2>
+  <div id="topicLinks" class="grid three"></div>
+
+</main>
+</body>
+</html>
