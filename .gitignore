@@ -1,0 +1,26 @@
+# secrets / credentials (never commit)
+.env
+.env.*
+*.key
+*.pem
+!app/mock/fixtures/*.pem
+credentials.json
+
+# runtime state
+app/data/*.jsonl
+app/data/*.json
+!app/data/.gitkeep
+app/data/state/.gitkeep
+
+# node
+node_modules/
+npm-debug.log*
+
+# python
+__pycache__/
+.venv/
+*.pyc
+
+# build scratch
+tmp/
+.DS_Store
