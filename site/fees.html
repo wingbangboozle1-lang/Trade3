@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fees · Trade3</title>
+<meta name="description" content="Kalshi fee formula, transcribed and reconciled against the official fee table.">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="favicon.svg">
+</head>
+<body>
+<header class="site">
+    <a class="logo" href="index.html">Kalshi demo · Trade3</a>
+    <nav>
+      <a href="index.html" class="">Overview</a>
+      <a href="gas.html" class="">Gas prices</a><a href="elections.html" class="">Elections</a><a href="culture.html" class="">Culture</a><a href="crypto.html" class="">Crypto</a><a href="golf.html" class="">Golf</a>
+      <a href="executive-summary.html" class="">Executive summary</a>
+      <a href="requirements.html" class="">Requirements</a>
+      <a href="api-contracts.html" class="">API contracts</a>
+      <a href="fees.html" class="on">Fees</a>
+      <a href="findings.html" class="">Findings</a>
+      <a href="suggestions.html" class="">Suggestions</a>
+      <a href="sources.html" class="">Sources</a>
+      <a href="flagged.html" class="">Flagged for review</a>
+    </nav>
+  </header>
+<main>
+
+<p class="lede">Fees decide whether a strategy is real. These are the numbers the paper trader charges and the numbers the scoring model uses, transcribed from Kalshi's official fee schedule and cross-checked against the published table.</p>
+<section id="formula">
+  <h2>The formula, verbatim</h2>
+  
+  <pre><code>Taker: fees = roundup(M x 0.07  x C x P x (1-P))
+Maker: fees = roundup(M x 0.0175 x C x P x (1-P))
+
+P = price per contract in dollars (0.50 = 50 cents)
+C = number of contracts
+M = per-contract multiplier (taker default 1, maker default 0)
+round up = fee + position cost rounded to a centicent ($0.0001)</code></pre>
+<p>Source: <a class="src" href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener" title="Kalshi Fee Schedule (PDF, effective July 7, 2026)">K6</a> · rounding detail: <a class="src" href="https://docs.kalshi.com/getting_started/fee_rounding.md" target="_blank" rel="noopener" title="Fee Rounding">K7</a></p>
+<p>There is <b>no settlement fee</b> and no membership fee. A resting order is not charged until it trades, and cancelling a resting order is free. <a class="src" href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener" title="Kalshi Fee Schedule (PDF, effective July 7, 2026)">K6</a></p>
+</section>
+<section id="table">
+  <h2>Published table reproduced, with our model beside it</h2>
+  <p class="secnote">Every published 100-contract value equals the taker formula rounded <b>up to the cent</b>. The schedule text says to round to a centicent, so the formula is the finer-grained authority; the difference is disclosed as flag <a href="flagged.html">F11</a>.</p>
+  <div class="tablewrap"><table><thead><tr><th>Price</th><th>Published fee, 1 contract</th><th class="num">Published fee, 100 contracts</th><th class="num">Formula, 100 contracts (taker)</th><th class="num">Formula, 100 contracts (maker)</th><th>Source</th></tr></thead><tbody><tr><td>$0.01</td><td>$0.01</td><td class="num">$0.07</td><td class="num">$0.0693</td><td class="num">$0.0173</td><td><a class="src" href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener" title="Kalshi Fee Schedule (PDF, effective July 7, 2026)">K6</a></td></tr><tr><td>$0.05</td><td>$0.01</td><td class="num">$0.34</td><td class="num">$0.3325</td><td class="num">$0.0831</td><td><a class="src" href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener" title="Kalshi Fee Schedule (PDF, effective July 7, 2026)">K6</a></td></tr><tr><td>$0.10</td><td>$0.01</td><td class="num">$0.63</td><td class="num">$0.6300</td><td class="num">$0.1575</td><td><a class="src" href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener" title="Kalshi Fee Schedule (PDF, effective July 7, 2026)">K6</a></td></tr><tr><td>$0.15</td><td>$0.01</td><td class="num">$0.90</td><td class="num">$0.8925</td><td class="num">$0.2231</td><td><a class="src" href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener" title="Kalshi Fee Schedule (PDF, effective July 7, 2026)">K6</a></td></tr><tr><td>$0.20</td><td>$0.02</td><td class="num">$1.12</td><td class="num">$1.1200</td><td class="num">$0.2800</td><td><a class="src" href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener" title="Kalshi Fee Schedule (PDF, effective July 7, 2026)">K6</a></td></tr><tr><td>$0.25</td><td>$0.02</td><td class="num">$1.32</td><td class="num">$1.3125</td><td class="num">$0.3281</td><td><a class="src" href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener" title="Kalshi Fee Schedule (PDF, effective July 7, 2026)">K6</a></td></tr><tr><td>$0.30</td><td>$0.02</td><td class="num">$1.47</td><td class="num">$1.4700</td><td class="num">$0.3675</td><td><a class="src" href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener" title="Kalshi Fee Schedule (PDF, effective July 7, 2026)">K6</a></td></tr><tr><td>$0.35</td><td>$0.02</td><td class="num">$1.60</td><td class="num">$1.5925</td><td class="num">$0.3981</td><td><a class="src" href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener" title="Kalshi Fee Schedule (PDF, effective July 7, 2026)">K6</a></td></tr><tr><td>$0.40</td><td>$0.02</td><td class="num">$1.68</td><td class="num">$1.6800</td><td class="num">$0.4200</td><td><a class="src" href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener" title="Kalshi Fee Schedule (PDF, effective July 7, 2026)">K6</a></td></tr><tr><td>$0.45</td><td>$0.02</td><td class="num">$1.74</td><td class="num">$1.7325</td><td class="num">$0.4331</td><td><a class="src" href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener" title="Kalshi Fee Schedule (PDF, effective July 7, 2026)">K6</a></td></tr><tr><td>$0.50</td><td>$0.02</td><td class="num">$1.75</td><td class="num">$1.7500</td><td class="num">$0.4375</td><td><a class="src" href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener" title="Kalshi Fee Schedule (PDF, effective July 7, 2026)">K6</a></td></tr><tr><td>$0.55</td><td>$0.02</td><td class="num">$1.74</td><td class="num">$1.7325</td><td class="num">$0.4331</td><td><a class="src" href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener" title="Kalshi Fee Schedule (PDF, effective July 7, 2026)">K6</a></td></tr><tr><td>$0.60</td><td>$0.02</td><td class="num">$1.68</td><td class="num">$1.6800</td><td class="num">$0.4200</td><td><a class="src" href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener" title="Kalshi Fee Schedule (PDF, effective July 7, 2026)">K6</a></td></tr><tr><td>$0.65</td><td>$0.02</td><td class="num">$1.60</td><td class="num">$1.5925</td><td class="num">$0.3981</td><td><a class="src" href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener" title="Kalshi Fee Schedule (PDF, effective July 7, 2026)">K6</a></td></tr><tr><td>$0.70</td><td>$0.02</td><td class="num">$1.47</td><td class="num">$1.4700</td><td class="num">$0.3675</td><td><a class="src" href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener" title="Kalshi Fee Schedule (PDF, effective July 7, 2026)">K6</a></td></tr><tr><td>$0.75</td><td>$0.02</td><td class="num">$1.32</td><td class="num">$1.3125</td><td class="num">$0.3281</td><td><a class="src" href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener" title="Kalshi Fee Schedule (PDF, effective July 7, 2026)">K6</a></td></tr><tr><td>$0.80</td><td>$0.02</td><td class="num">$1.12</td><td class="num">$1.1200</td><td class="num">$0.2800</td><td><a class="src" href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener" title="Kalshi Fee Schedule (PDF, effective July 7, 2026)">K6</a></td></tr><tr><td>$0.85</td><td>$0.01</td><td class="num">$0.90</td><td class="num">$0.8925</td><td class="num">$0.2231</td><td><a class="src" href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener" title="Kalshi Fee Schedule (PDF, effective July 7, 2026)">K6</a></td></tr><tr><td>$0.90</td><td>$0.01</td><td class="num">$0.63</td><td class="num">$0.6300</td><td class="num">$0.1575</td><td><a class="src" href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener" title="Kalshi Fee Schedule (PDF, effective July 7, 2026)">K6</a></td></tr><tr><td>$0.95</td><td>$0.01</td><td class="num">$0.34</td><td class="num">$0.3325</td><td class="num">$0.0831</td><td><a class="src" href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener" title="Kalshi Fee Schedule (PDF, effective July 7, 2026)">K6</a></td></tr><tr><td>$0.99</td><td>$0.01</td><td class="num">$0.07</td><td class="num">$0.0693</td><td class="num">$0.0173</td><td><a class="src" href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener" title="Kalshi Fee Schedule (PDF, effective July 7, 2026)">K6</a></td></tr></tbody></table></div>
+</section>
+<section id="multipliers">
+  <h2>Per-series multipliers (Non-Standard Fees table)</h2>
+  <p class="secnote">Only rows relevant to the five topics are transcribed here; the PDF lists many more. A series not in this table uses the general schedule, which the app labels as a default rather than a confirmation.</p>
+  <div class="tablewrap"><table><thead><tr><th>Series</th><th>Description</th><th class="num">Maker ×</th><th class="num">Taker ×</th><th>Source</th></tr></thead><tbody><tr><td><span class="mono">KXAAAGASM</span></td><td>US gas price</td><td>1</td><td>1</td><td><a class="src" href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener" title="Kalshi Fee Schedule (PDF, effective July 7, 2026)">K6</a></td></tr><tr><td><span class="mono">KXBTCMAX150</span></td><td>When will bitcoin hit 150k?</td><td>1</td><td>1</td><td><a class="src" href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener" title="Kalshi Fee Schedule (PDF, effective July 7, 2026)">K6</a></td></tr><tr><td><span class="mono">KXBTCY</span></td><td>BTC price range EOY</td><td>0</td><td>0</td><td><a class="src" href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener" title="Kalshi Fee Schedule (PDF, effective July 7, 2026)">K6</a></td></tr><tr><td><span class="mono">KXETHY</span></td><td>ETH price EOY</td><td>0</td><td>0</td><td><a class="src" href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener" title="Kalshi Fee Schedule (PDF, effective July 7, 2026)">K6</a></td></tr><tr><td><span class="mono">KXBALLONDOR</span></td><td>Ballon d&#39;Or</td><td>1</td><td>1</td><td><a class="src" href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener" title="Kalshi Fee Schedule (PDF, effective July 7, 2026)">K6</a></td></tr><tr><td><span class="mono">KXEMMYCSERIES</span></td><td>Emmys Award for Comedy Series</td><td>1</td><td>1</td><td><a class="src" href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener" title="Kalshi Fee Schedule (PDF, effective July 7, 2026)">K6</a></td></tr><tr><td><span class="mono">KXELECTIRAN</span></td><td>Will Iran hold a presidential election?</td><td>0</td><td>0</td><td><a class="src" href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener" title="Kalshi Fee Schedule (PDF, effective July 7, 2026)">K6</a></td></tr><tr><td><span class="mono">KXIRANDEMOCRACY</span></td><td>Will Iran become a democracy in 2026?</td><td>0</td><td>0</td><td><a class="src" href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener" title="Kalshi Fee Schedule (PDF, effective July 7, 2026)">K6</a></td></tr></tbody></table></div>
+</section>
+<section id="worked">
+  <h2>Worked example</h2>
+  
+  <p>Buy 100 YES at $0.45 as a taker. Taker fee = 0.07 × 100 × 0.45 × 0.55 = <b>$1.7325</b>, charged at centicent granularity. The published table prints <b>$1.74</b> because it rounds to whole cents. If the same order rested and filled as a maker at the general 0× multiplier, the maker fee would be <b>$0.00</b>.</p><p>This asymmetry is the entire basis of the maker strategy in the dashboard, and it is why the taker strategy is included as a control: it shows the cost of impatience.</p>
+</section>
+
+</main>
+<footer class="site">
+  <p>
+    Generated 2026-11-20 from this repository's own files.
+    Every factual row links to an official Kalshi (or other primary) source; see
+    <a href="sources.html">Sources</a> and <a href="flagged.html">Flagged for review</a>.
+  </p>
+  <p class="mute">
+    Kalshi demo environment only. Kalshi documents that demo prices and behaviour
+    "may not be reflective of those in real markets". Nothing here is investment advice.
+  </p>
+</footer>
+<script src="app.js" defer></script>
+</body>
+</html>

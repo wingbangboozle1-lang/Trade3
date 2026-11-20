@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>API contracts · Trade3</title>
+<meta name="description" content="Verified Kalshi REST and WebSocket contracts used by this project.">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="favicon.svg">
+</head>
+<body>
+<header class="site">
+    <a class="logo" href="index.html">Kalshi demo · Trade3</a>
+    <nav>
+      <a href="index.html" class="">Overview</a>
+      <a href="gas.html" class="">Gas prices</a><a href="elections.html" class="">Elections</a><a href="culture.html" class="">Culture</a><a href="crypto.html" class="">Crypto</a><a href="golf.html" class="">Golf</a>
+      <a href="executive-summary.html" class="">Executive summary</a>
+      <a href="requirements.html" class="">Requirements</a>
+      <a href="api-contracts.html" class="on">API contracts</a>
+      <a href="fees.html" class="">Fees</a>
+      <a href="findings.html" class="">Findings</a>
+      <a href="suggestions.html" class="">Suggestions</a>
+      <a href="sources.html" class="">Sources</a>
+      <a href="flagged.html" class="">Flagged for review</a>
+    </nav>
+  </header>
+<main>
+
+<p class="lede">The exact contracts this project codes against, transcribed from Kalshi's own reference pages on 2026-11-20. If the app and this page disagree, the app is wrong.</p>
+<section id="rest">
+  <h2>REST endpoints used</h2>
+  
+  <div class="tablewrap"><table><thead><tr><th>Method</th><th>Path</th><th>Purpose</th><th>Auth</th><th>Source</th></tr></thead><tbody><tr><td><span class="method get">GET</span></td><td><code>/exchange/status</code></td><td>Exchange up/down and estimated resume</td><td>Unauthenticated</td><td><a class="src" href="https://docs.kalshi.com/api-reference/exchange/get-exchange-status.md" target="_blank" rel="noopener" title="Get Exchange Status">K23</a></td></tr><tr><td><span class="method get">GET</span></td><td><code>/series</code></td><td>Series metadata incl. categories, tags, settlement sources, fee type</td><td>Unauthenticated</td><td><a class="src" href="https://docs.kalshi.com/api-reference/market/get-series-list.md" target="_blank" rel="noopener" title="Get Series List">K12</a></td></tr><tr><td><span class="method get">GET</span></td><td><code>/events</code></td><td>Events with nested markets, mutually_exclusive flag</td><td>Unauthenticated</td><td><a class="src" href="https://docs.kalshi.com/api-reference/events/get-events.md" target="_blank" rel="noopener" title="Get Events">K11</a></td></tr><tr><td><span class="method get">GET</span></td><td><code>/markets</code></td><td>Market list with prices, sizes, volume, open interest, liquidity, result</td><td>Unauthenticated</td><td><a class="src" href="https://docs.kalshi.com/api-reference/market/get-markets.md" target="_blank" rel="noopener" title="Get Markets">K9</a></td></tr><tr><td><span class="method get">GET</span></td><td><code>/markets/{ticker}</code></td><td>Single market</td><td>Unauthenticated</td><td><a class="src" href="https://docs.kalshi.com/api-reference/market/get-markets.md" target="_blank" rel="noopener" title="Get Markets">K9</a></td></tr><tr><td><span class="method get">GET</span></td><td><code>/markets/{ticker}/orderbook</code></td><td>Orderbook: bids only, aggregated size per level</td><td>Unauthenticated</td><td><a class="src" href="https://docs.kalshi.com/getting_started/orderbook_responses.md" target="_blank" rel="noopener" title="Orderbook Responses">K5</a></td></tr><tr><td><span class="method get">GET</span></td><td><code>/portfolio/balance</code></td><td>Balance and portfolio value (two separate fields)</td><td>Authenticated</td><td><a class="src" href="https://docs.kalshi.com/api-reference/portfolio/get-balance.md" target="_blank" rel="noopener" title="Get Balance">K15</a></td></tr><tr><td><span class="method get">GET</span></td><td><code>/portfolio/positions</code></td><td>Signed position_fp, realized P&amp;L, fees paid</td><td>Authenticated</td><td><a class="src" href="https://docs.kalshi.com/api-reference/portfolio/get-positions.md" target="_blank" rel="noopener" title="Get Positions">K16</a></td></tr><tr><td><span class="method get">GET</span></td><td><code>/portfolio/fills</code></td><td>Fills with outcome_side and book_side</td><td>Authenticated</td><td><a class="src" href="https://docs.kalshi.com/api-reference/portfolio/get-fills.md" target="_blank" rel="noopener" title="Get Fills">K17</a></td></tr><tr><td><span class="method post">POST</span></td><td><code>/portfolio/events/orders</code></td><td>Create an order (V2). A 201 means accepted, not resting.</td><td>Authenticated</td><td><a class="src" href="https://docs.kalshi.com/api-reference/orders/create-order-v2.md" target="_blank" rel="noopener" title="Create Order (V2)">K13</a></td></tr><tr><td><span class="method del">DELETE</span></td><td><code>/portfolio/events/orders/{order_id}</code></td><td>Cancel an order (V2)</td><td>Authenticated</td><td><a class="src" href="https://docs.kalshi.com/api-reference/orders/cancel-order-v2.md" target="_blank" rel="noopener" title="Cancel Order (V2)">K14</a></td></tr><tr><td><span class="method get">GET</span></td><td><code>/series/{s}/markets/{t}/candlesticks</code></td><td>Candles at 1 / 60 / 1440 minute intervals</td><td>Unauthenticated</td><td><a class="src" href="https://docs.kalshi.com/api-reference/market/get-market-candlesticks.md" target="_blank" rel="noopener" title="Get Market Candlesticks">K25</a></td></tr></tbody></table></div>
+</section>
+<section id="ws">
+  <h2>WebSocket channels used</h2>
+  <p class="secnote">Note the awkward but documented detail: even the "public" channels require an authenticated <em>connection</em>, though they impose no extra per-channel check.</p>
+  <div class="tablewrap"><table><thead><tr><th>Channel</th><th>Access</th><th>Market filter</th><th>Note</th><th>Source</th></tr></thead><tbody><tr><td><code>ticker</code></td><td>Public (still requires an authenticated connection)</td><td>Optional</td><td>Flushed once per second; intermediate values are not sent</td><td><a class="src" href="https://docs.kalshi.com/websockets/market-ticker.md" target="_blank" rel="noopener" title="WebSocket: Market Ticker">K18</a></td></tr><tr><td><code>trade</code></td><td>Public (still requires an authenticated connection)</td><td>Optional</td><td>Every print, immediately</td><td><a class="src" href="https://docs.kalshi.com/websockets/public-trades.md" target="_blank" rel="noopener" title="WebSocket: Public Trades">K19</a></td></tr><tr><td><code>orderbook_delta</code></td><td>Private group</td><td>Required</td><td>Snapshot then deltas; requires a key</td><td><a class="src" href="https://docs.kalshi.com/websockets/orderbook-updates.md" target="_blank" rel="noopener" title="WebSocket: Orderbook Updates">K20</a></td></tr><tr><td><code>market_lifecycle_v2</code></td><td>Public (still requires an authenticated connection)</td><td>Optional</td><td>determined / settled carry YES or NO and settlement value</td><td><a class="src" href="https://docs.kalshi.com/websockets/market-and-event-lifecycle.md" target="_blank" rel="noopener" title="WebSocket: Market &amp; Event Lifecycle">K21</a></td></tr><tr><td><code>fill</code></td><td>Private</td><td>n/a</td><td>Your fills</td><td><a class="src" href="https://docs.kalshi.com/getting_started/quick_start_websockets.md" target="_blank" rel="noopener" title="Quick Start: WebSockets">K8</a></td></tr></tbody></table></div>
+</section>
+<section id="auth">
+  <h2>Authentication</h2>
+  
+  <div class="tablewrap"><table><thead><tr><th>Item</th><th>Value</th><th>Note</th><th>Source</th></tr></thead><tbody><tr><td>Headers</td><td><code>KALSHI-ACCESS-KEY</code>, <code>KALSHI-ACCESS-SIGNATURE</code>, <code>KALSHI-ACCESS-TIMESTAMP</code></td><td>—</td><td><a class="src" href="https://docs.kalshi.com/getting_started/api_keys.md" target="_blank" rel="noopener" title="API Keys">K3</a></td></tr><tr><td>Pre-sign text</td><td><code>timestamp + METHOD + path</code>, query string removed</td><td>—</td><td><a class="src" href="https://docs.kalshi.com/getting_started/api_keys.md" target="_blank" rel="noopener" title="API Keys">K3</a></td></tr><tr><td>RSA</td><td>RSA-PSS / SHA-256 / MGF1-SHA256 / salt length = digest length / 2048-bit</td><td>—</td><td><a class="src" href="https://docs.kalshi.com/getting_started/api_keys.md" target="_blank" rel="noopener" title="API Keys">K3</a></td></tr><tr><td>Ed25519</td><td>Signs the message directly, 64-byte signature, recommended</td><td>—</td><td><a class="src" href="https://docs.kalshi.com/getting_started/api_keys.md" target="_blank" rel="noopener" title="API Keys">K3</a></td></tr><tr><td>Clock tolerance</td><td>Timestamp must be within 30 seconds of Kalshi's clock</td><td>Outside it the request returns 401 header_timestamp_expired</td><td><a class="src" href="https://docs.kalshi.com/getting_started/api_keys.md" target="_blank" rel="noopener" title="API Keys">K3</a></td></tr><tr><td>WebSocket handshake</td><td><code>timestamp + "GET" + "/trade-api/ws/v2"</code></td><td>—</td><td><a class="src" href="https://docs.kalshi.com/getting_started/quick_start_websockets.md" target="_blank" rel="noopener" title="Quick Start: WebSockets">K8</a></td></tr><tr><td>Rate limits</td><td>Token buckets, default 10 tokens per request, separate read/write buckets</td><td>429 has no Retry-After; back off exponentially</td><td><a class="src" href="https://docs.kalshi.com/getting_started/rate_limits.md" target="_blank" rel="noopener" title="Rate Limits and Tiers">K4</a></td></tr></tbody></table></div>
+</section>
+<section id="order">
+  <h2>Order create (V2) field by field</h2>
+  
+  <div class="tablewrap"><table><thead><tr><th>Field</th><th>Value</th><th>Note</th><th>Source</th></tr></thead><tbody><tr><td><code>ticker</code></td><td>Market ticker</td><td>Required</td><td><a class="src" href="https://docs.kalshi.com/api-reference/orders/create-order-v2.md" target="_blank" rel="noopener" title="Create Order (V2)">K13</a></td></tr><tr><td><code>side</code></td><td><code>bid</code> = buy YES, <code>ask</code> = sell YES</td><td>Required</td><td><a class="src" href="https://docs.kalshi.com/api-reference/orders/create-order-v2.md" target="_blank" rel="noopener" title="Create Order (V2)">K13</a></td></tr><tr><td><code>count</code></td><td>Fixed-point string, e.g. <code>"10.00"</code></td><td>Required</td><td><a class="src" href="https://docs.kalshi.com/api-reference/orders/create-order-v2.md" target="_blank" rel="noopener" title="Create Order (V2)">K13</a></td></tr><tr><td><code>price</code></td><td>Fixed-point dollars, e.g. <code>"0.5600"</code></td><td>Required</td><td><a class="src" href="https://docs.kalshi.com/api-reference/orders/create-order-v2.md" target="_blank" rel="noopener" title="Create Order (V2)">K13</a></td></tr><tr><td><code>time_in_force</code></td><td><code>fill_or_kill</code>, <code>good_till_canceled</code>, <code>immediate_or_cancel</code></td><td><code>GTT</code> is not a valid API value</td><td><a class="src" href="https://docs.kalshi.com/api-reference/orders/create-order-v2.md" target="_blank" rel="noopener" title="Create Order (V2)">K13</a></td></tr><tr><td><code>self_trade_prevention_type</code></td><td><code>taker_at_cross</code> or <code>maker</code></td><td>Required</td><td><a class="src" href="https://docs.kalshi.com/api-reference/orders/create-order-v2.md" target="_blank" rel="noopener" title="Create Order (V2)">K13</a></td></tr><tr><td><code>reduce_only</code></td><td>Only accepted with <code>immediate_or_cancel</code></td><td>Otherwise rejected</td><td><a class="src" href="https://docs.kalshi.com/api-reference/orders/create-order-v2.md" target="_blank" rel="noopener" title="Create Order (V2)">K13</a></td></tr><tr><td>Removed endpoint</td><td><code>POST /portfolio/orders</code> returns <b>410 Gone</b></td><td>code <code>deprecated_v1_order_endpoint</code></td><td><a class="src" href="https://docs.kalshi.com/api-reference/orders/create-order-v2.md" target="_blank" rel="noopener" title="Create Order (V2)">K13</a></td></tr></tbody></table></div>
+</section>
+
+</main>
+<footer class="site">
+  <p>
+    Generated 2026-11-20 from this repository's own files.
+    Every factual row links to an official Kalshi (or other primary) source; see
+    <a href="sources.html">Sources</a> and <a href="flagged.html">Flagged for review</a>.
+  </p>
+  <p class="mute">
+    Kalshi demo environment only. Kalshi documents that demo prices and behaviour
+    "may not be reflective of those in real markets". Nothing here is investment advice.
+  </p>
+</footer>
+<script src="app.js" defer></script>
+</body>
+</html>

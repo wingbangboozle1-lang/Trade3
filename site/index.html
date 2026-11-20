@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Overview · Trade3</title>
+<meta name="description" content="Kalshi demo dashboard: verified endpoints, five topics, $0.10 swing alerts, simulated trading.">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="favicon.svg">
+</head>
+<body>
+<header class="site">
+    <a class="logo" href="index.html">Kalshi demo · Trade3</a>
+    <nav>
+      <a href="index.html" class="on">Overview</a>
+      <a href="gas.html" class="">Gas prices</a><a href="elections.html" class="">Elections</a><a href="culture.html" class="">Culture</a><a href="crypto.html" class="">Crypto</a><a href="golf.html" class="">Golf</a>
+      <a href="executive-summary.html" class="">Executive summary</a>
+      <a href="requirements.html" class="">Requirements</a>
+      <a href="api-contracts.html" class="">API contracts</a>
+      <a href="fees.html" class="">Fees</a>
+      <a href="findings.html" class="">Findings</a>
+      <a href="suggestions.html" class="">Suggestions</a>
+      <a href="sources.html" class="">Sources</a>
+      <a href="flagged.html" class="">Flagged for review</a>
+    </nav>
+  </header>
+<main>
+
+<div class="banner info"><b>This site is documentation, not live market data.</b> It publishes verified API contracts, the fee model, requirements, findings and flagged items. The live dashboard itself runs as an app (<code>app/</code>); it is not hosted here because a static page cannot hold a private key or keep a WebSocket session open. See <a href="findings.html#what-could-not-be-verified">what could not be verified</a>.</div>
+
+<section>
+  <h1>Kalshi demo: live event tracking, $0.10 swing alerts, and a simulated trading tournament</h1>
+  <p class="lede">
+    This project tracks the highest dollar-volume live events on Kalshi's <b>demo</b> environment
+    inside five topics only — gas prices, elections, culture, crypto and golf — flags every
+    contract-price move of $0.10 or more, publishes each flag to a pair of live scrolling feeds,
+    follows every market until it resolves YES or NO, and runs four simulated strategies against
+    the same signals so the results can be compared instead of assumed.
+  </p>
+</section>
+
+<section id="endpoints">
+  <h2>Demo endpoints verified</h2>
+  <p class="secnote">Read from Kalshi's own API documentation on 2026-11-20. Both the recommended and the "also supported" hosts are implemented in the app and selectable in configuration.</p>
+  <div class="tablewrap"><table><thead><tr><th>Surface</th><th>URL</th><th>Note</th><th>Source</th></tr></thead><tbody><tr><td>REST trade API, demo</td><td><code>https://external-api.demo.kalshi.co/trade-api/v2</code></td><td>Recommended demo REST root</td><td><a class="src" href="https://docs.kalshi.com/getting_started/api_environments.md" target="_blank" rel="noopener" title="API Environments and Endpoints">K1</a></td></tr><tr><td>REST trade API, demo alternate</td><td><code>https://demo-api.kalshi.co/trade-api/v2</code></td><td>Documented as also supported</td><td><a class="src" href="https://docs.kalshi.com/getting_started/api_environments.md" target="_blank" rel="noopener" title="API Environments and Endpoints">K1</a></td></tr><tr><td>WebSocket API, demo</td><td><code>wss://external-api-ws.demo.kalshi.co/trade-api/ws/v2</code></td><td>Recommended demo WS URL</td><td><a class="src" href="https://docs.kalshi.com/getting_started/api_environments.md" target="_blank" rel="noopener" title="API Environments and Endpoints">K1</a></td></tr><tr><td>WebSocket API, demo alternate</td><td><code>wss://demo-api.kalshi.co/trade-api/ws/v2</code></td><td>Documented as also supported</td><td><a class="src" href="https://docs.kalshi.com/getting_started/api_environments.md" target="_blank" rel="noopener" title="API Environments and Endpoints">K1</a></td></tr><tr><td>Demo web UI</td><td><code>https://demo.kalshi.co/</code></td><td>Mock funds</td><td><a class="src" href="https://docs.kalshi.com/getting_started/demo_env.md" target="_blank" rel="noopener" title="Test In The Demo Environment">K2</a></td></tr><tr><td>Demo price fidelity</td><td>Explicitly not guaranteed</td><td>Kalshi: demo "price and behavior ... may not be reflective of those in real markets"</td><td><a class="src" href="https://docs.kalshi.com/getting_started/demo_env.md" target="_blank" rel="noopener" title="Test In The Demo Environment">K2</a></td></tr></tbody></table></div>
+</section>
+
+<section id="capabilities">
+  <h2>What the dashboard does</h2>
+  
+  <div class="tablewrap"><table><thead><tr><th>Capability</th><th>Behaviour</th><th>Detail</th><th>Source</th></tr></thead><tbody><tr><td>Swing threshold</td><td>$0.10 in either direction</td><td>Exactly >= $0.10 between observed prices</td><td><a class="src" href="https://docs.kalshi.com/websockets/public-trades.md" target="_blank" rel="noopener" title="WebSocket: Public Trades">K19</a></td></tr><tr><td>Topics tracked</td><td>Gas prices, Elections, Culture, Crypto, Golf</td><td>One page per topic on this site</td><td><a class="src" href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener" title="Kalshi Fee Schedule (PDF, effective July 7, 2026)">K6</a></td></tr><tr><td>Alert feeds</td><td>Two chats: all swings, and model promotions</td><td>Second feed is filtered by expected value after fees</td><td><a class="src" href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener" title="Kalshi Fee Schedule (PDF, effective July 7, 2026)">K6</a></td></tr><tr><td>Resolution tracking</td><td>YES / NO captured from the lifecycle channel</td><td>Live until each market resolves</td><td><a class="src" href="https://docs.kalshi.com/websockets/market-and-event-lifecycle.md" target="_blank" rel="noopener" title="WebSocket: Market &amp; Event Lifecycle">K21</a></td></tr><tr><td>Simulated trading</td><td>Four strategy families with a measured comparison</td><td>Maker and taker paths, official fee formula</td><td><a class="src" href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener" title="Kalshi Fee Schedule (PDF, effective July 7, 2026)">K6</a></td></tr><tr><td>Liquidity</td><td>Depth per price level, cost to cross</td><td>Bids only; asks implied as 1 − opposite bid</td><td><a class="src" href="https://docs.kalshi.com/getting_started/orderbook_responses.md" target="_blank" rel="noopener" title="Orderbook Responses">K5</a></td></tr><tr><td>Live charts</td><td>X = time (1s…1d), Y = contract price</td><td>Jumps >= $0.10 marked with candidate cause links</td><td><a class="src" href="https://docs.kalshi.com/websockets/market-ticker.md" target="_blank" rel="noopener" title="WebSocket: Market Ticker">K18</a></td></tr></tbody></table></div>
+</section>
+
+<section id="topics">
+  <h2>The five topics</h2>
+  <p class="secnote">Topic membership is decided by an explicit, auditable rule set (series prefix, then category, then keyword). A market that matches no rule is left out rather than guessed into a topic.</p>
+  <div class="catgrid"><a class="catcard" href="gas.html">
+      <span class="catname">Gas prices</span>
+      <span class="catblurb">Retail and wholesale gasoline prices, AAA national average, EIA weekly series.</span>
+      <span class="catmeta">1 verified seed series · 2 candidate-cause feeds</span>
+    </a><a class="catcard" href="elections.html">
+      <span class="catname">Elections</span>
+      <span class="catblurb">US and international elections, primaries, ballot measures, election-adjacent control of power.</span>
+      <span class="catmeta">1 verified seed series · 2 candidate-cause feeds</span>
+    </a><a class="catcard" href="culture.html">
+      <span class="catname">Culture</span>
+      <span class="catblurb">Entertainment, awards, box office, music, streaming, celebrity and pop-culture milestones.</span>
+      <span class="catmeta">2 verified seed series · 2 candidate-cause feeds</span>
+    </a><a class="catcard" href="crypto.html">
+      <span class="catname">Crypto</span>
+      <span class="catblurb">Bitcoin, Ethereum and other digital-asset price levels, ranges and milestones.</span>
+      <span class="catmeta">2 verified seed series · 2 candidate-cause feeds</span>
+    </a><a class="catcard" href="golf.html">
+      <span class="catname">Golf</span>
+      <span class="catblurb">PGA Tour, DP World Tour, majors, LIV and golf tournament markets.</span>
+      <span class="catmeta">0 verified seed series · 2 candidate-cause feeds</span>
+    </a></div>
+</section>
+
+<section id="start">
+  <h2>How to read this site</h2>
+  
+  <div class="tablewrap"><table><thead><tr><th>Page</th><th>What it answers</th><th>Primary official source</th><th>Source</th></tr></thead><tbody><tr><td><a href="executive-summary.html">Executive summary</a></td><td>The short version: what was built, what is verified, what is not.</td><td>Kalshi API environments</td><td><a class="src" href="https://docs.kalshi.com/getting_started/api_environments.md" target="_blank" rel="noopener" title="API Environments and Endpoints">K1</a></td></tr><tr><td><a href="api-contracts.html">API contracts</a></td><td>Every endpoint and channel the app uses, with exact field names.</td><td>Create Order (V2) reference</td><td><a class="src" href="https://docs.kalshi.com/api-reference/orders/create-order-v2.md" target="_blank" rel="noopener" title="Create Order (V2)">K13</a></td></tr><tr><td><a href="fees.html">Fees</a></td><td>The official fee formula plus the reconciliation against the published table.</td><td>Kalshi fee schedule (PDF)</td><td><a class="src" href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener" title="Kalshi Fee Schedule (PDF, effective July 7, 2026)">K6</a></td></tr><tr><td><a href="requirements.html">Requirements</a></td><td>Each line of the request mapped to what implements it, with a status.</td><td>WebSocket quick start</td><td><a class="src" href="https://docs.kalshi.com/getting_started/quick_start_websockets.md" target="_blank" rel="noopener" title="Quick Start: WebSockets">K8</a></td></tr><tr><td><a href="findings.html">Findings</a></td><td>What the documentation actually says, including where common advice is stale.</td><td>Orderbook responses</td><td><a class="src" href="https://docs.kalshi.com/getting_started/orderbook_responses.md" target="_blank" rel="noopener" title="Orderbook Responses">K5</a></td></tr><tr><td><a href="suggestions.html">Suggestions</a></td><td>Concrete ways to make the dashboard more live and more useful.</td><td>Public trades channel</td><td><a class="src" href="https://docs.kalshi.com/websockets/public-trades.md" target="_blank" rel="noopener" title="WebSocket: Public Trades">K19</a></td></tr><tr><td><a href="flagged.html">Flagged for review</a></td><td>Every irregularity and unverified value, so nothing is buried.</td><td>Rate limits and tiers</td><td><a class="src" href="https://docs.kalshi.com/getting_started/rate_limits.md" target="_blank" rel="noopener" title="Rate Limits and Tiers">K4</a></td></tr></tbody></table></div>
+</section>
+
+
+
+</main>
+<footer class="site">
+  <p>
+    Generated 2026-11-20 from this repository's own files.
+    Every factual row links to an official Kalshi (or other primary) source; see
+    <a href="sources.html">Sources</a> and <a href="flagged.html">Flagged for review</a>.
+  </p>
+  <p class="mute">
+    Kalshi demo environment only. Kalshi documents that demo prices and behaviour
+    "may not be reflective of those in real markets". Nothing here is investment advice.
+  </p>
+</footer>
+<script src="app.js" defer></script>
+</body>
+</html>

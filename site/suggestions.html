@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Suggestions · Trade3</title>
+<meta name="description" content="Suggestions — generated from research/SUGGESTIONS.md.">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="favicon.svg">
+</head>
+<body>
+<header class="site">
+    <a class="logo" href="index.html">Kalshi demo · Trade3</a>
+    <nav>
+      <a href="index.html" class="">Overview</a>
+      <a href="gas.html" class="">Gas prices</a><a href="elections.html" class="">Elections</a><a href="culture.html" class="">Culture</a><a href="crypto.html" class="">Crypto</a><a href="golf.html" class="">Golf</a>
+      <a href="executive-summary.html" class="">Executive summary</a>
+      <a href="requirements.html" class="">Requirements</a>
+      <a href="api-contracts.html" class="">API contracts</a>
+      <a href="fees.html" class="">Fees</a>
+      <a href="findings.html" class="">Findings</a>
+      <a href="suggestions.html" class="on">Suggestions</a>
+      <a href="sources.html" class="">Sources</a>
+      <a href="flagged.html" class="">Flagged for review</a>
+    </nav>
+  </header>
+<main>
+<h1 id="suggestions-making-the-dashboard-more-live-more-interactive-and-easier-to-trade-from">Suggestions: making the dashboard more live, more interactive, and easier to trade from</h1>
+<p>Ranked by expected usefulness per hour of work. Each item names the documented behaviour it depends on, so none of it is speculative about what the API can do.</p>
+<h2 id="tier-1-do-these-first">Tier 1 — do these first</h2>
+<div class="tablewrap"><table><thead><tr><th>#</th><th>Suggestion</th><th>Why it helps a trader</th><th>Depends on (source)</th></tr></thead><tbody><tr><td>1</td><td><strong>Make the trade tape, not the ticker, the heartbeat.</strong> Show a &quot;prints/sec&quot; and an &quot;exchange clock lag&quot; readout in the header, side by side.</td><td><code>ticker</code> flushes once per second and drops intermediate values, so a quiet ticker can mean &quot;no change&quot; <em>or</em> &quot;a burst we will never see&quot;. A trade-rate readout tells you which.</td><td><a href="https://docs.kalshi.com/websockets/market-ticker.md" target="_blank" rel="noopener" target="_blank" rel="noopener">K18</a>, <a href="https://docs.kalshi.com/websockets/public-trades.md" target="_blank" rel="noopener" target="_blank" rel="noopener">K19</a></td></tr>
+<tr><td>2</td><td><strong>Price the ladder as &quot;cost to buy N&quot;, not just top-of-book.</strong> A slider for N (10/100/500 contracts) that walks the actual levels and returns the average fill price and the slippage versus touch.</td><td>Top-of-book size overstates liquidity. The orderbook returns aggregated size per level, so the walk is exact and cheap to compute.</td><td><a href="https://docs.kalshi.com/getting_started/orderbook_responses.md" target="_blank" rel="noopener" target="_blank" rel="noopener">K5</a></td></tr>
+<tr><td>3</td><td><strong>Split every alert into &quot;what moved&quot; and &quot;what it cost to act on it&quot;.</strong> Two numbers on the card: the move in cents, and the round-trip cost in cents at that moment (half-spread + fees both ways).</td><td>A 10-cent move on a 12-cent spread is not tradable. Putting the cost next to the move makes that instant.</td><td><a href="https://docs.kalshi.com/getting_started/orderbook_responses.md" target="_blank" rel="noopener" target="_blank" rel="noopener">K5</a>, <a href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener">K6</a></td></tr>
+<tr><td>4</td><td><strong>Persist the resolution log and the paper ledger to disk.</strong> JSONL append, replay on boot.</td><td>Right now a restart loses the archive. A resolution log is the one thing that cannot be recomputed later.</td><td><a href="https://docs.kalshi.com/websockets/market-and-event-lifecycle.md" target="_blank" rel="noopener" target="_blank" rel="noopener">K21</a></td></tr>
+<tr><td>5</td><td><strong>Show adverse selection on every strategy card.</strong> Percentage of maker fills that occurred at a price worse than the contemporaneous mid.</td><td>It is the honest counterweight to a maker strategy&#39;s headline edge, and the app already computes it.</td><td><a href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener">K6</a></td></tr></tbody></table></div>
+<h2 id="tier-2-high-value-more-work">Tier 2 — high value, more work</h2>
+<div class="tablewrap"><table><thead><tr><th>#</th><th>Suggestion</th><th>Why it helps</th><th>Depends on (source)</th></tr></thead><tbody><tr><td>6</td><td><strong>Event-level thesis view.</strong> For each event, one row per market with YES price, and an explicit &quot;sum of YES prices&quot; against $1.00 for mutually exclusive events. Colour only when the deviation exceeds fees.</td><td>In a mutually exclusive event the legs must sum to ≤ $1.00. That is a checkable structural fact, not a forecast.</td><td><a href="https://docs.kalshi.com/api-reference/events/get-events.md" target="_blank" rel="noopener" target="_blank" rel="noopener">K11</a></td></tr>
+<tr><td>7</td><td><strong>Quote-quality decay.</strong> For each market, plot time since the last print against the spread. Wide book + stale print is a different risk from wide book + active print.</td><td>Distinguishes illiquidity from a genuinely quiet market, which matters before sizing.</td><td><a href="https://docs.kalshi.com/websockets/market-ticker.md" target="_blank" rel="noopener" target="_blank" rel="noopener">K18</a></td></tr>
+<tr><td>8</td><td><strong>Alert replay with a scrubber.</strong> Replay any 10-minute window of alerts at 1×/10×/60× with the chart in sync.</td><td>Turns the alert feed into something reviewable after the fact, instead of a wall you had to be watching.</td><td><a href="https://docs.kalshi.com/websockets/public-trades.md" target="_blank" rel="noopener" target="_blank" rel="noopener">K19</a></td></tr>
+<tr><td>9</td><td><strong>Backtest mode over candles.</strong> Build the same signal on <code>candlesticks</code> history instead of the live stream, then compare signal counts per day across topics.</td><td>Second-order validation: does the maker edge survive more than one afternoon of data? Candles are the only historical source that does not need a full tape.</td><td><a href="https://docs.kalshi.com/api-reference/market/get-market-candlesticks.md" target="_blank" rel="noopener" target="_blank" rel="noopener">K25</a></td></tr>
+<tr><td>10</td><td><strong>Per-series fee badge on every row.</strong> Show the multiplier the fee model actually applied, and whether it came from the schedule table or the default.</td><td>Kalshi&#39;s schedule has per-series multipliers (some are 0×/0×). A silent default is a silent surprise in P&amp;L.</td><td><a href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener">K6</a></td></tr></tbody></table></div>
+<h2 id="tier-3-polish-that-traders-notice">Tier 3 — polish that traders notice</h2>
+<div class="tablewrap"><table><thead><tr><th>#</th><th>Suggestion</th><th>Why it helps</th><th>Depends on (source)</th></tr></thead><tbody><tr><td>11</td><td><strong>Keyboard-first navigation.</strong> <code>1</code>–<code>5</code> for topics, <code>l/p/r/s</code> for tabs, <code>/</code> to search, <code>space</code> to pause both feeds.</td><td>Already implemented; keep it and document it on screen with a <code>?</code> overlay.</td><td><a href="https://docs.kalshi.com/getting_started/quick_start_websockets.md" target="_blank" rel="noopener" target="_blank" rel="noopener">K8</a></td></tr>
+<tr><td>12</td><td><strong>One-screen &quot;state of the book&quot; strip.</strong> For the selected market: last, bid, ask, spread, depth each side, time to close, and the last alert. Six numbers, no scroll.</td><td>Traders need one glance, not a scroll.</td><td><a href="https://docs.kalshi.com/api-reference/market/get-markets.md" target="_blank" rel="noopener" target="_blank" rel="noopener">K9</a></td></tr>
+<tr><td>13</td><td><strong>Separate &quot;candidate cause&quot; links from &quot;settlement source&quot; links visually.</strong> Two different kinds of evidence should not look identical.</td><td>A settlement source is authoritative for resolution; a news feed is only a hint about why a price moved.</td><td><a href="https://docs.kalshi.com/api-reference/market/get-market-series-list.md" target="_blank" rel="noopener" target="_blank" rel="noopener">K12</a></td></tr>
+<tr><td>14</td><td><strong>Explicit &quot;no key&quot; and &quot;key present but rejected&quot; states.</strong> Different colours, different words, with the exact error code.</td><td>Turns a silent failure into a fixable one; <code>header_timestamp_expired</code> in particular looks like a permissions bug and is not.</td><td><a href="https://docs.kalshi.com/getting_started/api_keys.md" target="_blank" rel="noopener" target="_blank" rel="noopener">K3</a></td></tr>
+<tr><td>15</td><td><strong>Alert-density strip.</strong> One bar per minute showing how many alerts fired, so you can see whether the market is hot without reading the feed.</td><td>Cheap to compute, immediately readable.</td><td><a href="https://docs.kalshi.com/websockets/public-trades.md" target="_blank" rel="noopener" target="_blank" rel="noopener">K19</a></td></tr>
+<tr><td>16</td><td><strong>A &quot;why is this empty?&quot; affordance on every panel.</strong> The exact endpoint that returned nothing and the query used.</td><td>The most common support question on a dashboard is &quot;why is this blank&quot;.</td><td><a href="https://docs.kalshi.com/api-reference/exchange/get-exchange-status.md" target="_blank" rel="noopener" target="_blank" rel="noopener">K23</a></td></tr></tbody></table></div>
+<h2 id="things-that-would-look-good-and-be-wrong">Things that would look good and be wrong</h2>
+<p>These are deliberately not built. They are listed so nobody adds them later thinking they are missing:</p>
+<div class="tablewrap"><table><thead><tr><th>Anti-pattern</th><th>Why it is wrong</th></tr></thead><tbody><tr><td>Showing per-order sizes in the book</td><td>The API returns aggregated size per price level only. Per-order data does not exist. <a href="https://docs.kalshi.com/getting_started/orderbook_responses.md" target="_blank" rel="noopener" target="_blank" rel="noopener">K5</a></td></tr>
+<tr><td>Sampling <code>ticker</code> at 100 ms to &quot;catch spikes&quot;</td><td>The channel drops intermediate values; the extra sampling adds latency, not information. Use <code>trade</code>. <a href="https://docs.kalshi.com/websockets/market-ticker.md" target="_blank" rel="noopener" target="_blank" rel="noopener">K18</a></td></tr>
+<tr><td>Treating demo prices as real market prices</td><td>Kalshi states demo behaviour may not reflect real markets. <a href="https://docs.kalshi.com/getting_started/demo_env.md" target="_blank" rel="noopener" target="_blank" rel="noopener">K2</a></td></tr>
+<tr><td>Claiming a news story &quot;caused&quot; a move</td><td>No official feed attributes price moves to stories. Candidate links are labelled as candidates. <a href="https://docs.kalshi.com/api-reference/market/get-series-list.md" target="_blank" rel="noopener" target="_blank" rel="noopener">K12</a></td></tr>
+<tr><td>Ranking strategies on 3 trades</td><td>Sample-size theatre. The UI flags anything under 10 trades as thin and refuses to rank it. <a href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener">K6</a></td></tr>
+<tr><td>Summing balance and portfolio value into one &quot;equity&quot; number and calling it the account value</td><td>They are two documented fields. Reported side by side, never merged. <a href="https://docs.kalshi.com/api-reference/portfolio/get-balance.md" target="_blank" rel="noopener" target="_blank" rel="noopener">K15</a></td></tr>
+<tr><td>Using <code>POST /portfolio/orders</code> because a tutorial does</td><td>It returns 410. <a href="https://docs.kalshi.com/api-reference/orders/create-order-v2.md" target="_blank" rel="noopener" target="_blank" rel="noopener">K13</a></td></tr>
+<tr><td>Polling <code>/portfolio/balance</code> in a loop</td><td>It has its own tight bucket (1/s on the lower tiers) and only changes on fills, settlements and transfers. React to fills instead. <a href="https://docs.kalshi.com/getting_started/rate_limits.md" target="_blank" rel="noopener" target="_blank" rel="noopener">K4</a></td></tr></tbody></table></div>
+</main>
+<footer class="site">
+  <p>
+    Generated 2026-11-20 from this repository's own files.
+    Every factual row links to an official Kalshi (or other primary) source; see
+    <a href="sources.html">Sources</a> and <a href="flagged.html">Flagged for review</a>.
+  </p>
+  <p class="mute">
+    Kalshi demo environment only. Kalshi documents that demo prices and behaviour
+    "may not be reflective of those in real markets". Nothing here is investment advice.
+  </p>
+</footer>
+<script src="app.js" defer></script>
+</body>
+</html>

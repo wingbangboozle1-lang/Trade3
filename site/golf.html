@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Golf · Trade3</title>
+<meta name="description" content="Golf on Kalshi demo: verified series, classification rules and thresholds.">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="favicon.svg">
+</head>
+<body>
+<header class="site">
+    <a class="logo" href="index.html">Kalshi demo · Trade3</a>
+    <nav>
+      <a href="index.html" class="">Overview</a>
+      <a href="gas.html" class="">Gas prices</a><a href="elections.html" class="">Elections</a><a href="culture.html" class="">Culture</a><a href="crypto.html" class="">Crypto</a><a href="golf.html" class="on">Golf</a>
+      <a href="executive-summary.html" class="">Executive summary</a>
+      <a href="requirements.html" class="">Requirements</a>
+      <a href="api-contracts.html" class="">API contracts</a>
+      <a href="fees.html" class="">Fees</a>
+      <a href="findings.html" class="">Findings</a>
+      <a href="suggestions.html" class="">Suggestions</a>
+      <a href="sources.html" class="">Sources</a>
+      <a href="flagged.html" class="">Flagged for review</a>
+    </nav>
+  </header>
+<main>
+
+<div class="banner info"><b>Golf.</b> PGA Tour, DP World Tour, majors, LIV and golf tournament markets. <br><span class="mute">This page lists the verified rules and seeds for the topic. The live market table for this topic is produced by the dashboard app, not by this static page — see <a href="index.html#start">how to read this site</a>.</span></div>
+
+<section id="series">
+  <h2>Verified series in this topic</h2>
+  <p class="secnote">Retrieved 2026-11-20. A "seed" is a series whose existence and subject matter were read on an official Kalshi page. Seeds are not a census: the app re-discovers live series on every refresh and labels anything found at runtime as discovered.</p>
+  <div class="tablewrap"><table><thead><tr><th>Series ticker</th><th>Subject</th><th>Evidence (verbatim or summarised from the source)</th><th>Source</th></tr></thead><tbody><tr class="unverified"><td>—</td><td>—</td><td>—</td><td><span class="flag">unverified</span></td></tr><tr class="note"><td colspan="4">Kalshi publishes no static list of golf series tickers that could be verified from the documentation retrieved here. The app discovers golf series at runtime via <code>GET /series</code> and <code>GET /events</code>; nothing is invented to fill this table.</td></tr></tbody></table></div>
+</section>
+
+<section id="rules">
+  <h2>Classification rules</h2>
+  <p class="secnote">Order of precedence: series prefix, then category, then keyword, then tag. A market that matches none is excluded, not guessed.</p>
+  <div class="tablewrap"><table><thead><tr><th>Rule type</th><th>Values</th><th>Why this rule</th><th>Source</th></tr></thead><tbody><tr><td>Series prefix</td><td><span class="mono">KXPGA, KXGOLF, KXMASTERS, KXOPEN, KXLIVGOLF, KXRYDER</span></td><td>Highest-confidence signal: ticker structure is stable</td><td><a class="src" href="https://docs.kalshi.com/api-reference/market/get-series-list.md" target="_blank" rel="noopener" title="Get Series List">K12</a></td></tr><tr><td>Category</td><td><span class="mono">Golf, Sports</span></td><td>Kalshi series carry a primary <code>category</code> and a <code>categories[]</code> list</td><td><a class="src" href="https://docs.kalshi.com/api-reference/market/get-series-list.md" target="_blank" rel="noopener" title="Get Series List">K12</a></td></tr><tr><td>Keyword</td><td>golf, pga, masters, ryder cup, open championship, liv golf, dp world tour, birdie</td><td>Applied to event and market titles, with word boundaries</td><td><a class="src" href="https://docs.kalshi.com/api-reference/events/get-events.md" target="_blank" rel="noopener" title="Get Events">K11</a></td></tr></tbody></table></div>
+</section>
+
+<section id="causes">
+  <h2>Candidate causes and reference sources</h2>
+  <p class="secnote">These links are attached to a price-jump alert as <b>candidate</b> causes. No official source attributes a Kalshi price move to a specific news story, so asserting one would be a fabrication.</p>
+  <div class="tablewrap"><table><thead><tr><th>Reference</th><th>Kind</th><th>How it is used</th><th>Source</th></tr></thead><tbody><tr><td><a href="https://www.pgatour.com/leaderboard" target="_blank" rel="noopener">PGA Tour (official leaderboard)</a></td><td>official_metric</td><td>Used as a candidate-cause link, never as a confirmed cause</td><td><a class="src" href="https://www.pgatour.com/leaderboard" target="_blank" rel="noopener">publisher</a></td></tr><tr><td><a href="https://www.owgr.com/" target="_blank" rel="noopener">Official World Golf Ranking</a></td><td>official_metric</td><td>Used as a candidate-cause link, never as a confirmed cause</td><td><a class="src" href="https://www.owgr.com/" target="_blank" rel="noopener">publisher</a></td></tr></tbody></table></div>
+</section>
+
+
+
+<section id="thresholds">
+  <h2>Thresholds applied to this topic</h2>
+  
+  <div class="tablewrap"><table><thead><tr><th>Threshold</th><th>Value</th><th>Meaning</th><th>Source</th></tr></thead><tbody><tr><td>Swing alert</td><td>$0.10</td><td>A move of at least this much, in either direction, is published to the alert feed</td><td><a class="src" href="https://docs.kalshi.com/websockets/public-trades.md" target="_blank" rel="noopener" title="WebSocket: Public Trades">K19</a></td></tr><tr><td>Minimum expected edge</td><td>$0.005/contract</td><td>After the official fee, before a signal can reach the model feed</td><td><a class="src" href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener" title="Kalshi Fee Schedule (PDF, effective July 7, 2026)">K6</a></td></tr><tr><td>Minimum return</td><td>150 bps</td><td>Expected edge divided by capital at risk</td><td><a class="src" href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener" title="Kalshi Fee Schedule (PDF, effective July 7, 2026)">K6</a></td></tr><tr><td>Signal-to-noise</td><td>2× spread</td><td>The move must dominate the spread to count as signal</td><td><a class="src" href="https://docs.kalshi.com/getting_started/orderbook_responses.md" target="_blank" rel="noopener" title="Orderbook Responses">K5</a></td></tr><tr><td>Minimum depth</td><td>25 contracts</td><td>Both sides of the book must hold at least this many</td><td><a class="src" href="https://docs.kalshi.com/getting_started/orderbook_responses.md" target="_blank" rel="noopener" title="Orderbook Responses">K5</a></td></tr></tbody></table></div>
+</section>
+
+</main>
+<footer class="site">
+  <p>
+    Generated 2026-11-20 from this repository's own files.
+    Every factual row links to an official Kalshi (or other primary) source; see
+    <a href="sources.html">Sources</a> and <a href="flagged.html">Flagged for review</a>.
+  </p>
+  <p class="mute">
+    Kalshi demo environment only. Kalshi documents that demo prices and behaviour
+    "may not be reflective of those in real markets". Nothing here is investment advice.
+  </p>
+</footer>
+<script src="app.js" defer></script>
+</body>
+</html>

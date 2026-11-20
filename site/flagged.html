@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flagged for review · Trade3</title>
+<meta name="description" content="Irregularities and unverified values found while verifying against official Kalshi sources.">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="favicon.svg">
+</head>
+<body>
+<header class="site">
+    <a class="logo" href="index.html">Kalshi demo · Trade3</a>
+    <nav>
+      <a href="index.html" class="">Overview</a>
+      <a href="gas.html" class="">Gas prices</a><a href="elections.html" class="">Elections</a><a href="culture.html" class="">Culture</a><a href="crypto.html" class="">Crypto</a><a href="golf.html" class="">Golf</a>
+      <a href="executive-summary.html" class="">Executive summary</a>
+      <a href="requirements.html" class="">Requirements</a>
+      <a href="api-contracts.html" class="">API contracts</a>
+      <a href="fees.html" class="">Fees</a>
+      <a href="findings.html" class="">Findings</a>
+      <a href="suggestions.html" class="">Suggestions</a>
+      <a href="sources.html" class="">Sources</a>
+      <a href="flagged.html" class="on">Flagged for review</a>
+    </nav>
+  </header>
+<main>
+
+<div class="banner warn"><b>Flagged for review.</b> Everything on this page is either an irregularity found while verifying against official sources, or a value that could not be confirmed and was therefore left blank. None of it blocks the site; all of it is here so you can decide.</div>
+
+<section id="irregularities">
+  <h2>Irregularities found in official sources</h2>
+  <p class="secnote">Each row was checked against the source in its last column. The two that matter most: the legacy order endpoint now returns 410, and the fee schedule's printed table rounds differently from its own formula text.</p>
+  <div class="tablewrap"><table><thead><tr><th>#</th><th>Item</th><th>Why flagged</th><th>What was done</th><th>Source</th></tr></thead><tbody><tr><td>F1</td><td>Legacy <code>POST /portfolio/orders</code> removed (410) while popular tutorials and the official starter repo still show it</td><td>Contract drift between docs and sample code</td><td>App uses V2 only and refuses to fall back; noted here and on the site</td><td><a href="https://docs.kalshi.com/api-reference/orders/create-order-v2.md" target="_blank" rel="noopener">K13</a><a href="https://github.com/Kalshi/kalshi-starter-code-python" target="_blank" rel="noopener">K24</a></td></tr>
+<tr><td>F2</td><td>Official starter repo uses the non-recommended demo host <code>demo-api.kalshi.co</code></td><td>Docs say <code>external-api.demo.kalshi.co</code> is recommended</td><td>Recommended host is the default, alternate is a setting</td><td><a href="https://docs.kalshi.com/getting_started/api_environments.md" target="_blank" rel="noopener">K1</a><a href="https://github.com/Kalshi/kalshi-starter-code-python" target="_blank" rel="noopener">K24</a></td></tr>
+<tr><td>F3</td><td>Demo price behaviour &quot;may not be reflective of those in real markets&quot;</td><td>Any demo-derived edge may not transfer to live markets</td><td>Every page that shows a demo price repeats this warning verbatim</td><td><a href="https://docs.kalshi.com/getting_started/demo_env.md" target="_blank" rel="noopener">K2</a></td></tr>
+<tr><td>F4</td><td><code>orderbook_delta</code> requires an authenticated connection while the REST orderbook is public</td><td>Liquidity ladder is polled via REST instead of streamed</td><td>Documented in the UI (&quot;depth comes from REST snapshots&quot;)</td><td><a href="https://docs.kalshi.com/getting_started/quick_start_websockets.md" target="_blank" rel="noopener">K8</a><a href="https://docs.kalshi.com/websockets/orderbook-updates.md" target="_blank" rel="noopener">K20</a></td></tr>
+<tr><td>F5</td><td>Exact demo series tickers for gas prices / elections / culture / crypto / golf</td><td>Not enumerable without live API access; no official static list exists</td><td>Discovered at runtime from <code>/series</code> + <code>/events</code>; the verified-by-name seeds in <code>research/topics.json</code> are marked <code>seed</code> and re-checked live</td><td><a href="https://docs.kalshi.com/api-reference/market/get-series-list.md" target="_blank" rel="noopener">K12</a><a href="https://docs.kalshi.com/api-reference/events/get-events.md" target="_blank" rel="noopener">K11</a></td></tr>
+<tr><td>F6</td><td>Demo account starting balance</td><td>Depends on the account; not a documented constant</td><td>Read from <code>/portfolio/balance</code>; shown as &quot;unknown&quot; when no key</td><td><a href="https://docs.kalshi.com/api-reference/portfolio/get-balance.md" target="_blank" rel="noopener">K15</a></td></tr>
+<tr><td>F7</td><td>&quot;Highest dollar amount live events&quot; — no official ranking metric is documented</td><td>Kalshi does not document a &quot;largest event&quot; endpoint or sort order</td><td>Ranked by reported <code>dollar_volume</code> from the ticker feed, else <code>volume_fp × price</code>; the metric is disclosed on the page</td><td><a href="https://docs.kalshi.com/websockets/market-ticker.md" target="_blank" rel="noopener">K18</a><a href="https://docs.kalshi.com/api-reference/market/get-markets.md" target="_blank" rel="noopener">K9</a></td></tr>
+<tr><td>F8</td><td>Causes of price jumps</td><td>No official feed attributes a price move to a news story</td><td>Candidate links only (series settlement sources + configured news feeds), always labelled candidates</td><td><a href="https://docs.kalshi.com/api-reference/market/get-series-list.md" target="_blank" rel="noopener">K12</a></td></tr>
+<tr><td>F9</td><td>Whether demo <code>KXGAS</code>-style gas series are open on a given day</td><td>Dynamic</td><td>Discovered at runtime; blank if absent</td><td><a href="https://docs.kalshi.com/api-reference/market/get-series-list.md" target="_blank" rel="noopener">K12</a></td></tr>
+<tr><td>F10</td><td><code>liquidity_dollars</code> definition (how Kalshi computes it)</td><td>The field exists on the market object but its formula is not documented on the pages retrieved</td><td>Displayed as reported, never recomputed or relabelled</td><td><a href="https://docs.kalshi.com/api-reference/market/get-markets.md" target="_blank" rel="noopener">K9</a></td></tr>
+<tr><td>F11</td><td>Fee schedule self-inconsistency: the formula text says round up to a <strong>centicent</strong> ($0.0001) but the printed General Trading Fees Table is rounded up to a whole <strong>cent</strong></td><td>1 contract at $0.01: formula gives 0.07×1×0.01×0.99 = $0.000693, table prints <strong>$0.01</strong>. 100 contracts at $0.45: formula gives $1.7325, table prints $1.74. Every row reconciles only under cent rounding.</td><td>The app charges the formula at centicent (which is what can actually leave a balance per <a href="https://docs.kalshi.com/getting_started/fee_rounding.md" target="_blank" rel="noopener">K7</a>) and displays the formula value, not the table value. Both are shown in the fee panel so the difference is visible.</td><td><a href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener">K6</a><a href="https://docs.kalshi.com/getting_started/fee_rounding.md" target="_blank" rel="noopener">K7</a></td></tr></tbody></table></div>
+</section>
+
+<section id="unverified">
+  <h2>What could not be verified</h2>
+  
+  <div class="tablewrap"><table><thead><tr><th>Item</th><th>Reason</th><th>Consequence</th><th>Source</th></tr></thead><tbody><tr><td>Any live Kalshi response</td><td>Sandbox egress is allowlisted to GitHub/PyPI/npm; Kalshi hosts resolve but TCP is blocked</td><td>No live prices, volumes, event tickers or account data are claimed anywhere in this repo</td><td>unverified — no source can confirm a response that was never received</td></tr>
+<tr><td>The demo account&#39;s actual balance/positions</td><td>Needs a demo API key; none is stored in the repo (and should not be)</td><td>App reports &quot;not connected&quot; until a key is present</td><td>unverified — value is account-specific, blank until a key exists</td></tr>
+<tr><td>Current per-series fee multipliers for the 5 topics</td><td>The PDF lists many series but not every one; multipliers can change with each schedule update</td><td>The app reads the PDF-documented defaults and shows the multiplier it applied</td><td>unverified for series not listed in <a href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener">K6</a>; the defaults themselves are from <a href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener">K6</a></td></tr></tbody></table></div>
+</section>
+
+<section id="blank">
+  <h2>Values deliberately left blank on topic pages</h2>
+  
+  <ul><li><span class="mono">golf/ (no verified seed series)</span> — no official source confirms this value, so the cell is blank.</li></ul>
+</section>
+
+<section id="build">
+  <h2>Build-time source checks</h2>
+  <p class="secnote">These are produced by the generator itself. If this list is ever non-empty, the build script exits non-zero and the deploy is stopped.</p>
+  <p class="ok">No rows were published without a source at build time.</p>
+</section>
+
+<section id="howto">
+  <h2>How to review this</h2>
+  
+  <ol>
+<li>Pick any row on any page. Its last cell is a source ID; the <a href="sources.html">Sources</a> page turns that ID into an official URL.</li>
+<li>Open the URL and search the page for the exact field name or number in the row.</li>
+<li>If the source does not support the row, add it here and open an issue. The build does not prevent a wrong claim — it prevents an <em>unsourced</em> claim — so human review is still the last line of defence.</li>
+</ol>
+</section>
+
+</main>
+<footer class="site">
+  <p>
+    Generated 2026-11-20 from this repository's own files.
+    Every factual row links to an official Kalshi (or other primary) source; see
+    <a href="sources.html">Sources</a> and <a href="flagged.html">Flagged for review</a>.
+  </p>
+  <p class="mute">
+    Kalshi demo environment only. Kalshi documents that demo prices and behaviour
+    "may not be reflective of those in real markets". Nothing here is investment advice.
+  </p>
+</footer>
+<script src="app.js" defer></script>
+</body>
+</html>
