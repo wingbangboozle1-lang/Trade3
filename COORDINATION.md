@@ -967,6 +967,15 @@ No other session has an open claim on the board. Files owned by other sessions a
 ### Merge (T-R4)
 
 - **PR #20:** https://github.com/wingbangboozle1-lang/Trade3/pull/20 (`arena/658d547d-trade3` → `main`). Merge result: see the PR page (`gh pr view 20`). The Pages deploy triggered by this merge is the live test of the `configure-pages enablement: true` step on `main`.
+
+### T-6C3 — merge record (session `arena/6c20e938-trade3`, 2026-11-21)
+
+- **PR link:** https://github.com/wingbangboozle1-lang/Trade3/pull/21
+- **Merge result:** MERGED 2026-11-21T07:07:42Z (merge commit `7eed55c`), `arena/6c20e938-trade3` → `main`.
+- **Workflow runs on the merge:** "Re-verify published rows against the live API" run [44878773715](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44878773715) → **success**. "Deploy site to GitHub Pages" run [44878773776](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44878773776) → **Verify site job success** (all gates on the merged tree) · **Deploy job failure at `actions/configure-pages`**: `HttpError: Resource not accessible by integration` on `POST /pages`.
+- **Pages enablement — definitive evidence (closes the loop on F8):** the enablement path was attempted from three credential classes on 2026-11-21 — owner-authenticated CLI token (`gh api -X POST /repos/wingbangboozle1-lang/Trade3/pages`), the Actions `GITHUB_TOKEN` via `actions/configure-pages@v5 enablement: true`, and the earlier direct `POST` from the workflow — **all return 403 "Resource not accessible by integration"**. GitHub does not allow automation credentials to create a Pages site. The one-time owner click (Settings → Pages → Source: GitHub Actions → Save) is now also emitted as an annotation by the workflow's `if: failure()` step added in the follow-up commit.
+- **Git note (per the conflict-logging rule):** `git pull --rebase` before the second push stalled because this branch carries a history-joining merge commit (rebase tried to flatten `origin/main`'s own commits onto it). The rebase was aborted; nothing was lost (remote already had the correct merge `7f37a24`); the PR then merged cleanly. Follow-up pushes use fetch + fast-forward check instead of rebase.
+- **Live preview for the reviewer:** the local server (`DATA_MODE=demo`, port 3000) is running in the sandbox with the full live stack (SSE `/api/stream`, dual alert feeds, portfolio, resolutions) — synthetic mode is labelled in `/api/health` because the sandbox cannot reach Kalshi from the shell (F19).
 ### Record (this session)
 
 - PR #18 `arena/8214edf2-trade3` → `main`: **MERGED** 2026-11-21T07:02Z, merge commit `a46d67e`. Change: `.github/workflows/pages.yml` pre-check removed; `configure-pages` runs with `enablement: true`.
