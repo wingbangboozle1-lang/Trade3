@@ -224,6 +224,17 @@ KALSHI_PRIVATE_KEY_PATH=./demo_private_key.pem
         <code>KALSHI-ACCESS-KEY / -TIMESTAMP / -SIGNATURE</code>
         (<a href="https://docs.kalshi.com/getting_started/quick_start_authenticated_requests" target="_blank" rel="noopener">docs</a>).</li>
       <li>WebSocket handshake signs <code>GET /trade-api/ws/v2</code> — the socket path, not the REST prefix.</li>
+      <li><b>Two price scales in one book.</b> The <code>orderbook_delta</code> and <code>orderbook_snapshot</code>
+        channels report NO-side levels in <em>no-leg</em> pricing by default — “a no-side delta at
+        <code>price_dollars=0.30</code> corresponds to a market offer of ‘no at 30c’, which would match against
+        ‘yes at 70c’”. Subscribing with <code>use_yes_price: true</code> puts both sides on the yes scale, and
+        Kalshi says new integrations are encouraged to set it. This project asks for yes-leg pricing and also
+        handles the flip explicitly, so a book can never be half-mirrored: a NO level arriving at 0.30 is stored
+        as 0.70. Source: <a href="https://docs.kalshi.com/getting_started/order_direction" target="_blank" rel="noopener">Order direction</a>.</li>
+      <li>Direction has two vocabularies that always agree — <code>bid ≡ yes</code> and <code>ask ≡ no</code> —
+        and the legacy <code>action</code>/<code>side</code> fields are deprecated but “will not be removed before
+        May 28, 2026”. This project reads <code>outcome_side</code>/<code>book_side</code>, and on public trades
+        <code>taker_outcome_side</code>/<code>taker_book_side</code>, rather than the deprecated pair.</li>
       <li>A <code>201</code> means accepted, not filled: always check <code>remaining_count</code>
         (<a href="https://docs.kalshi.com/getting_started/quick_start_create_order" target="_blank" rel="noopener">docs</a>).</li>
       <li>Keys are never stored in this repository, never entered into the website, and never sent anywhere but Kalshi.</li>

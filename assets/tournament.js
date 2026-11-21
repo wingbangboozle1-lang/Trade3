@@ -77,6 +77,9 @@ function renderStatus() {
 // data
 // ---------------------------------------------------------------------------
 async function load() {
+  // On a static host there is no collector, and hammering a relative API path that
+  // cannot exist just produces noise (and a 404/503 per poll). Ask once, then stop.
+  if (state.relayState === "unavailable" || state.relayState === "closed") return;
   try {
     const r = await fetch("api/tournament", { cache: "no-store" });
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
@@ -119,7 +122,14 @@ function renderNote() {
     return;
   }
   if (state.error) {
-    note.textContent = `Could not read the tournament ledger: ${state.error}. The table is left empty on purpose.`;
+    const staticHost = !/^http/.test(location.protocol) || location.hostname.endsWith("github.io");
+    note.innerHTML = staticHost
+      ? `This page is served as a static file from <code>${esc(location.hostname)}</code>, so there is no
+         collector here to hold the shadow ledger (the read returned ${esc(state.error)}). The books live in the
+         Node collector, not the browser, because four strategies need one shared ledger that keeps running.
+         Run <code>npm start</code> in the repository and open <code>/tournament.html</code> to see it.
+         The table is deliberately left empty rather than filled with zeros that would look like a flat result.`
+      : `Could not read the tournament ledger: ${esc(state.error)}. The table is left empty on purpose.`;
     meta.textContent = "";
     return;
   }
