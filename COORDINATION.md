@@ -827,3 +827,16 @@ No other session is active; no conflicting claims exist on the board.
 
 - F8 Pages enablement still requires one owner click (reproduced 403 this session). Site itself is verified and not broken.
 - All other flags F1–F25 unchanged; no new unverified values introduced. No hallucinations: every value in this record links its official source above.
+# Session `arena/658d547d-trade3` — claim (2026-11-21)
+
+**Branch:** `arena/658d547d-trade3` (fixed for this session; based on `main` @ `4eb92a1`). The task text names
+`session-<id>/<task>` branches; the session rules for this run require the assigned `arena/…` branch, so that name is used.
+
+| Task | Status | Owner | File scope |
+|---|---|---|---|
+| T-R1 Re-run all local gates on `main` (`npm test`, `check_site.py`, `check-links.js`, Python compile + offline checks) | in progress | `arena/658d547d-trade3` | none (read-only) |
+| T-R2 Spot re-verify published values against the official Kalshi demo API and docs (via fetch, not sandbox bash) | in progress | `arena/658d547d-trade3` | `COORDINATION.md` (record only) |
+| T-R3 GitHub Pages enablement retry (`POST /repos/…/pages`, `build_type=workflow`) | in progress | `arena/658d547d-trade3` | none (API call only) |
+| T-R4 Record results, PR to `main`, merge, Pages status | pending | `arena/658d547d-trade3` | `COORDINATION.md` (record only) |
+
+No other session has an open claim on the board. Files owned by other sessions are not touched.
