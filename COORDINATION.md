@@ -1681,13 +1681,13 @@ Marking T-74a … T-74d **done**.
 | Crypto KXETHD | [series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXETHD) | "Ethereum price Above/below", Crypto, CF Benchmarks settlement — matches |
 | Base URLs / WS | [API Environments](https://docs.kalshi.com/getting_started/api_environments) | Demo REST `external-api.demo.kalshi.co`, WS `external-api-ws.demo.kalshi.co` — exactly as specified in the task |
 
-### T-22b Gates on latest merged tree (`main` @ `91e748f`, after PRs #29, #37/#42, #40, #43)
+### T-22b Gates on latest merged tree (`main` @ `a2b6d13`; site tree `bf08e73`, after PRs #29, #37/#42, #40, #43, #41/#45, #44/#46)
 
 | Gate | Result |
 |---|---|
 | `npm test` | **pass** — logic tests, engine 15/15, site render 13/13 |
 | `npm run test:all` | **pass** — logic, headless render (with `jsdom@25`), engine 15/15, site render 13/13 |
-| Latest GitHub Actions Verify site job | **pass** — [run 44879704914](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879704914) on the latest site-bearing tree (`bf08e73`); later main commits only add coordination records |
+| Latest GitHub Actions Verify site job | **pass** — [run 44879704914](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879704914) on the latest site-bearing tree (`bf08e73`); PRs #41/#44/#45/#46 afterward only add coordination records |
 | `python3 scripts/check_site.py` | **pass** — 29 pages, 387 local links, 20 JS modules, 39 series rows |
 | `node scripts/check-links.js` | **pass** — 387 references resolve, 0 broken |
 | `py_compile` (6 files) · `node --check` (`app/app.js`, all `server/*.js`) | **pass** |
@@ -1705,7 +1705,7 @@ Marking T-74a … T-74d **done**.
 
 ### T-22e PR + merge record
 
-- **PR #33:** https://github.com/wingbangboozle1-lang/Trade3/pull/33 — "Final integration 2026-11-21: live re-verification, gates, preview + Pages blocker evidence (22ed9fdf)". Coordination-record only. This branch is being updated to include the latest `main`; merge and post-merge deploy results will be recorded in a follow-up coordination entry.
+- **PR #33:** https://github.com/wingbangboozle1-lang/Trade3/pull/33 — "Final integration 2026-11-21: live re-verification, gates, preview + Pages blocker evidence (22ed9fdf)". Coordination-record only. The local branch is rebased through latest `main` @ `a2b6d13`; the updated head will be pushed, then the merge and post-merge deploy results will be recorded in a follow-up coordination entry.
 
 ### T-22 branch update after concurrent merges
 
@@ -1720,3 +1720,10 @@ Marking T-74a … T-74d **done**.
 - Full local gates were rerun on the `91e748f` tree plus this session's coordination record: `npm run test:all` (including `jsdom@25` headless render), `scripts/check_site.py`, `scripts/check-links.js`, six-file Python compile, and `node --check` for app/server — all pass.
 - Latest Pages workflow [run 44879704914](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879704914) verifies the latest site-bearing commit `bf08e73`: **Verify site ✓**; **Deploy ✗ at `Pages readiness`**. The Pages site API still returns 404, and the POST/create attempt returns 403; F8 remains the sole owner-only publish blocker.
 - PR #29 and PR #37/#42 were merged by their owners before this rebase; this session did not edit their scopes. Other session PR #44 (`COORDINATION.md` only) remains outside this session's scope. PR #33 head update and merge record follow.
+
+### T-22 third rebase (latest main @ `a2b6d13`)
+
+- The required pre-push `git pull --rebase origin main` fetched new merges after `91e748f`: PR #44 (session `arena/d9cfd60b-trade3`), PR #45 (session `arena/7457e87c-trade3`), and PR #46 (session `arena/77ec3a0e-trade3`); PR #41 was already in that first-parent chain. All these PRs touch `COORDINATION.md` only.
+- Rebase conflicted only while replaying this session's claim in `COORDINATION.md`; kept the entire upstream block (143 lines) and the claim, then all four remaining session commits replayed cleanly. No external session content or product files were changed.
+- Since the site code is unchanged after `bf08e73`, the full local suite from `91e748f` remains applicable; the current diff from `origin/main` is only this session's `COORDINATION.md` entries. Latest Pages run remains [44879704914](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879704914) (verify green, Pages readiness failure F8).
+- PRs #44–#46 were merged by their owners; this session did not edit or merge them. PR #33 is the only deliverable from this branch; its updated head is next.
