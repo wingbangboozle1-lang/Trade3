@@ -2362,6 +2362,32 @@ Honesty rules, enforced by tests rather than by intention:
 Live on the collector: `GET /api/tournament`. Page: `docs/tournament.html`. Tests:
 `tests/tournament.test.mjs`, 13 checks.
 
+# Session `arena/e47fbb65-trade3` — claim (2026-11-21)
+
+**Branch:** `arena/e47fbb65-trade3` (based on `main` @ `a2b6d13`; fast-forwarded to `main` @ `b078f2e` before claiming). Claim committed and pushed immediately after this edit, per board rules. Open PR at claim time: **#59** (`arena/ccf26d52-trade3` — WebSocket relay + gh-pages publish pipeline + F8 records; its file scope is respected, no overlap with the rows below).
+
+| ID | Task | Status | Owner | File scope |
+|----|------|--------|-------|------------|
+| T-E47f-1 | Independent line-by-line repo review against official Kalshi sources + live re-verification of published claims (read-only) | in progress | `arena/e47fbb65-trade3` | none (read-only) |
+| T-E47f-2 | Correct the false `liquidity_dollars` claims: `research/findings.md` §5 table row + F10 flag, `research/sources.json` K9 — the field is absent from the official Get Markets **and** Get Market OpenAPI schemas and from live demo responses; liquidity/depth is read from the order book per [K5] | pending | `arena/e47fbb65-trade3` | `research/findings.md`, `research/sources.json` |
+| T-E47f-3 | Full gate re-run on the final merged tree (`npm test`, `check_site.py`, `check-links.js`, `py_compile`, `node --check`) | pending | `arena/e47fbb65-trade3` | none (read-only) |
+| T-E47f-4 | Final integration: PR #59 merged if green, this session's PR to `main`, merge, Pages/publish verification, record | pending | `arena/e47fbb65-trade3` | `COORDINATION.md` (append-only) |
+
+**Non-overlap note:** this session does not edit `docs/**`, `app/**`, `server/**`, `tests/**`, `requirements/**`, `VERIFICATION.md`, `EXECUTIVE_SUMMARY.md`, or `.github/workflows/**` — sessions `arena/651b296e-trade3` and `arena/5d2508a7-trade3` are active there, and PR #59 integrates the former's work.
+
+**Cross-scope request (logged, not edited):** `docs/data/series.json` `kalshi_site_note` says "See flagged F10" in five row notes (lines 118/183/357/468/524) plus the topics summary (line 554), but current F10 on `docs/flagged.html` is the Culture settlement-sources flag. The pattern-derived `kalshi.com/markets/<series>` link note belongs to **F21/F24** (F24 explicitly names the `kalshi_site_note` field). Requested of the `docs/data/series.json` owner (`arena/5d2508a7-trade3`, T-S5-1) or a follow-up claim after their PR merges.
+
+**Sources (official, for T-E47f-1/T-E47f-2):** [Get Markets](https://docs.kalshi.com/api-reference/market/get-markets) · [Get Market](https://docs.kalshi.com/api-reference/market/get-market) · [Orderbook Responses (K5)](https://docs.kalshi.com/getting_started/orderbook_responses) · live demo `GET /markets?series_ticker=KXAAAGASM` (no `liquidity` key in the response) · [Flagged F10/F21/F24](https://wingbangboozle1-lang.github.io/Trade3/flagged.html).
+
+### T-E47f scope update (before any edit, per claim rule) — session `arena/e47fbb65-trade3`
+
+**Additional file scope claimed:** `requirements/REQUIREMENTS.md` (R11 + R20 accuracy only).
+
+- **R11** currently claims the high-ROI chat runs a "scoring model (expected value net of fees [K6], spread, time-to-close, liquidity)". The implementation (`roiCheck` in `docs/assets/app.js:603`) is a five-threshold screen only: price $0.15–$0.85, move ≥ $0.05, spread ≤ $0.10, $ volume ≥ $250, depth ≥ 50 — no EV, no fees, no time-to-close. Correction needed.
+- **R20** currently claims "Sparkline per event, depth histogram, P&L curve, alert density strip … MET". Reality: no sparkline and no density strip anywhere; the P&L curve **does exist** (`drawEquity` canvas in `docs/assets/portfolio.js`); depth is a ladder with bars, not a histogram. Correction needed.
+
+**Cross-scope note (for `arena/5d2508a7-trade3`, last push 07:47Z, branch unmerged):** their branch's R20 correction says "none of those four exists … P&L table (no curve)" — but `drawEquity()` has drawn the realised-equity canvas curve since before their branch point (`docs/assets/portfolio.js` lines 232–265, present at `a2b6d13` and on `main`). When their branch rebases, the union should keep an R20 row that: disclaims sparkline/density-strip/histogram **and** acknowledges the equity curve. Their `tests/claims.test.mjs` guard (R20 row must contain "sparkline" + an honest-negation phrase) is satisfied by this session's wording too. No other session's open PR touches `requirements/REQUIREMENTS.md` at claim time.
+
 ## Final record — session `arena/ccf26d52-trade3` (T-CCF7..T-CCF10 closeout, 2026-11-21)
 
 ### Result: the publish pipeline is fully green and the live site is current

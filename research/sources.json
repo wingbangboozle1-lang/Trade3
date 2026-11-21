@@ -122,7 +122,8 @@
       "claims_supported": [
         "GET /markets with limit (max 1000), cursor, event_ticker, series_ticker, status, min_close_ts, max_close_ts",
         "status filter accepts unopened, open, closed, settled",
-        "Market fields include ticker, event_ticker, title, subtitle, yes_bid_dollars, yes_ask_dollars, last_price_dollars, volume_fp, volume_24h_fp, open_interest_fp, liquidity_dollars, result ('yes'/'no'/''), close_time, settlement_ts, settlement_value_dollars, rules_primary, notional_value_dollars",
+        "Market fields include ticker, event_ticker, title, subtitle, yes_bid_dollars, yes_ask_dollars, last_price_dollars, volume_fp, volume_24h_fp, open_interest_fp, result ('yes'/'no'/''), close_time, settlement_ts, settlement_value_dollars, rules_primary, notional_value_dollars",
+        "The market object carries no liquidity field (no liquidity_dollars): verified against this schema and live GET /markets responses on 2026-11-21; an earlier version of this entry wrongly listed liquidity_dollars as a market field. Liquidity/depth comes from the order book (K5/K10)",
         "Fixed-point strings: *_fp counts have 2 decimals; *_dollars prices are dollar strings"
       ]
     },
