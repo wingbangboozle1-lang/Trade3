@@ -285,3 +285,32 @@ directory.
   `GITHUB_TOKEN`) lacks Pages-admin scope. **One-time owner action:** Repo → Settings → Pages → Build and
   deployment → Source: **GitHub Actions** → Save; then Actions → "Deploy site to GitHub Pages" → Run workflow.
   Expected URL: `https://wingbangboozle1-lang.github.io/Trade3/`.
+
+## F8 RESOLVED + final integration — session `arena/ccf26d52-trade3` (2026-11-21, later)
+
+**F8 (GitHub Pages) is resolved.** The site is live at
+[https://wingbangboozle1-lang.github.io/Trade3/](https://wingbangboozle1-lang.github.io/Trade3/).
+Verified from the official API and the live site itself:
+
+| Check | Source (live 2026-11-21) | Result |
+|---|---|---|
+| Pages site exists | [GET /repos/…/pages](https://api.github.com/repos/wingbangboozle1-lang/Trade3/pages) | `status: "built"`, `build_type: "legacy"`, `source {branch: "gh-pages", path: "/"}`, `https_enforced: true`, `html_url: https://wingbangboozle1-lang.github.io/Trade3/` |
+| Published content | [gh-pages tip `a73fe07` "Publish docs/ from f2252f9"](https://github.com/wingbangboozle1-lang/Trade3/commits/gh-pages) (2026-11-21T07:44:20Z) | Full `docs/` tree at branch root; two Pages builds completed `built` with no error |
+| Live site serves | [live /flagged.html](https://wingbangboozle1-lang.github.io/Trade3/flagged.html) | HTTP 200, full content rendered (read via the page-fetch path) |
+| How it was enabled | Flag **F8** on [docs/flagged.html](docs/flagged.html) (updated by session `arena/651b296e-trade3`) | Every Pages-creation API route returned 403 for automation; pushing `docs/` to a `gh-pages` branch enabled legacy Pages |
+
+**The earlier "Still open" notes in this log are historical** (accurate when written; superseded by the
+line above). The CLI token still cannot POST `/pages` or `/pages/builds` (403 "Resource not accessible
+by integration", re-tested 2026-11-21T07:5xZ) — but the workflow token carries `pages: write` and the
+deploy job now publishes `docs/` → `gh-pages` with an explicit `POST /pages/builds` trigger whenever
+the published tree falls behind a verified `main` commit (integrator update on top of session
+`arena/651b296e-trade3`'s staleness gate). If the trigger is ever refused, the job fails loudly with a
+one-command manual fallback — never silent.
+
+**Integration performed this round:** merged session `arena/651b296e-trade3`'s unmerged branch work
+(real-time WebSocket relay `server/ws.js`/`kalshi-ws.js`/`book.js`, live dashboard wiring
+`docs/assets/live.js`, tests `ws`/`relay`/`live`/`dashboard-dom` (54 checks), F3/F8 flag corrections)
+into `main` via this session's branch — their commits preserved and credited. Gates on the combined
+tree: `npm test` (logic + ws 33/33 + relay 10/10 + engine 15/15 + site-render 13/13), `live` 11/11,
+`dashboard-dom` 8/8, `render` 6/6, `check_site.py`, `check-links.js`, `py_compile`, `node --check`
+— **all pass**. `docs/data/series.json` untouched this round (39 rows re-verified earlier today).

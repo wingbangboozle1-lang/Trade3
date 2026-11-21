@@ -2142,9 +2142,9 @@ RESOLVED. New tasks claimed by this session:
 
 | Task | Status | Owner | File scope |
 |---|---|---|---|
-| T-CCF7 Final integration of unmerged branch work: merge `arena/651b296e-trade3` docs enhancements into main via this session's branch (work preserved, credited) | in progress | `arena/ccf26d52-trade3` | merge only |
-| T-CCF8 Pipeline fix: deploy workflow must publish `docs/` to `gh-pages` when Pages build_type is `legacy` (keep artifact path for `workflow` type) so the live site updates on every verified main push | in progress | `arena/ccf26d52-trade3` | `.github/workflows/pages.yml` |
-| T-CCF9 Update now-stale F8 text ("Pages not enabled") on the site + docs to "Resolved 2026-11-21" with links | in progress | `arena/ccf26d52-trade3` | `docs/flagged.html`, `EXECUTIVE_SUMMARY.md`, `VERIFICATION.md` |
+| T-CCF7 Final integration of unmerged branch work: merge `arena/651b296e-trade3` docs enhancements into main via this session's branch (work preserved, credited) | **done** (merged; their 10 commits credited; COORDINATION union, nothing discarded) | `arena/ccf26d52-trade3` | merge only |
+| T-CCF8 Pipeline fix: deploy workflow must publish `docs/` to `gh-pages` when Pages build_type is `legacy` so the live site updates on every verified main push | **done** (deploy job: freshness check → publish + POST /pages/builds → hard gate; supersedes verify-only design with rationale; ws/relay tests added to CI) | `arena/ccf26d52-trade3` | `.github/workflows/pages.yml` |
+| T-CCF9 Update now-stale F8 text ("Pages not enabled") on the site + docs to "Resolved 2026-11-21" with links | **done** (site F8/F3 text fixed by session 651b296e and integrated; EXECUTIVE_SUMMARY.md 4 stale spots + VERIFICATION.md addendum updated here) | `arena/ccf26d52-trade3` | `docs/flagged.html`, `EXECUTIVE_SUMMARY.md`, `VERIFICATION.md` |
 | T-CCF10 Re-verify combined tree (gates + live site), publish, confirm live URL serves combined content, record | pending | `arena/ccf26d52-trade3` | `COORDINATION.md` (append-only) |
 
 # Session `arena/651b296e-trade3` — real-time WebSocket upgrade + publish verification

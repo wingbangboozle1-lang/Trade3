@@ -9,7 +9,10 @@
 # source { branch: "gh-pages", path: "/" }). The Pages API routes
 # (POST /pages, actions/configure-pages with enablement) return 403
 # "Resource not accessible by integration" for this installation, so they are no
-# longer used. Pushing needs only `contents: write`.
+# longer used. Pushing needs only `contents: write`; because a GITHUB_TOKEN push does
+# not wake a legacy Pages build, the push is followed by an explicit
+# POST /repos/{owner}/{repo}/pages/builds request, and the job fails loudly if the
+# published tree does not converge to docs/ at the pushed commit.
 #
 # Manual alternative: Actions -> "Deploy site to GitHub Pages" -> Run workflow.
 
@@ -57,6 +60,9 @@ jobs:
 
       - name: Dashboard logic tests
         run: node tests/logic.test.mjs
+
+      - name: WebSocket + relay conformance tests (RFC 6455 vectors, Kalshi feed client)
+        run: node tests/ws.test.mjs && node tests/relay.test.mjs
 
       - name: Collector and engine tests
         run: node tests/smoke-test.js
@@ -138,11 +144,16 @@ jobs:
     needs: verify
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write   # push the docs/ tree to gh-pages when the published site is stale
+      pages: write      # POST /pages/builds (explicit legacy Pages build trigger)
     steps:
       - uses: actions/checkout@v4
 
-      # HOW THIS REPO PUBLISHES (verified 2026-11-21 against the live API)
+      # HOW THIS REPO PUBLISHES (verified 2026-11-21 against the live API; integrator
+      # update, session arena/ccf26d52-trade3 — supersedes the verify-only design from
+      # session arena/651b296e-trade3. Their staleness gate is kept below as the gate;
+      # this revision adds the publish path so the live site tracks verified main with
+      # zero manual steps, which the project brief demands.)
       #
       # GitHub Pages on this repository is bound to the `gh-pages` branch:
       #   GET /repos/{owner}/{repo}/pages
@@ -150,29 +161,28 @@ jobs:
       #        source: { branch: "gh-pages", path: "/" }, https_enforced: true,
       #        html_url: "https://wingbangboozle1-lang.github.io/Trade3/" }
       #
-      # This workflow does NOT push that branch, and that is deliberate.
-      # GitHub's own documentation, "Configuring a publishing source for your
-      # GitHub Pages site", states:
-      #
-      #   "Commits pushed by a GitHub Actions workflow that uses the GITHUB_TOKEN
-      #    do not trigger a GitHub Pages build."
-      #
-      # so a workflow-side push would run green and publish nothing — the exact
-      # silent failure this project refuses to ship. The branch is updated by a
-      # normal authenticated push (a maintainer, or the developer agent working on
-      # the branch), which does trigger the legacy Pages build.
-      #
       # The artifact route (actions/configure-pages + actions/deploy-pages) is not
-      # available either: this installation's token has no Pages permission, so
+      # available: this installation's tokens have no Pages-admin permission, so
       # POST /repos/{owner}/{repo}/pages returns 403 "Resource not accessible by
-      # integration".
+      # integration" (flag F8; full evidence on docs/flagged.html).
       #
-      # What this job therefore does is verify, not publish: it proves that what
-      # gh-pages currently serves is identical to docs/ at this commit, and fails
-      # if the published site has fallen behind. A red X here means "the site is
-      # stale, publish it", never "the site is broken but we published anyway".
+      # Publishing therefore works like this, fully automatically:
+      #   1. If gh-pages already serves exactly docs/ at this commit, do nothing.
+      #   2. Otherwise push the docs/ tree to gh-pages (needs only `contents: write`).
+      #      Per GitHub's docs ("Configuring a publishing source for your GitHub Pages
+      #      site"), commits pushed by a workflow with the GITHUB_TOKEN do NOT trigger
+      #      a legacy Pages build.
+      #   3. So the push is followed by an explicit build request —
+      #      POST /repos/{owner}/{repo}/pages/builds ("Request a GitHub Pages build",
+      #      https://docs.github.com/rest/pages/pages#request-a-github-pages-build) —
+      #      which the workflow token can make (pages: write). If that call is ever
+      #      refused, the job fails loudly with the exact manual fallback; it never
+      #      leaves a stale site looking green.
+      #   4. The final gate re-checks the built tree and fails unless the published
+      #      site is current.
 
-      - name: Is the published site identical to docs/ at this commit?
+      - name: Check freshness of the published site
+        id: check
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -187,23 +197,84 @@ jobs:
           commit=$(printf '%s' "$json" | python3 -c "import json,sys;print(json.load(sys.stdin).get('commit',''))" 2>/dev/null || echo '')
           echo "latest Pages build: status=${status:-unknown} commit=${commit:-unknown}"
 
-          if [ -z "$commit" ]; then
-            echo "::warning title=Pages build record unreadable::the token cannot read /pages/builds/latest; skipping the freshness comparison. The live site is still checked by 'Verify published site is live'."
-            exit 0
+          published=""
+          if [ -n "$commit" ]; then
+            # On gh-pages the tree root IS docs/, so the published commit's tree
+            # must equal this commit's docs/ tree.
+            published=$(git rev-parse "${commit}:docs" 2>/dev/null || git rev-parse "${commit}^{tree}" 2>/dev/null || echo '')
           fi
 
-          published=$(git rev-parse "${commit}:docs" 2>/dev/null || git rev-parse "${commit}^{tree}" 2>/dev/null || echo '')
-          published=${published:-unknown}
+          echo "expected=$expected" >> "$GITHUB_OUTPUT"
+          if [ "$status" = "built" ] && [ "$published" = "$expected" ]; then
+            echo "::notice title=Published site is current::gh-pages serves docs/ from $GITHUB_SHA exactly."
+            echo "stale=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice title=Published site is stale::Pages serves ${commit:0:12} (${status:-unknown}) but docs/ at ${GITHUB_SHA:0:12} is expected. Publishing."
+            echo "stale=true" >> "$GITHUB_OUTPUT"
+          fi
 
-          # On gh-pages the tree root IS docs/, so the published commit's tree
-          # must equal this commit's docs/ tree.
+      - name: Publish docs/ to gh-pages and trigger a Pages build
+        if: steps.check.outputs.stale == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          expected="${{ steps.check.outputs.expected }}"
+          git fetch origin gh-pages --depth=1 2>/dev/null || true
+          parent=""
+          if git rev-parse -q --verify FETCH_HEAD >/dev/null; then parent="-p FETCH_HEAD"; fi
+          new=$(git commit-tree "$expected" $parent -m "Publish docs/ from ${GITHUB_SHA}")
+          git push origin "+${new}:refs/heads/gh-pages"
+          echo "pushed ${new} to gh-pages"
+
+          # A GITHUB_TOKEN push does not trigger a legacy Pages build (GitHub docs);
+          # request one explicitly.
+          code=$(curl -s -o /tmp/build.json -w '%{http_code}' -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/pages/builds" || echo 000)
+          echo "POST /pages/builds -> $code"
+          if [ "$code" != "201" ]; then
+            cat /tmp/build.json || true
+            echo "::error title=Pages build could not be triggered::the tree was pushed to gh-pages (${new}) but POST /pages/builds returned ${code}. One manual step remains (it triggers the legacy build because it is not a GITHUB_TOKEN push): git fetch origin gh-pages && git commit-tree \$(git rev-parse HEAD:docs) -p FETCH_HEAD -m 'Publish docs/' | xargs git push origin +:refs/heads/gh-pages"
+            exit 1
+          fi
+
+          # Wait for the build and prove it serves the pushed tree (never silent).
+          for i in $(seq 1 24); do
+            sleep 5
+            json=$(curl -sS -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/pages/builds/latest" || echo '{}')
+            status=$(printf '%s' "$json" | python3 -c "import json,sys;print(json.load(sys.stdin).get('status',''))" 2>/dev/null || echo '')
+            commit=$(printf '%s' "$json" | python3 -c "import json,sys;print(json.load(sys.stdin).get('commit',''))" 2>/dev/null || echo '')
+            echo "build poll ${i}: status=${status:-unknown} commit=${commit:-unknown}"
+            if [ "$status" = "built" ] && [ "$commit" = "$new" ]; then
+              echo "::notice title=Pages build complete::gh-pages@${new:0:12} is built and serving."
+              exit 0
+            fi
+            if [ "$status" = "errored" ]; then
+              echo "::error title=Pages build errored::see the repository's Pages build logs."
+              exit 1
+            fi
+          done
+          echo "::warning title=Pages build still running::polling timed out; the final gate below decides."
+
+      - name: Published site must be current
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          expected=$(git rev-parse HEAD:docs)
+          json=$(curl -sS -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/pages/builds/latest" || echo '{}')
+          status=$(printf '%s' "$json" | python3 -c "import json,sys;print(json.load(sys.stdin).get('status',''))" 2>/dev/null || echo '')
+          commit=$(printf '%s' "$json" | python3 -c "import json,sys;print(json.load(sys.stdin).get('commit',''))" 2>/dev/null || echo '')
+          published=""
+          if [ -n "$commit" ]; then
+            published=$(git rev-parse "${commit}:docs" 2>/dev/null || git rev-parse "${commit}^{tree}" 2>/dev/null || echo '')
+          fi
           if [ "$status" = "built" ] && [ "$published" = "$expected" ]; then
             echo "::notice title=Published site is current::gh-pages serves docs/ from $GITHUB_SHA exactly."
             exit 0
           fi
-
-          echo "::error title=Published site is stale::Pages is serving commit ${commit:0:12} (${status}), which is not docs/ at ${GITHUB_SHA:0:12}."
-          echo "Publish it with an authenticated push of docs/ to gh-pages:"
-          echo "  git fetch origin gh-pages && git commit-tree \$(git rev-parse HEAD:docs) -p FETCH_HEAD -m 'Publish docs/' | xargs git push origin +:refs/heads/gh-pages"
-          echo "(A GITHUB_TOKEN push would not trigger a Pages build, per GitHub's documentation.)"
+          echo "::error title=Published site is stale::Pages is serving commit ${commit:0:12} (${status:-unknown}), which is not docs/ at ${GITHUB_SHA:0:12}. Manual fallback (a non-GITHUB_TOKEN push triggers the legacy build): git fetch origin gh-pages && git commit-tree \$(git rev-parse HEAD:docs) -p FETCH_HEAD -m 'Publish docs/' | xargs git push origin +:refs/heads/gh-pages"
           exit 1
