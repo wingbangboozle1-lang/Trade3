@@ -188,3 +188,11 @@ jobs:
           path: docs
       - id: deployment
         uses: actions/deploy-pages@v4
+
+      # If any step above failed, say exactly what the owner must do. Reproduced 2026-11-21
+      # from the workflow token AND from an owner-authenticated CLI token: POST /pages returns
+      # 403 "Resource not accessible by integration" for every automation credential (flag F8).
+      - name: Deploy failed — owner action required
+        if: failure()
+        run: |
+          echo "::error title=GitHub Pages is not enabled on this repository::Every automation route (POST/PUT /pages from Actions and CLI tokens, and actions/configure-pages with enablement) returns 403. One-time owner action: Repository Settings -> Pages -> Build and deployment -> Source: GitHub Actions -> Save. Then re-run this workflow (Actions -> Deploy site to GitHub Pages -> Run workflow). Expected URL: https://wingbangboozle1-lang.github.io/Trade3/ — the verify job above passed; the site artifact is ready." 

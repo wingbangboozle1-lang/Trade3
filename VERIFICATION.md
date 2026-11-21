@@ -127,7 +127,6 @@ DOM targets) · `logic.test.mjs` · `render.test.mjs` (headless, jsdom) · `smok
 capture) · `site-render-test.js` (build B pages) · `py_compile` + the offline unit block for the Python layer ·
 `verify_series.py --from-cache docs/data/live-verification-2026-11-20.json` → **4/4, exit 0**.
 
-
 ---
 
 ## Line-by-line review + live re-verification — session `arena/6c20e938-trade3` (2026-11-21)
@@ -186,3 +185,56 @@ corrected above (the portfolio.js tick-space fix).
   F8 and the workflow's failure summary. Everything else deploys automatically afterwards.
 - **Live demo-account trading / portfolio pulls**: still require user-owned demo API keys
   (F3). Not requested, not stored.
+
+
+---
+
+## Re-verification pass — session `arena/b47b1c48-trade3` (2026-11-21)
+
+Additive: everything above is unchanged. This pass re-read the published rows and the key claims
+against the live Kalshi demo API again on 2026-11-21, and re-ran every local gate on the current tree.
+
+### Live re-reads performed this session (all via the official demo REST API)
+
+| Check | Official source (live) | Result |
+|---|---|---|
+| Exchange status | [GET /exchange/status](https://external-api.demo.kalshi.co/trade-api/v2/exchange/status) | `exchange_active: true`, `trading_active: true`, shards 0–3 — matches V27/V29. |
+| Gas series `KXAAAGASM` | [GET /series/KXAAAGASM](https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASM) | Matches `series.json`: category `Economics`, tags `Oil & Gas`/`Oil and energy`, scope `Gasoline`, frequency `monthly`, settlement AAA `https://gasprices.aaa.com/`. |
+| Golf series `KXPGAGOLFERSCORE` | [GET /series/KXPGAGOLFERSCORE](https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAGOLFERSCORE) | Matches: category `Sports`, tag `Golf`, settlement NBC Sports / Fox Sports / the Governing League (pgatour.com) / AP / Golf Channel. |
+| Crypto series `KXETHD` | [GET /series/KXETHD](https://external-api.demo.kalshi.co/trade-api/v2/series/KXETHD) | Matches: category `Crypto`, frequency `hourly`, settlement CF Benchmarks `ETHUSD_RTI`. |
+| Culture category | [GET /series?category=Culture](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture) | Two series (`KXXBANNEDGROK`, `KXXBANNEDMURRAYHILLGUY1`), both `category: Culture` — confirms V18. |
+| Culture markets empty | [GET /markets?series_ticker=KXXBANNEDGROK&status=open](https://external-api.demo.kalshi.co/trade-api/v2/markets?series_ticker=KXXBANNEDGROK&status=open) | `{"markets":[]}` — confirms F9. |
+
+### Discrepancy found and corrected this session
+
+**Stale Culture settlement documentation (supersedes the older F10 wording).** The `series.json`
+notes for `KXXBANNEDGROK` and `KXXBANNEDMURRAYHILLGUY1` described the record's `settlement_sources`
+as consisting only of "Google-search URLs, a personal X account and an unnamed 'account holder of'
+entry", and stated "the first entry (ABC) was published by an earlier revision and is withdrawn
+here." Re-reading [GET /series/KXXBANNEDGROK](https://external-api.demo.kalshi.co/trade-api/v2/series/KXXBANNEDGROK)
+on 2026-11-21 shows the record carries **23 settlement sources, 17 official publishers** — ABC,
+Fox News, MSNBC, WSJ, Semafor, Barchart, NYT, CBS, Washington Post, Axios, CNN, Reuters, Bloomberg, AP, EIA,
+Politico, TechCrunch — alongside the non-official entries (Google-search URLs for "account holder of ",
+Ars Technica, Engadget, Mashable, Verge, and the personal X account Elon Musk). **ABC is present**, so
+the "withdrawn" claim was false. Corrected in `docs/data/series.json` (both rows + the topic `flag`)
+and in flag **F10** on [docs/flagged.html](docs/flagged.html). The decision to leave settlement blank
+under the official-publishers-only policy is unchanged and still defensible; only the *rationale* was
+inaccurate and is now stated correctly.
+
+### Gates re-run this session (on the current tree)
+
+- `npm test` (logic + smoke 15/15 + site-render 13/13) → **pass**
+- `python3 scripts/check_site.py` → **pass** (28 pages, 360 local links, 20 JS modules, 39 series rows)
+- `node scripts/check-links.js` → **pass** (0 broken local links/anchors/imports/DOM targets)
+- `python3 -m py_compile` on all 6 Python files → **pass**
+- `node -e "JSON.parse(... series.json)"` → **pass** (after the correction above)
+
+### Still open (environment-level, not a code defect)
+
+- **F8 — GitHub Pages is still not enabled.** Re-tested 2026-11-21: `GET /repos/wingbangboozle1-lang/Trade3/pages`
+  → **404**, and `POST /repos/…/pages` → **403 "Resource not accessible by integration"**. The automation
+  token cannot create the Pages site; this needs the one-time owner action (Settings → Pages → Source:
+  **GitHub Actions** → Save). Every deploy run fails only at the "Pages readiness" step — the site itself
+  passes all checks. Owner action required; not fixable from inside the sandbox.
+- Sandbox shell egress to `*.kalshi.co` is still blocked (TLS reset); live values were read through the
+  page-fetch path. Non-blocking (see F19).

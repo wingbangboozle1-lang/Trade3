@@ -644,7 +644,7 @@ export const FLAGS = [
     severity: 'Medium',
     item: 'Some official-looking settlement sources are not official publishers',
     detail:
-      'The Culture series settlement_sources include Google search URLs (for example https://www.google.com/search?q=Ars+Technica), a personal X account (https://x.com/elonmusk) and a source name with a trailing space and no URL of its own ("account holder of "). A settlement source that is a search page cannot be confirmed as an official source, so this build does not link them as settlement sources.',
+      'Re-checked 2026-11-21: the Culture series settlement_sources list is a MIXED set — 17 official publisher homepages (ABC, Fox News, MSNBC, WSJ, Semafor, Barchart, NYT, CBS, Washington Post, Axios, CNN, Reuters, Bloomberg, AP, EIA, Politico, TechCrunch) alongside non-official entries: Google search URLs (for example https://www.google.com/search?q=Ars+Technica), a personal X account (https://x.com/elonmusk) and a source name with a trailing space and no URL of its own ("account holder of "). A settlement source that is a search page cannot be confirmed as an official source, and because the list is mixed this build does not link any of it as a settlement source.',
     evidence: 'Verbatim in GET /series?category=Culture (settlement_sources array).',
     sourceUrl: `${DEMO_REST}/series?category=Culture`,
     status: 'Open. Needs Kalshi confirmation of the intended settlement reference for these series.',
