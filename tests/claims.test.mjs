@@ -101,5 +101,32 @@ check('every requirement row that is corrected says so in the row', () => {
   return `${corrected.length} rows carry the correction`;
 });
 
+
+check('Build B: a re-verified row is never labelled a blanket "match" without a per-row outcome', () => {
+  const dataJs = readFileSync(path.join(ROOT, 'docs', 'dashboard-site', 'assets', 'data.js'), 'utf8');
+  const block = dataJs.slice(dataJs.indexOf('export const REVERIFIED'), dataJs.indexOf('export const DEMO_REST'));
+  const rows = block.match(/result: '([a-z-]+)'/g) || [];
+  if (rows.length < 10) throw new Error(`only ${rows.length} per-row outcomes recorded`);
+  if (!/result: 'not-checked'/.test(block)) throw new Error('expired strikes must be recorded as not-checked, not match');
+  if (!/result: 'corrected'/.test(block)) throw new Error('the corrected rows must say so');
+  return `${rows.length} rows carry an explicit outcome`;
+});
+
+check('Build B: no market row publishes a null volume where the API returns a number', () => {
+  const dataJs = readFileSync(path.join(ROOT, 'docs', 'dashboard-site', 'assets', 'data.js'), 'utf8');
+  const block = dataJs.slice(dataJs.indexOf('export const MARKETS'), dataJs.indexOf('export const EMPTY_TOPIC_NOTES'));
+  if (/volume: null/.test(block)) throw new Error('a market row still has volume: null');
+  return 'no null volumes';
+});
+
+check('the snapshot never claims to be live data', () => {
+  const snap = JSON.parse(readFileSync(path.join(ROOT, 'data', 'snapshot.json'), 'utf8'));
+  if (!/not live/i.test(snap.note || '')) throw new Error('snapshot note lost its "Not live" wording');
+  if (!snap.recheck || !snap.recheck.verified || !snap.recheck.pending_recheck) throw new Error('snapshot lost its recheck block');
+  const pending = snap.recheck.pending_recheck.tickers.length;
+  const verified = Object.keys(snap.recheck.verified).length;
+  return `${verified} re-read, ${pending} explicitly pending`;
+});
+
 console.log(`\n${passed}/${passed + failed} claim checks passed`);
 process.exit(failed ? 1 : 0);

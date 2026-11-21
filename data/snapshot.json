@@ -1,7 +1,7 @@
 {
  "capturedAt": "2026-11-20T13:24:00Z",
  "environment": "demo",
- "note": "Real values read from the Kalshi demo Trade API during the build and re-read on 2026-11-21. Used only when the live API cannot be reached, and always labelled 'snapshot' in the UI. No value here is invented. Gas strikes were re-fetched from their official GET /markets/{ticker} records on 2026-11-21 (see recheck below); the other records keep their 2026-11-20 capture and are listed under pending_recheck rather than silently restated.",
+ "note": "Real values read from the Kalshi demo Trade API during the build and re-read on 2026-11-21. Used only when the live API cannot be reached, and always labelled 'snapshot' in the UI. No value here is invented. Gas strikes were re-fetched from their official GET /markets/{ticker} records on 2026-11-21 (see recheck below); the other records keep their 2026-11-20 capture and are listed under pending_recheck rather than silently restated. SNAPSHOT \u2014 not live: these values are a dated capture, never today's prices.",
  "sources": [
   "https://external-api.demo.kalshi.co/trade-api/v2/markets?series_ticker=KXAAAGASM&status=open",
   "https://external-api.demo.kalshi.co/trade-api/v2/markets?series_ticker=KXPGATOUR&status=open",
