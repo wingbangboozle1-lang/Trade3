@@ -1,6 +1,6 @@
 {
  "generated": "2026-11-20",
- "note": "Verified snapshot of Kalshi series for the five dashboard topics. Every row was returned by the live demo API. Each row was re-read in session b4e5648a on 2026-11-20 with GET /series/{ticker} (see source_url) and compared with the title, frequency and settlement source. Corrections made in that pass: settlement text for KXLINKPERP and KXSOLPERP (API lists none), KXPGAGOLFERSCORE (AP missing), KXBTC2025100 (exact URL). Live values (prices, volume) are fetched in the browser and are NOT stored here. | Field contract for this file: every row carries `source` AND the equivalent `source_url` (both are the official GET /series/{ticker} record), `verified_on`, and, where the row came from a topic's disclosed superset category, a `via` note plus the row's own `category`. Blank `settlement` is deliberate: it means the exchange published no official-publisher source for the row (see the flagged page), never an omission.",
+ "note": "Verified snapshot of Kalshi series for the five dashboard topics. Every row was returned by the live demo API. Each row was re-read in session b4e5648a on 2026-11-20 with GET /series/{ticker} (see source_url) and compared with the title, frequency and settlement source. Corrections made in that pass: settlement text for KXLINKPERP and KXSOLPERP (API lists none), KXPGAGOLFERSCORE (AP missing), KXBTC2025100 (exact URL). Live values (prices, volume) are fetched in the browser and are NOT stored here. | Field contract for this file: every row carries `source` AND the equivalent `source_url` (both are the official GET /series/{ticker} record), `verified_on`, and, where the row came from a topic's disclosed superset category, a `via` note plus the row's own `category`. Blank `settlement` is deliberate: it means the exchange published no official-publisher source for the row (see the flagged page), never an omission. Third pass 2026-11-21 (session arena/5d2508a7-trade3): all 39 rows re-checked against the raw records in data/verify-cache/batch1.json with scripts/verify_series_bulk.py — 39/39 pass. Eight settlement cells that had been paraphrased were replaced with the verbatim 'NAME — URL' from settlement_sources[0] (flag F28); five rows stay blank on the official-publishers-only rule and say why. Values not re-read are labelled, never restated.",
  "demo_base": "https://external-api.demo.kalshi.co/trade-api/v2",
  "prod_base": "https://external-api.kalshi.com/trade-api/v2",
  "topics": {
@@ -571,7 +571,7 @@
    "why": "Golf contracts are Sports series carrying the Golf tag, settled from PGA Tour / ESPN / Fox Sports / NBC Sports."
   }
  },
- "verified_at": "2026-11-21T07:4xZ third line-by-line re-fetch of ALL 39 rows against raw official GET /series/{ticker} responses (session arena/5d2508a7-trade3) — every row PASS",
+ "verified_at": "2026-11-21T07:55Z third line-by-line re-fetch of all 39 rows against raw official GET /series/{ticker} responses (session arena/5d2508a7-trade3) — 39 checked, 39 pass, 0 mismatches; report data/verify-cache/report-2026-11-21.json",
  "protocol_docs": "https://docs.kalshi.com/getting_started/api_environments",
  "integration_recheck": {
   "at": "2026-11-20T20:20Z",

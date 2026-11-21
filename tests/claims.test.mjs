@@ -128,5 +128,15 @@ check('the snapshot never claims to be live data', () => {
   return `${verified} re-read, ${pending} explicitly pending`;
 });
 
+
+check('Build B states golf settlement sources in the API order', () => {
+  const dataJs = readFileSync(path.join(ROOT, 'docs', 'dashboard-site', 'assets', 'data.js'), 'utf8');
+  const bad = /settle(ment)?Source(Name)?: 'ESPN, Fox Sports/;
+  if (bad.test(dataJs)) throw new Error('golf settlement sources are not in the record order (Fox Sports, ESPN, the Governing League)');
+  const good = (dataJs.match(/Fox Sports, ESPN, the Governing League/g) || []).length;
+  if (good < 3) throw new Error(`only ${good} rows carry the record order; expected market rows + series row`);
+  return `${good} rows in record order`;
+});
+
 console.log(`\n${passed}/${passed + failed} claim checks passed`);
 process.exit(failed ? 1 : 0);
