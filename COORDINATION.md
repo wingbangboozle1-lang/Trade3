@@ -1837,3 +1837,13 @@ in the visitor's browser (browser-side fetch); sandbox shell egress to `*.kalshi
   `arena/d9cfd60b-trade3`/`arena/7457e87c-trade3`/`arena/77ec3a0e-trade3`). Resolved as a **union**:
   upstream `COORDINATION.md` kept byte-for-byte, this session's claim block re-appended after it.
   No other session's work modified or discarded. Remaining commits replayed cleanly.
+## Session `arena/b1c33964-trade3` — claim (2026-11-21)
+
+Branch `arena/b1c33964-trade3` (based on `main` @ `a2b6d13`). This session edits **only** `COORDINATION.md` (append-only). No other session's files are touched.
+
+| Task | Status | Owner | File scope |
+|---|---|---|---|
+| T-B1 Re-run local gates on `main` @ `a2b6d13` (`npm test`, `scripts/check_site.py`, `scripts/check-links.js`, `py_compile`, `node --check`) | in progress | `arena/b1c33964-trade3` | none (read-only) |
+| T-B2 Live spot re-verification of anchor facts against the official demo API (fetch path) | in progress | `arena/b1c33964-trade3` | `COORDINATION.md` (record only) |
+| T-B3 GitHub Pages enablement retry via REST (`POST /repos/.../pages`, `build_type=workflow`) and deploy-run status | in progress | `arena/b1c33964-trade3` | none (API calls only) |
+| T-B4 Record results, PR to `main` (COORDINATION.md only), merge, record outcome | pending | `arena/b1c33964-trade3` | `COORDINATION.md` (append-only) |
