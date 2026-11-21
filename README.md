@@ -30,10 +30,17 @@ from, and anything the API did not return is left blank and marked *unverified* 
 ```bash
 # Node 20+. Zero npm dependencies.
 npm start
-#   dashboard  http://localhost:3000/app/
-#   site       http://localhost:3000/
+#   dashboard  http://localhost:3000/app/      live data, alerts, charts, paper trades
+#   site       http://localhost:3000/          the published site, same origin
+#   audit      http://localhost:3000/audit/    the source-audited edition
 #   API        http://localhost:3000/api/state
 ```
+
+`npm start` runs `server/preview.js`, which reads Kalshi from Node — so there is no
+browser CORS question — and prints its credential state at boot. Reading your **real demo
+portfolio** needs the two environment variables below; without them the dashboard still
+shows live public market data and says plainly that the account is unread. Order sending
+stays disabled unless `KALSHI_ALLOW_ORDERS=1`.
 
 ### Data modes
 
@@ -53,6 +60,9 @@ data.
 
 ```bash
 export KALSHI_API_KEY_ID="your-demo-key-id"
+# either keep the key material off disk …
+export KALSHI_PRIVATE_KEY_PEM="$(cat ./kalshi-demo-key.pem)"
+# … or point at a local file
 export KALSHI_PRIVATE_KEY_PATH="./kalshi-demo-key.pem"
 npm start
 ```

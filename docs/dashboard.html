@@ -63,6 +63,15 @@
       <a href="https://docs.kalshi.com/getting_started/rate_limits" target="_blank" rel="noopener">rate limits</a>.
       If your network blocks the API, set a CORS proxy on the <a href="methodology.html#network">Method</a> page.
     </p>
+    <div class="note" style="margin:10px 0 0" id="cors-note">
+      <b>If this page shows “Fetch failed”, the likely cause is browser CORS, not a broken build.</b>
+      Whether Kalshi's public REST hosts send <code>Access-Control-Allow-Origin</code> is <b>unverified</b>
+      (flag <a href="flagged.html#F6">F6</a>): no CORS probe could be run from the build sandbox, so this
+      page cannot promise it works from every origin. The guaranteed live path is the same repository's
+      node server — <code>npm start</code>, then <code>/app/</code> — which reads the API server-side where
+      no CORS rule applies. The audit edition (<a href="dashboard-site/index.html">Build B</a>) is designed
+      around that server and says the same thing on its own pages.
+    </div>
   </section>
 
   <!-- ============ KPIs ============ -->

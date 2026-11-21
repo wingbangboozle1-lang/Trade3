@@ -8,8 +8,8 @@
     "node": ">=20"
   },
   "scripts": {
-    "start": "node server/index.js",
-    "dev": "node --watch server/index.js",
+    "start": "node server/preview.js",
+    "dev": "node --watch server/preview.js",
     "check:links": "node scripts/check-links.js",
     "test:engine": "node tests/smoke-test.js",
     "test:site": "node tests/site-render-test.js",
@@ -22,7 +22,8 @@
     "verify:rows": "python3 scripts/verify_series.py",
     "snapshot:dry": "node scripts/capture-snapshot.js --dry-run",
     "test:data": "node tests/data-verify.test.mjs",
-    "verify:rows:bulk": "python3 scripts/verify_series_bulk.py"
+    "verify:rows:bulk": "python3 scripts/verify_series_bulk.py",
+    "start:collector": "node server/index.js"
   },
   "license": "MIT"
 }

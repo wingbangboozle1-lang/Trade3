@@ -97,5 +97,38 @@ check('no published row claims a category its topic does not declare', () => {
   return 'all inside their topic';
 });
 
+// --- preview server: environment-only credentials ---------------------------
+import { createRequire } from 'node:module';
+import { credentialState } from '../server/preview.js';
+
+const require = createRequire(import.meta.url);
+
+check('credentialState reports no key when the environment is empty', () => {
+  const s = credentialState({});
+  if (s.authenticated) throw new Error('empty env reported authenticated');
+  if (s.keyIdPresent || s.keyMaterialPresent) throw new Error('empty env reported key material');
+  return 'unauthenticated, as expected';
+});
+
+check('credentialState never echoes key material back', () => {
+  const s = credentialState({ KALSHI_API_KEY_ID: 'abc', KALSHI_PRIVATE_KEY_PEM: 'not-a-real-key' });
+  for (const v of Object.values(s)) {
+    if (typeof v === 'string' && v.includes('not-a-real-key')) throw new Error('key material leaked in state');
+  }
+  if (s.authenticated) throw new Error('an invalid PEM must not count as authenticated');
+  if (!s.keyError) throw new Error('an invalid PEM should surface a keyError');
+  return 'key rejected without being echoed';
+});
+
+check('credentialState accepts a real RSA private key from the PEM env var', () => {
+  const { generateKeyPairSync } = require('node:crypto');
+  const { privateKey } = generateKeyPairSync('rsa', { modulusLength: 2048 });
+  const pem = privateKey.export({ type: 'pkcs8', format: 'pem' });
+  const s = credentialState({ KALSHI_API_KEY_ID: 'k', KALSHI_PRIVATE_KEY_PEM: pem });
+  if (!s.authenticated) throw new Error(`valid key not accepted: ${s.keyError}`);
+  if (s.ordersAllowed) throw new Error('orders must be off unless explicitly allowed');
+  return 'accepted, orders still blocked';
+});
+
 console.log(`\n${passed}/${passed + failed} data-integrity checks passed`);
 process.exit(failed ? 1 : 0);
