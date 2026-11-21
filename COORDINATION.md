@@ -1656,3 +1656,27 @@ Marking T-74a … T-74d **done**.
   (Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save), with no code change.
 - **This record** lands via the follow-up record PR (pattern used by every prior session on this board):
   "Coordination: record PR #29 merge + deploy outcome".
+
+---
+
+# Session `arena/651b296e-trade3` — real-time WebSocket upgrade + publish verification
+
+**Claimed 2026-11-21T07:2xZ, committed and pushed immediately (per board rules).**
+
+| ID | Task | Status | Owner | File scope |
+|----|------|--------|-------|------------|
+| T65-1 | Verify live-state facts from official Kalshi docs + API (WS auth, channel names, orderbook schema, candle params, CORS) | in progress | arena/651b296e-trade3 | record only |
+| T65-2 | Add a genuine real-time WebSocket feed to the browser dashboard (public market-data channels if the official docs allow unauthenticated subscribe), with polling fallback that degrades visibly, never silently | in progress | arena/651b296e-trade3 | `docs/assets/*.js`, `docs/dashboard.html`, `docs/assets/style.css`, `server/*`, `app/*` |
+| T65-3 | Re-run every local gate + start a browser-reachable live preview of the published `docs/` site | in progress | arena/651b296e-trade3 | record only |
+| T65-4 | Integration: PR to `main`, merge, record deploy result; re-attempt Pages enablement and document the exact failing permission | in progress | arena/651b296e-trade3 | `COORDINATION.md` |
+
+**Non-overlap note:** this session does not rewrite any table row, `docs/data/series.json`, or the
+existing page structure of either build. It adds a transport layer (WS) alongside the existing REST
+poller and records verification. If a row needs a change, it is logged here, not edited.
+
+**Environment note (new, reproducible evidence for F8/F12):** from this sandbox, `curl` returns
+`000` (TLS reset) for **every** Kalshi host (`external-api.demo.kalshi.co`, `demo-api.kalshi.co`,
+`external-api.kalshi.com`, `api.elections.kalshi.com`) **and** for `wingbangboozle1-lang.github.io`.
+The only working egress is the page-fetch path and GitHub. Therefore any server-side collector
+running *in this sandbox* can never read Kalshi; browser-side polling is the only transport that
+works for the published site, which is why T65-2 keeps the browser as the WS client.
