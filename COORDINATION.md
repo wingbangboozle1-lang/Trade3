@@ -890,3 +890,37 @@ No other session has an open claim on the board. Files owned by other sessions a
 - **Owner action (one time, ~30 seconds):** GitHub repo → Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save. Then Actions → "Deploy site to GitHub Pages" → Run workflow. Expected URL: `https://wingbangboozle1-lang.github.io/Trade3/`.
 - Sources for this session's claims: GitHub REST Pages API (`https://docs.github.com/rest/pages/pages`), `actions/configure-pages` (`https://github.com/actions/configure-pages`). Run logs linked from the Actions tab.
 - Not done this session (honest scope): live Kalshi demo portfolio tracking and order placement (need user demo API keys; not in repo); WebSocket live feed (requires authenticated handshake); the sandbox has no direct egress to kalshi.co, so the per-row Kalshi re-check runs in CI (`verify-live.yml`) only.
+
+---
+
+# Session `arena/84e59a8b-trade3` — current-branch review and UX/verification follow-up (2026-11-21)
+
+**Claimed on `arena/84e59a8b-trade3` at base `4eb92a1`; rebased onto `main` at `9baaec4` and then `9ed35e9` to preserve concurrently merged work.**
+
+| Task | Status | Owner | File scope |
+|---|---|---|---|
+| T-84 Fresh review of live-market ranking and volume labelling; rerun local gates, verify claims against official sources, and report publish status | **done** | `arena/84e59a8b-trade3` | `COORDINATION.md`, `app/app.js`, `app/index.html` |
+
+### Changes
+- Live app market list now defaults to descending order-book liquidity in dollars, the directly available dollar-denominated measure for ranking largest displayed live books. The table labels this as available book depth, not traded dollar volume, and links the methodology to Kalshi's official order-book docs.
+- Corrected the overview KPI that previously formatted Kalshi's `volume_24h_fp` contract count as USD. It now reads `24h contract volume` and uses a number formatter. The markets table explicitly labels 24h volume and open interest as contracts.
+- No API data rows or market values were edited or inferred.
+
+### Official sources and checks
+- [Kalshi Get Markets](https://docs.kalshi.com/api-reference/market/get-markets): response schema distinguishes `volume_24h_fp` and `open_interest_fp` fixed-point fields from dollar-price fields (`last_price_dollars`, `notional_value_dollars`).
+- [Kalshi Orderbook Responses](https://docs.kalshi.com/getting_started/orderbook_responses): order-book arrays pair price in dollars with contract count and return bids only; the interface describes notional as displayed bid depth.
+- `npm test`: pass (logic, 15/15 engine checks, 13/13 site render checks).
+- `npm run test:all` (with temporary, untracked jsdom install): pass, including Build A headless dashboard, portfolio and deep-link render tests.
+- `python3 scripts/check_site.py`: pass (28 pages, 360 local links, 20 JS modules, 39 series rows).
+- `node scripts/check-links.js`: pass (360 local references, no broken links/anchors/imports/DOM targets).
+- Python `py_compile` for `kalshi_client.py`, `strategies.py`, `backtest.py`, `run_sim.py`, `scripts/verify_series.py`, `scripts/check_site.py`; `node --check` for `app/app.js` and all `server/*.js`: pass.
+- Snapshot-mode preview on port 3000: `/`, `/app/`, `/site/`, `/api/health`, `/api/state`, `/api/alerts`, `/api/portfolio` all returned HTTP 200. It reported snapshot mode and its captured timestamp, not live data.
+- GitHub Pages readiness re-check (`gh api repos/wingbangboozle1-lang/Trade3/pages`): HTTP 404, site still not enabled. No deploy success is claimed; F8 remains an owner-side blocker.
+
+### Parallel coordination / remaining limits
+- PR #21 (`arena/6c20e938-trade3`) and PR #22 (`arena/b47b1c48-trade3`) are open. Their branches/files were left untouched; the T-84 product patch changes only `app/app.js` and `app/index.html` besides this coordination record.
+- Live demo account reads/trading remain unavailable without owner-provided demo API credentials. This patch does not enable or attempt live orders.
+- News-cause attribution is not inferred. Existing F-series flags remain the review surface for external news feeds, authenticated WS and hosting limitations.
+
+### Rebase / conflict record
+- Two `git pull --rebase origin main` operations advanced main while PRs #20 and #24 merged. Both conflicts were in the append-only `COORDINATION.md`; resolved by keeping all latest main content and re-appending this session's record. No other session work was discarded.
