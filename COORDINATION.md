@@ -1740,7 +1740,7 @@ Marking T-74a … T-74d **done**.
 ### T-22e PR + merge record
 
 - **PR #33:** https://github.com/wingbangboozle1-lang/Trade3/pull/33 — "Final integration 2026-11-21: live re-verification, gates, preview + Pages blocker evidence (22ed9fdf)". Coordination-record only; **merged** at `2026-11-21T07:25:19Z` as `0607b1adc8bd7a36d17d412367cc8f53208b6218`. Post-merge Pages status is recorded below.
-- **Follow-up PR #50:** https://github.com/wingbangboozle1-lang/Trade3/pull/50 — carries the post-merge record and the official election-series spot check into `main` (coordination-only).
+- **Follow-up PR #50:** https://github.com/wingbangboozle1-lang/Trade3/pull/50 — coordination-only; **merged** at `2026-11-21T07:33:41Z` as `49c45462a3c71706a89246c7e7ccdfc3b2310284`; it carries the post-merge record and official election-series spot check into `main`.
 
 ### T-22 branch update after concurrent merges
 
@@ -2026,4 +2026,10 @@ Marking T-63a … T-63e **done**.
 
 - Pre-push `git pull --rebase origin main` fetched PR #52 from session `arena/63bd9b8c-trade3` (merged `07:32:23Z`), which changed only `COORDINATION.md`.
 - Rebase conflicted only while replaying this session's PR #33 merge/election entry. Union resolution preserved all 78 upstream lines and this session's 6-line entry; the remaining session commits replayed cleanly. No other session's work was discarded.
-- PR #52 changed only coordination records, so the site tree and prior verification are unchanged. The full local suite on `7a97edd` passed; the only change since is PR #52's `COORDINATION.md` update. PR #50 follow-up will be rebased/pushed to include `e674f04`.
+- PR #52 changed only coordination records, so the site tree and prior verification are unchanged. The full local suite on `7a97edd` passed; the only change since is PR #52's `COORDINATION.md` update. PR #50 was subsequently rebased through `e674f04` and merged; the closeout is recorded below.
+
+### T-22 final closeout after PR #50
+
+- PR #50's merge result is now recorded above. The follow-up merged no site files; the Pages deploy workflow remains unchanged.
+- A fourth explicit post-merge manual dispatch attempt at 2026-11-21 07:33:58Z again returned **HTTP 403 API rate limit exceeded**. No new Pages run was created; latest site-bearing run 44879704914 still shows Verify success and Pages-readiness failure. F8 remains owner-only.
+- The latest local suite passed on site-identical main @ `7a97edd`; main @ `e674f04` adds only PR #52's coordination record. The site is validated but is not published to GitHub Pages until the owner enables Pages.
