@@ -1215,7 +1215,7 @@ Only 3 rows were re-read in this session (not all 39). The 39-row full diff is r
 
 # Session `arena/a1c4d012-trade3` — claim (2026-11-21)
 
-**Branch:** `arena/a1c4d012-trade3` (based on `e712575` = merge of PR #32). Claimed per board rules;
+**Branch:** `arena/a1c4d012-trade3` (originally based on `e712575` = merge of PR #32; rebased onto `origin/main` @ `4615447` = PR #35 to resolve the `COORDINATION.md` conflict, keeping both sessions' sections). Claimed per board rules;
 commit + push of this claim happens immediately after this edit, before any other work.
 Open PRs from other sessions at claim time: #33 (`arena/22ed9fdf-trade3`, `COORDINATION.md` only) and
 #29 (`arena/77ec3a0e-trade3`, `pages.yml` + `COORDINATION.md` + `EXECUTIVE_SUMMARY.md` + `docs/flagged.html`).
