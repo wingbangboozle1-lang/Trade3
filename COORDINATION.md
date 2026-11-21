@@ -1681,13 +1681,13 @@ Marking T-74a … T-74d **done**.
 | Crypto KXETHD | [series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXETHD) | "Ethereum price Above/below", Crypto, CF Benchmarks settlement — matches |
 | Base URLs / WS | [API Environments](https://docs.kalshi.com/getting_started/api_environments) | Demo REST `external-api.demo.kalshi.co`, WS `external-api-ws.demo.kalshi.co` — exactly as specified in the task |
 
-### T-22b Gates on latest merged tree (`main` @ `262f22a`, after PRs #22 and #32)
+### T-22b Gates on latest merged tree (`main` @ `91e748f`, after PRs #29, #37/#42, #40, #43)
 
 | Gate | Result |
 |---|---|
 | `npm test` | **pass** — logic tests, engine 15/15, site render 13/13 |
 | `npm run test:all` | **pass** — logic, headless render (with `jsdom@25`), engine 15/15, site render 13/13 |
-| Latest GitHub Actions Verify site job | **pass** — [run 44879350060](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879350060) includes the CI-installed `jsdom` render test and Python offline checks |
+| Latest GitHub Actions Verify site job | **pass** — [run 44879704914](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879704914) on the latest site-bearing tree (`bf08e73`); later main commits only add coordination records |
 | `python3 scripts/check_site.py` | **pass** — 29 pages, 387 local links, 20 JS modules, 39 series rows |
 | `node scripts/check-links.js` | **pass** — 387 references resolve, 0 broken |
 | `py_compile` (6 files) · `node --check` (`app/app.js`, all `server/*.js`) | **pass** |
@@ -1700,18 +1700,23 @@ Marking T-74a … T-74d **done**.
 ### T-22d Pages (F8) — reproduced, still owner-only
 
 - `GET .../pages` → **404**; `POST .../pages` (`build_type=workflow`) → **403 "Resource not accessible by integration"** ([Pages REST docs](https://docs.github.com/rest/pages/pages)).
-- Latest `main` deploy run [44879350060](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879350060) on `262f22a`: **Verify site ✓** · **Deploy ✗ at `actions/configure-pages@v5`** (enablement call only; no site defect).
+- Latest site deploy run [44879704914](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879704914) on site-bearing commit `bf08e73`: **Verify site ✓** · **Deploy ✗ at `Pages readiness`** (Pages site creation remains blocked by the integration permission; no site defect).
 - Conclusion unchanged: **one owner click** — Repo → Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save — then "Deploy site to GitHub Pages" → Run workflow. Expected URL: `https://wingbangboozle1-lang.github.io/Trade3/`.
 
 ### T-22e PR + merge record
 
-- PR link and merge result recorded below after PR creation.
-
-- **PR #33:** https://github.com/wingbangboozle1-lang/Trade3/pull/33 — "Final integration 2026-11-21: live re-verification, gates, preview + Pages blocker evidence (22ed9fdf)". Coordination-record only. Merging without waiting for approval per task instructions; deploy outcome to be checked after merge (F8 expected).
+- **PR #33:** https://github.com/wingbangboozle1-lang/Trade3/pull/33 — "Final integration 2026-11-21: live re-verification, gates, preview + Pages blocker evidence (22ed9fdf)". Coordination-record only. This branch is being updated to include the latest `main`; merge and post-merge deploy results will be recorded in a follow-up coordination entry.
 
 ### T-22 branch update after concurrent merges
 
 - While PR #33 was open, `main` advanced from `49397f2` to `262f22a` through PRs #32 and #22. The first `gh pr merge 33 --merge` attempt correctly refused the stale head because of a `COORDINATION.md` conflict.
 - Rebased the current branch onto the updated `origin/main`. The only conflict was the append-only `COORDINATION.md`; resolved by retaining the full incoming PR #32/#22 entries and this session's claim/results. No other session's files or edits were discarded; this session still changes only `COORDINATION.md`.
 - Re-ran the full local suite on `262f22a` plus this coordination record: `npm run test:all` (including `jsdom@25` render tests), `check_site.py`, `check-links.js`, Python compile, and JS syntax — all pass. Latest GitHub Actions Verify job also passes on `262f22a`; deploy remains blocked only at F8.
-- PR #29 (workflow/executive-summary/flagged scope) and the independent coordination-only PRs #36/#37 remain untouched by this session. PR #33 head update, merge result, and resulting Pages run will be recorded below.
+- At this point in the log (`main` @ `262f22a`), PR #29 (workflow/executive-summary/flagged scope) and the independent coordination-only PRs #36/#37 were still open and were left untouched; they were later merged by their owners, as recorded in the following update. PR #33 head update, merge result, and resulting Pages run will be recorded below.
+
+### T-22 second rebase + latest-tree verification
+
+- Before the PR-head update, `git pull --rebase origin main` advanced the branch to `91e748f` (PR #43 merge; first-parent history also includes PRs #29, #37/#42 and #40). Replaying this session's claim conflicted only in `COORDINATION.md`; union resolution retained all upstream records (359 lines) plus this session's claim, and the remaining three session commits replayed cleanly. No non-owned files were edited or discarded.
+- Full local gates were rerun on the `91e748f` tree plus this session's coordination record: `npm run test:all` (including `jsdom@25` headless render), `scripts/check_site.py`, `scripts/check-links.js`, six-file Python compile, and `node --check` for app/server — all pass.
+- Latest Pages workflow [run 44879704914](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879704914) verifies the latest site-bearing commit `bf08e73`: **Verify site ✓**; **Deploy ✗ at `Pages readiness`**. The Pages site API still returns 404, and the POST/create attempt returns 403; F8 remains the sole owner-only publish blocker.
+- PR #29 and PR #37/#42 were merged by their owners before this rebase; this session did not edit their scopes. Other session PR #44 (`COORDINATION.md` only) remains outside this session's scope. PR #33 head update and merge record follow.
