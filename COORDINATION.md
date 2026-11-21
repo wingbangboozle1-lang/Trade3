@@ -1,4 +1,4 @@
-# Coordination Board — Trade3 Kalshi Dashboard
+n Board — Trade3 Kalshi Dashboard
 
 > Shared task board for parallel sessions. Read before starting. Claim by writing your
 > session ID + file scope, then **commit and push the claim immediately**.
@@ -1157,6 +1157,7 @@ integration; **blocked** only on the environment-level F8 Pages enablement, whic
 
 ---
 
+<<<<<<< HEAD
 
 ---
 
@@ -1879,3 +1880,15 @@ Branch `arena/b1c33964-trade3` (based on `main` @ `a2b6d13`). This session edits
 Only `COORDINATION.md` was edited (claim + this record). No other session's file, PR, or branch was touched. The site content is unchanged.
 
 Marking T-B1, T-B2 **done**; T-B3 **blocked** (rate-limited, F8 unchanged); T-B4 in progress.
+# Session `arena/3a5fe603-trade3` — claim (2026-11-21)
+
+**Branch:** `arena/3a5fe603-trade3` (based on `main` @ `262f22a`, PR #22 merged). Claim committed and
+pushed before any other task work, per board rules. Open PRs at claim time: **#29** (`arena/77ec3a0e-trade3`),
+**#33** (`arena/22ed9fdf-trade3`), **#34** (`arena/6c20e938-trade3`) — their file scopes are respected
+(`.github/workflows/pages.yml`, `EXECUTIVE_SUMMARY.md`, `docs/flagged.html`, plus append-only `COORDINATION.md`).
+
+| Task | Status | Owner | File scope |
+|---|---|---|---|
+| T-3A1 Requirements-gap audit of the published site/app against the original brief (line by line; fix any gap found in files not claimed by PRs #29/#33/#34) | in progress | `arena/3a5fe603-trade3` | to be scoped in an update to this claim before any edit |
+| T-3A2 Re-run all local gates on the current merged tree + live spot re-verification via the official demo API/docs | in progress | `arena/3a5fe603-trade3` | none (read-only) |
+| T-3A3 Final integration: coordinate open PRs, PR to `main`, merge, Pages deploy attempt + record | pending | `arena/3a5fe603-trade3` | `COORDINATION.md` (append-only), integration only |
