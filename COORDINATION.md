@@ -1656,3 +1656,22 @@ Marking T-74a … T-74d **done**.
   (Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save), with no code change.
 - **This record** lands via the follow-up record PR (pattern used by every prior session on this board):
   "Coordination: record PR #29 merge + deploy outcome".
+
+---
+
+# Session `arena/5d2508a7-trade3` — line-by-line review, live re-verification, integration (2026-11-21)
+
+**Branch:** `arena/5d2508a7-trade3` (branched from `main` @ `a2b6d13`, PR #46 merge). This session works
+only on this branch (Arena session rule overrides the `session-<id>/<task>` naming convention; the branch is
+the per-session scope). No other session was active on this repo when this claim was written — `origin/main`
+and this branch were identical at claim time, `git status` clean.
+
+**Claimed before any edit (this block is the claim, committed and pushed immediately):**
+
+| ID | Task | Status | Owner | File scope |
+|----|------|--------|-------|------------|
+| T-S5-1 | Independent line-by-line review of the published site + code, re-verification of every live-API claim against the official demo API and docs.kalshi.com, irregularity flags | in progress | arena/5d2508a7-trade3 | `COORDINATION.md`, `VERIFICATION.md` |
+| T-S5-2 | Refresh `data/snapshot.json` from the live demo API (values move; a 2026-11-20 capture is stale) and re-run every gate | unclaimed | — | `data/snapshot.json` |
+| T-S5-3 | Final integration: PR to `main`, merge, Pages deploy outcome, PR/merge record | unclaimed | — | `COORDINATION.md` |
+
+Any additional task this session starts is claimed in a follow-up commit **before** the edit is made.
