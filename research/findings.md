@@ -76,7 +76,7 @@ independent rows reconcile, so the formula as implemented is correct.
 | Markets list | `GET /markets` (limit max 1000, cursor, `event_ticker`, `series_ticker`, `status`, `min_close_ts`, `max_close_ts`) | [K9] |
 | Price fields | `yes_bid_dollars`, `yes_ask_dollars`, `last_price_dollars`, `previous_price_dollars`, all fixed-point **strings** | [K9] |
 | Size fields | `yes_bid_size_fp`, `yes_ask_size_fp`, `volume_fp`, `open_interest_fp`, 2-decimal strings | [K9] |
-| Liquidity | `liquidity_dollars` on the market object | [K9] |
+| Liquidity | **No liquidity field on the market object.** `liquidity_dollars` does not exist — absent from the Get Markets **and** Get Market OpenAPI schemas and from live demo responses (corrected 2026-11-21; an earlier version of this row cited [K9] in error). Depth/liquidity is read from the order-book ladder below, never from a market field | [K5][K10] |
 | Resolution | `result` = `yes` / `no` / empty, plus `settlement_value_dollars`, `settlement_ts` | [K9] |
 | Orderbook | `GET /markets/{ticker}/orderbook`, `orderbook_fp.yes_dollars` / `.no_dollars`, levels `[price, count_fp]`, **ascending** so the best bid is last | [K5][K10] |
 | Asks | Not returned. Best YES ask = 1 − best NO bid | [K5] |
@@ -125,7 +125,7 @@ book/volume snapshot, and records which stream each alert came from.
 | F7 | "Highest dollar amount live events" — no official ranking metric is documented | Kalshi does not document a "largest event" endpoint or sort order | Ranked by reported `dollar_volume` from the ticker feed, else `volume_fp × price`; the metric is disclosed on the page | [K18][K9] |
 | F8 | Causes of price jumps | No official feed attributes a price move to a news story | Candidate links only (series settlement sources + configured news feeds), always labelled candidates | [K12] |
 | F9 | Whether demo `KXGAS`-style gas series are open on a given day | Dynamic | Discovered at runtime; blank if absent | [K12] |
-| F10 | `liquidity_dollars` definition (how Kalshi computes it) | The field exists on the market object but its formula is not documented on the pages retrieved | Displayed as reported, never recomputed or relabelled | [K9] |
+| F10 | Earlier research claimed a `liquidity_dollars` field on the market object (and flagged only its undocumented formula) | **Disproved 2026-11-21:** the field does not exist. It is absent from the official Get Markets and Get Market OpenAPI schemas and from live `GET /markets` responses; the site never displayed it (its own Flagged page F23 and Method page already state "no `liquidity` field anywhere") | This row and the §5 Liquidity row corrected to the verified fact: liquidity/depth comes only from the order-book ladder | [K9][K5][K10] |
 | F11 | Fee schedule self-inconsistency: the formula text says round up to a **centicent** ($0.0001) but the printed General Trading Fees Table is rounded up to a whole **cent** | 1 contract at $0.01: formula gives 0.07×1×0.01×0.99 = $0.000693, table prints **$0.01**. 100 contracts at $0.45: formula gives $1.7325, table prints $1.74. Every row reconciles only under cent rounding. | The app charges the formula at centicent (which is what can actually leave a balance per [K7]) and displays the formula value, not the table value. Both are shown in the fee panel so the difference is visible. | [K6][K7] |
 
 ## 9. Suggestions to make the site more live and interactive
