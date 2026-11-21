@@ -779,3 +779,31 @@ and its file scope is non-overlapping with every other claim on this board.
 | T-AW3 Final integration: full gates, PR to `main`, merge, CI + Pages status | in progress | `arena/77ec3a0e-trade3` | `COORDINATION.md` (record) |
 
 Claim pushed immediately after this edit, before starting work. No other session is active.
+
+### T-AW1 verification performed (live fetches, 2026-11-21, by this session)
+
+| Check | Official source (live) | Result |
+|---|---|---|
+| Exchange/trading status | [GET /exchange/status](https://external-api.demo.kalshi.co/trade-api/v2/exchange/status) | `exchange_active: true`, `trading_active: true`, shards 0–3 — matches published rows |
+| `KXAAAGASM` vs `docs/data/series.json` | [series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASM) | title/category(Economics)/tags/scope/frequency/fee_multiplier/settlement (AAA — gasprices.aaa.com) all match |
+| `KXETHD` vs published rows | [series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXETHD) | Crypto, hourly, CF Benchmarks ETHUSD_RTI — matches |
+| `KXPGAGOLFERSCORE` vs published rows | [series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAGOLFERSCORE) | Sports, Golf tag, Golfer Score scope, 5-source settlement list — matches |
+| Culture category (2 series) | [series?category=Culture](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture) | KXXBANNEDGROK + KXXBANNEDMURRAYHILLGUY1 — matches |
+| `category=Gas` | [series?category=Gas](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Gas) | `{"series":null}` — Gas is not a Kalshi category; Economics+tag mapping stands |
+| All 39 published rows carry per-row official API links | `docs/data/series.json` (checked programmatically) | 39/39 have `source_url`; scheduled `verify-live.yml` re-reads all rows every 6 h from a Kalshi-capable runner |
+| Official docs for the Pages enablement rule | [actions/configure-pages action.yml](https://github.com/actions/configure-pages/blob/main/action.yml) (`enablement` input) | Confirmed verbatim: "requires a token other than `GITHUB_TOKEN` … a PAT with the `repo` scope or Pages write permission … or a GitHub App with `administration:write` and `pages:write`" — no token in this environment qualifies |
+
+### T-AW2 changes
+
+- `.github/workflows/pages.yml` — Pages readiness step now **attempts `POST /pages` (build_type=workflow)
+  itself** on a 404 before emitting the owner-action error (self-healing if the run token ever gains the
+  permission); the error message cites the official action.yml rule. `configure-pages@v5` retained.
+- `docs/flagged.html` F8 — re-tested 2026-11-21 (GET 404 / POST 403 from both the sandbox token and the
+  Actions token); root cause now linked to the official action.yml source.
+- `EXECUTIVE_SUMMARY.md` — 2026-11-21 re-verification table + confirmed Pages root cause.
+
+### Gates re-run green after the edits (2026-11-21)
+
+`npm test` (smoke 15/15 + site-render 13/13) · `node tests/logic.test.mjs` · `node scripts/check-links.js`
+(28 pages / 360 refs, 0 broken) · `python3 scripts/check_site.py` (39 rows) · `python3 -m py_compile` (all 6) ·
+`pages.yml` YAML parse OK.
