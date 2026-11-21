@@ -1390,3 +1390,84 @@ Local clone started shallow (depth 1); unshallowed this session (`git fetch --un
 ### T-A4 PR + merge record
 
 - To be filled after PR creation/merge below.
+
+
+---
+
+
+
+### T-A4 Merge record (session `arena/a1c4d012-trade3`, 2026-11-21)
+
+- **PR #37:** https://github.com/wingbangboozle1-lang/Trade3/pull/37 — **MERGED** 2026-11-21T07:17:41Z, merge commit `c7c04d0` (`arena/a1c4d012-trade3` → `main`). Change: `COORDINATION.md` only (claim + T-A1–T-A3 results); no site code changed.
+- **Conflict handling:** PR #37 hit `COORDINATION.md` append conflicts twice as `main` advanced (PR #35 `4615447`, PR #38 `80b662d`, PR #39 `3243d28`). Each time the branch was unshallowed (`git fetch --unshallow origin`), rebased onto latest `origin/main`, and the conflict resolved by keeping both sessions' sections (upstream first, then this session). Nothing from any other session was discarded. Final rebase base: `3243d28`; merged clean.
+- **Deploy outcome:** the merge touched only `COORDINATION.md`, which is outside `pages.yml`'s path filter, so no new workflow run was triggered by PR #37. Latest `main` deploy run at record time: [44879350060](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879350060) (PR #22 merge) — **Verify site ✓** (1m35s, all gates green) · **Deploy ✗ at `actions/configure-pages@v5`** only (upload/deploy skipped). `GET /repos/…/pages` → **404**; `POST` → **403** (reproduced this session). **Site is not live** — F8 owner click still required: Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save. Expected URL: https://wingbangboozle1-lang.github.io/Trade3/
+- **Site status:** verified and not broken (all gates pass locally and in CI Verify). Flagged items F1–F26 remain on the Flagged for Review page and did not block the merge, per instructions.
+
+---
+
+---
+
+# Session `arena/77ec3a0e-trade3` — live re-verification, Pages blocker evidence, deploy hardening, final integration (2026-11-21)
+
+**Claim (this session, branch `arena/77ec3a0e-trade3`, based on `main` @ `4eb92a1`):**
+Branch note: Arena sessions work on their fixed branch `arena/<id>-trade3` (the platform forbids the
+`session-<id>/<task>` naming scheme in the header), so this session's branch is `arena/77ec3a0e-trade3`
+and its file scope is non-overlapping with every other claim on this board.
+
+| Task | Status | Owner | File scope |
+|---|---|---|---|
+| T-AW1 Live re-verification of load-bearing published facts (exchange status, anchor series, category queries) against the official demo API on 2026-11-21 | in progress | `arena/77ec3a0e-trade3` | `COORDINATION.md` (record), `EXECUTIVE_SUMMARY.md` (status rows) |
+| T-AW2 Pages blocker evidence + deploy workflow hardening (attempt site creation before the owner-action error) | in progress | `arena/77ec3a0e-trade3` | `.github/workflows/pages.yml`, `docs/flagged.html` |
+| T-AW3 Final integration: full gates, PR to `main`, merge, CI + Pages status | in progress | `arena/77ec3a0e-trade3` | `COORDINATION.md` (record) |
+
+Claim pushed immediately after this edit, before starting work. No other session is active.
+
+### T-AW1 verification performed (live fetches, 2026-11-21, by this session)
+
+| Check | Official source (live) | Result |
+|---|---|---|
+| Exchange/trading status | [GET /exchange/status](https://external-api.demo.kalshi.co/trade-api/v2/exchange/status) | `exchange_active: true`, `trading_active: true`, shards 0–3 — matches published rows |
+| `KXAAAGASM` vs `docs/data/series.json` | [series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASM) | title/category(Economics)/tags/scope/frequency/fee_multiplier/settlement (AAA — gasprices.aaa.com) all match |
+| `KXETHD` vs published rows | [series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXETHD) | Crypto, hourly, CF Benchmarks ETHUSD_RTI — matches |
+| `KXPGAGOLFERSCORE` vs published rows | [series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAGOLFERSCORE) | Sports, Golf tag, Golfer Score scope, 5-source settlement list — matches |
+| Culture category (2 series) | [series?category=Culture](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture) | KXXBANNEDGROK + KXXBANNEDMURRAYHILLGUY1 — matches |
+| `category=Gas` | [series?category=Gas](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Gas) | `{"series":null}` — Gas is not a Kalshi category; Economics+tag mapping stands |
+| All 39 published rows carry per-row official API links | `docs/data/series.json` (checked programmatically) | 39/39 have `source_url`; scheduled `verify-live.yml` re-reads all rows every 6 h from a Kalshi-capable runner |
+| Official docs for the Pages enablement rule | [actions/configure-pages action.yml](https://github.com/actions/configure-pages/blob/main/action.yml) (`enablement` input) | Confirmed verbatim: "requires a token other than `GITHUB_TOKEN` … a PAT with the `repo` scope or Pages write permission … or a GitHub App with `administration:write` and `pages:write`" — no token in this environment qualifies |
+
+### T-AW2 changes
+
+- `.github/workflows/pages.yml` — Pages readiness step now **attempts `POST /pages` (build_type=workflow)
+  itself** on a 404 before emitting the owner-action error (self-healing if the run token ever gains the
+  permission); the error message cites the official action.yml rule. `configure-pages@v5` retained.
+- `docs/flagged.html` F8 — re-tested 2026-11-21 (GET 404 / POST 403 from both the sandbox token and the
+  Actions token); root cause now linked to the official action.yml source.
+- `EXECUTIVE_SUMMARY.md` — 2026-11-21 re-verification table + confirmed Pages root cause.
+
+### Gates re-run green after the edits (2026-11-21)
+
+`npm test` (smoke 15/15 + site-render 13/13) · `node tests/logic.test.mjs` · `node scripts/check-links.js`
+(28 pages / 360 refs, 0 broken) · `python3 scripts/check_site.py` (39 rows) · `python3 -m py_compile` (all 6) ·
+`pages.yml` YAML parse OK.
+
+### Merge-conflict log (2026-11-21, session `arena/77ec3a0e-trade3`)
+
+`gh pr merge 29` initially refused: `main` had advanced via parallel sessions (`arena/6c20e938-trade3`,
+`arena/658d547d-trade3`, `arena/25db01aa-trade3`, PRs #26–#28) while this branch was in progress.
+`git merge origin/main` produced four conflicts, resolved **without discarding either side**:
+
+| File | Conflict | Resolution |
+|---|---|---|
+| `.github/workflows/pages.yml` | This branch's Pages-readiness gate (tries `POST /pages`, then a cited owner-action error) vs main's fix "let `configure-pages` enablement create the site" (PRs #18/#19, sessions 8214edf2/8373696a) | **Both kept, combined**: `configure-pages@v5` with `enablement: true` runs first (`continue-on-error`, so enablement always gets its chance — addressing the review note on main that the old pre-check exited before enablement could try), then the readiness gate repeats the same `POST /pages` create attempt and, only when creation is proven impossible for the run token, stops with the exact owner action and the official rule. Verified against the official action source (`api-client.js`: `findOrCreatePagesSite` fetches first, calls `createPagesSite` = `POST /pages` `build_type=workflow` on a miss — the identical call, same token). Duplicate trailing `configure-pages` step from the common hunk removed. |
+| `docs/flagged.html` | Both rewrote F8 | **Both kept, combined**: their session list (2100849c, ca612a03, 6c20e938) + this session's GET-404/POST-403 evidence + the official action.yml and api-client.js citations + the self-heal note. Their F26 row, nav link and header edits auto-merged untouched. |
+| `EXECUTIVE_SUMMARY.md` | Both appended a 2026-11-21 section at EOF | **Both kept**: session 6c20e938's audit section first (it landed on main first), then this session's re-verification section, whose workflow paragraph was updated to describe the combined flow actually merged. Their earlier header/table edits auto-merged untouched. |
+| `COORDINATION.md` | Both appended session records at EOF | **Both kept**: main's session records (6c20e938, 658d547d, 25db01aa, …) then this session's claim + T-AW1/T-AW2 records. |
+
+No other session's work was modified or removed; their unmerged-in files (tests, `docs/suggestions.html`,
+app JS chart windows 1m–1w, requirements) auto-merged cleanly and are unchanged by this resolution.
+
+**Second conflict round (same session, minutes later):** `main` advanced again (PRs #21–#39 from sessions
+6c20e938, 755fb608, 71252315, 25db01aa, b47b1c48). Re-merged `origin/main`; this round conflicted only in
+`COORDINATION.md` and `EXECUTIVE_SUMMARY.md` (EOF append collisions) and both were union-resolved the same
+way — their records kept first, this session's records appended after. `docs/flagged.html` auto-merged
+(their F10 correction + our F8 evidence coexist). No work discarded.

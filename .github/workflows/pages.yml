@@ -139,14 +139,50 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # configure-pages with enablement: true creates the Pages site (build type: workflow) if it
-      # does not exist yet. The earlier pre-check that exited on 404 is removed: it stopped the run
-      # before this step could ever try the enablement.
-      # (Sessions arena/8214edf2-trade3 PR #18 and arena/8373696a-trade3 independently made
-      # this same fix; upstream version kept, both COORDINATION records kept.)
+      # Combined resolution of two independent fixes (sessions arena/8214edf2-trade3 PR #18 /
+      # arena/8373696a-trade3, and session arena/77ec3a0e-trade3 — logged in COORDINATION.md):
+      # configure-pages with enablement: true gets its chance first (per findOrCreatePagesSite in
+      # the official action source, it fetches the site and only calls createPagesSite
+      # (POST /pages, build_type=workflow) when the fetch misses:
+      # https://github.com/actions/configure-pages/blob/main/src/api-client.js). Its failure is
+      # not terminal here: the readiness gate below repeats the same create attempt and, when the
+      # run token cannot create the site, stops with the exact owner action and the official rule
+      # (https://github.com/actions/configure-pages/blob/main/action.yml: the enablement option
+      # "requires a token other than GITHUB_TOKEN" - a PAT with the repo scope or Pages write
+      # permission, or a GitHub App with administration:write and pages:write).
       - uses: actions/configure-pages@v5
+        continue-on-error: true
         with:
           enablement: true
+
+      - name: Pages readiness
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/pages")
+          echo "GET /repos/$GITHUB_REPOSITORY/pages -> $code"
+          if [ "$code" = "404" ]; then
+            # The site has never been created. Try to create it with this run's token first,
+            # so the deploy self-heals if the token ever carries the required permission.
+            echo "GET returned 404; attempting POST /repos/$GITHUB_REPOSITORY/pages (build_type=workflow)"
+            post=$(curl -s -o /tmp/pages-create.json -w '%{http_code}' \
+              -X POST \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/$GITHUB_REPOSITORY/pages" \
+              -d '{"build_type":"workflow"}')
+            echo "POST /repos/$GITHUB_REPOSITORY/pages -> $post"
+            if [ "$post" = "201" ]; then
+              echo "Pages site created by the workflow token; continuing."
+            else
+              cat /tmp/pages-create.json || true
+              echo "::error title=GitHub Pages is not enabled on this repository::Pages has never been created for $GITHUB_REPOSITORY and the token for this run could not create it (POST /pages -> $post; actions/configure-pages enablement failed the same way above). Per the official actions/configure-pages action.yml (https://github.com/actions/configure-pages/blob/main/action.yml), enabling Pages needs a token other than GITHUB_TOKEN: a PAT with the repo scope or Pages write permission, or a GitHub App with administration:write and pages:write. Owner action, one time: Settings -> Pages -> Build and deployment -> Source: GitHub Actions -> Save, then re-run this workflow (or push to main). The site itself passed every check in the verify job."
+              exit 1
+            fi
+          fi
       - uses: actions/upload-pages-artifact@v3
         with:
           path: docs

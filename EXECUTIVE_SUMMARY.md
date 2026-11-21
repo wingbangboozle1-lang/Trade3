@@ -172,3 +172,47 @@ the decision to leave settlement blank under the official-publishers-only policy
 | Local gates | `npm test`, `check_site.py`, `check-links.js`, `py_compile`, JSON parse — all pass | See [VERIFICATION.md](VERIFICATION.md) |
 | GitHub Pages | **Still not enabled** (404; enablement returns 403 to automation). Owner action required — see F8 | [docs/flagged.html](docs/flagged.html) |
 
+---
+
+
+---
+
+---
+
+## Re-verification + deploy-hardening pass — session `arena/77ec3a0e-trade3` (2026-11-21)
+
+Additive record. Everything above remains true except where noted.
+
+### Live re-verification against the official demo API (fetched 2026-11-21)
+
+| Claim re-checked | Official source (live fetch) | Result |
+|---|---|---|
+| Exchange active / trading active | [GET /exchange/status](https://external-api.demo.kalshi.co/trade-api/v2/exchange/status) | `exchange_active: true`, `trading_active: true`, shards 0–3 — matches published rows |
+| Gas anchor series `KXAAAGASM` | [Series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASM) | title "US gas price", category `Economics`, tags `Oil & Gas` / `Oil and energy`, scope `Gasoline`, `fee_multiplier: 1`, `fee_type: quadratic`, `frequency: monthly`, settlement `AAA — https://gasprices.aaa.com/` — matches `docs/data/series.json` |
+| Crypto anchor series `KXETHD` | [Series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXETHD) | category `Crypto`, `frequency: hourly`, settlement `CF Benchmarks — https://www.cfbenchmarks.com/data/indices/ETHUSD_RTI` — matches |
+| Golf anchor series `KXPGAGOLFERSCORE` | [Series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAGOLFERSCORE) | category `Sports`, tag `Golf`, scope `Golfer Score`, settlement list (NBC Sports, Fox Sports, Governing League/pgatour.com, AP, Golf Channel) — matches |
+| Culture category exists (2 series) | [Series by category: Culture](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture) | `KXXBANNEDGROK`, `KXXBANNEDMURRAYHILLGUY1` — matches published rows |
+| `Gas` is not a category | [Series by category: Gas](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Gas) | `{"series":null}` — the Economics + tag mapping stands |
+
+All 39 published rows carry a per-row official API `source_url`; the scheduled CI job
+`verify-live.yml` re-reads every row from a runner with Kalshi egress every 6 hours.
+
+### GitHub Pages blocker — root cause confirmed from an official source
+
+`GET /repos/…/pages` → 404 and `POST /repos/…/pages` → 403 "Resource not accessible by integration"
+were re-tested on 2026-11-21 from both the sandbox token and the Actions workflow token. The reason is
+now cited from the official [`actions/configure-pages` action.yml](https://github.com/actions/configure-pages/blob/main/action.yml):
+the `enablement` option — the only automated route to create a Pages site — *"requires a token other
+than `GITHUB_TOKEN` to be provided. In the context of a Personal Access Token, the `repo` scope or
+Pages write permission is required. In the context of a GitHub App, the `administration:write` and
+`pages:write` permissions are required."* No token in this environment has those permissions, so the
+site creation needs the one owner click (Settings → Pages → Source: **GitHub Actions** → Save).
+
+The deploy workflow (`pages.yml`) was hardened in a merge-safe combination with the parallel
+fix from sessions 8214edf2/8373696a (PRs #18/#19): `actions/configure-pages` with `enablement: true`
+gets its chance first (per the official `api-client.js`, it fetches the site and only calls
+`createPagesSite` — `POST /pages`, `build_type: workflow` — on a miss), and when that cannot create
+the site the readiness gate **repeats the `POST /pages` attempt itself** before surfacing the
+owner-action error, so the deploy self-heals if the repository token ever gains the required
+permission. Flag F8 on the [Flagged for Review](docs/flagged.html) page carries this evidence and
+all three source links.
