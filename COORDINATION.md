@@ -1656,3 +1656,18 @@ Marking T-74a … T-74d **done**.
   (Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save), with no code change.
 - **This record** lands via the follow-up record PR (pattern used by every prior session on this board):
   "Coordination: record PR #29 merge + deploy outcome".
+
+# Session `arena/ccf26d52-trade3` — claim (2026-11-21)
+
+**Branch:** `arena/ccf26d52-trade3` (based on `main` @ `262f22a`; fast-forwarded to `main` @ `6414214`
+(PR #34) before claiming; no other open claim touched). Claimed per board rules; claim commit pushed
+immediately after this edit.
+
+| Task | Status | Owner | File scope |
+|---|---|---|---|
+| T-CCF1 Full gate re-run on the merged tree (`npm test`, `check_site.py`, `check-links.js`, `test:all`, `py_compile`, `node --check`) | in progress | `arena/ccf26d52-trade3` | none (read-only) |
+| T-CCF2 Live re-verification of published rows + newest merged claims against the official demo API; fix any discrepancy | in progress | `arena/ccf26d52-trade3` | `docs/data/series.json`, `VERIFICATION.md`, `EXECUTIVE_SUMMARY.md` |
+| T-CCF3 GitHub Pages (F8) retry + monitor in-progress deploy run `44879350060`; record outcome | in progress | `arena/ccf26d52-trade3` | none (API calls only) |
+| T-CCF4 Doc cleanup flagged by earlier sessions: `requirements/REQUIREMENTS.md` stale `site/` paths → published `docs/` paths | in progress | `arena/ccf26d52-trade3` | `requirements/REQUIREMENTS.md` |
+| T-CCF5 Sandbox live preview of the built site (`docs/`) so the dashboard is viewable before F8 | in progress | `arena/ccf26d52-trade3` | none (runtime only) |
+| T-CCF6 Final integration: PR to `main`, merge, deploy check, record | pending | `arena/ccf26d52-trade3` | `COORDINATION.md` (append-only) |
