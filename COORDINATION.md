@@ -1513,3 +1513,93 @@ Platform rules fix this session to this branch name (the `session-<id>/<task>` n
 - PR from `arena/d9cfd60b-trade3` → `main` created and merged; number and merge result recorded in the appended merge note below (added in a follow-up commit inside the same PR so the merged board carries it).
 - The merge touches `COORDINATION.md` only (no `docs/**`), so no new Pages deploy run is triggered by it; the deploy outcome on the identical site tree is run [44879350060](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879350060) above.
 - No open claims from other sessions were touched. Open PRs belonging to other sessions were left alone.
+# Session `arena/7457e87c-trade3` — claim (2026-11-21)
+
+**Branch:** `arena/7457e87c-trade3` (rebased onto `origin/main` @ `262f22a` before claiming; no local commits yet).
+Claimed per board rules; commit + push immediately after this edit. File scope is non-overlapping:
+this session appends only its own record section below and edits no other session's files.
+
+| Task | Status | Owner | File scope |
+|---|---|---|---|
+| T-74a Fresh live re-verification of load-bearing published facts (exchange status, anchor series, category queries) against the official demo API | in progress | `arena/7457e87c-trade3` | `COORDINATION.md` (record only) |
+| T-74b Full gate re-run on the current tree (`npm test`, `check_site.py`, `check-links.js`, `py_compile`, `node --check`) | in progress | `arena/7457e87c-trade3` | none (read-only) |
+| T-74c Sandbox live preview of the built site (`docs/` + `server/`) so the dashboard is viewable before F8 | in progress | `arena/7457e87c-trade3` | none (runtime only) |
+| T-74d Final integration: PR to `main`, merge, CI + Pages deploy check, record outcome | pending | `arena/7457e87c-trade3` | `COORDINATION.md` (append-only) |
+
+**Note on PR #29** (`arena/77ec3a0e-trade3`, open, claimed ~07:08Z today — not stale, not taken over):
+this session does not merge or modify another session's PR. Its files (`pages.yml`, `flagged.html`,
+`EXECUTIVE_SUMMARY.md`) are left untouched; any defect found there will be logged here as a request.
+
+## Session `arena/7457e87c-trade3` — results (2026-11-21, ~07:17Z)
+
+### T-74a Live re-verification against the official demo API (all reads 2026-11-21 07:15–07:16Z)
+Source base for every line: `https://external-api.demo.kalshi.co/trade-api/v2` (official demo REST base,
+per https://docs.kalshi.com/getting_started/api_environments). Reads done through the page-fetch path;
+sandbox `curl` to `*.kalshi.co` is blocked by network egress (TLS reset) — known environment limit, not a site defect.
+
+| # | Official request | Returned | Matches published site data? |
+|---|---|---|---|
+| 1 | `GET /exchange/status` | `exchange_active: true`, `trading_active: true`, 4 demo shards (0–3) all active | Yes — "demo exchange is up" claim |
+| 2 | `GET /series/KXAAAGASM` | category `Economics`, tags `["Oil & Gas","Oil and energy"]`, settlement source `AAA — https://gasprices.aaa.com/`, frequency `monthly`, title "US gas price" | Yes — gas anchor row |
+| 3 | `GET /series/KXPGAGOLFERSCORE` | category `Sports`, tags `["Golf"]`, settlement sources NBC/Fox/PGATour/AP/Golf Channel, frequency `custom` | Yes — golf anchor row |
+| 4 | `GET /series/KXETHD` | category `Crypto`, tags `Crypto, Hourly, Ethereum`, settlement `CF Benchmarks ETHUSD_RTI`, frequency `hourly` | Yes — crypto row |
+| 5 | `GET /series/POPVOTEKHVA` | category `Elections`, tags `["US Elections"]`, settlement `https://www.congress.gov/`, title "Kamala Virginia" | Yes — elections row |
+| 6 | `GET /series?category=Culture` | exactly 2 series: `KXXBANNEDGROK`, `KXXBANNEDMURRAYHILLGUY1` | Yes — confirms Culture **is** a category (and that the earlier Culture→Entertainment mapping was wrong; not reintroduced) |
+| 7 | `GET /markets?series_ticker=KXETHD&limit=2&status=open` | field names `last_price_dollars`, `previous_price_dollars`, `yes_bid_dollars`, `yes_ask_dollars`, `volume_fp`, `result`, `status`, `event_ticker`, `price_ranges[].step = "0.0100"` | Yes — the dashboard/alarm code reads exactly these fields; the 1-cent `step` is what makes "≥ $0.10" = 10 ticks, matching the integer-tick comparison in `docs/assets/dashboard.js` |
+
+No drift found: nothing published on the site contradicts a live API record. `Gas` and `Golf` remain
+non-categories, so the topic pages keep documenting them as tag/scope-filtered views over `Economics`
+and `Sports` rather than inventing a category.
+
+### T-74b Gate re-run on the rebased tree (`8b1813d`, on top of `origin/main` @ `6414214`)
+- `npm test` — PASS: logic tests OK, smoke 15/15, site-render 13/13.
+- `python3 scripts/check_site.py` — PASS: 29 pages, 387 local links, 20 JS modules, 39 series rows.
+- `node scripts/check-links.js` — PASS: 387 local references resolve, 0 broken.
+- `python3 -m py_compile` (kalshi_client, strategies, backtest, run_sim, verify_series, check_site) — PASS.
+- `node --check` (app/app.js, server/index.js, server/collector.js) — PASS.
+- Data completeness: 39/39 rows in `docs/data/series.json` carry `source_url` back to the official
+  `GET /series/{ticker}` record; blank `settlement` fields are deliberate "no official publisher
+  disclosed" flags, listed on the Flagged page — none were filled in or inferred.
+
+### T-74c Live preview
+Started `server/index.js` bound to `0.0.0.0:3000` with `DATA_MODE=snapshot ALLOW_DEMO_FALLBACK=0` —
+`GET /api/health` reports `ok: true`, `effectiveMode: snapshot`, `trackedMarkets: 12`, note
+"Snapshot of real demo values captured 2026-11-20T13:24:00Z. Not live." Routes verified 200:
+`/app/` (dashboard), `/site/` (this build's audit edition), `/` (repo site).
+`ALLOW_DEMO_FALLBACK=0` was used deliberately: with the default, an unreachable API silently switches
+to synthetic demo data; here it would have produced that switch, so the preview is labelled snapshot instead.
+
+### T-74d Deploy / Pages status (evidence, not a site defect)
+- `actions/configure-pages` remains the only failing step. Latest main run `44879350060` (after PR #34):
+  `Verify site = success`, `Deploy = failure` at `Run actions/configure-pages@v5` (same for `44879180202`).
+- `GET /repos/.../pages` → `404 Not Found` (no Pages site exists yet).
+- Root cause and owner one-click fix stay as recorded under F8: token cannot create the site
+  (https://github.com/actions/configure-pages/blob/main/action.yml requires a token other than
+  `GITHUB_TOKEN` for `enablement`); Settings → Pages → Source: GitHub Actions → Save.
+- `Re-verify published rows against the live API` on main: conclusion `success` at 07:14:59Z.
+
+### Irregularities / notes for other sessions
+- 4 parallel PRs are open with overlapping "final integration" scope touching `COORDINATION.md`:
+  #29 (`arena/77ec3a0e`, now CONFLICTING vs main — owner should rebase), #33, #36, #37 (mergeable UNKNOWN).
+  They are append-only coordination records like this one; nothing in them contradicts this session's
+  findings. Request to whoever integrates last: merge them in PR-number order to keep this file linear,
+  and do not let any of them re-mark F8 as resolved without a `GET /pages` 200.
+- This session edited **only** `COORDINATION.md` (append-only). No request to another session's file
+  went unmet: no change was needed in `pages.yml`, `flagged.html`, or `EXECUTIVE_SUMMARY.md` — F8 evidence
+  there is accurate as written.
+
+### Conflict log (board rule)
+
+Hit twice, same shape both times — parallel sessions appending to the end of this file. Both resolved by
+`git pull --rebase` keeping **both** records verbatim (markers deleted only; no reordering, no edits inside
+another session's text): (1) `main` `80b662d`/`3243d28` (PRs #38, #39), (2) `main` `c7c04d0` (PR #37).
+
+Pushing this record hit a `COORDINATION.md` conflict because `main` advanced twice mid-session
+(PR #38 `arena/71252315-trade3` @ `80b662d`, then PR #39 `arena/755fb608-trade3` @ `3243d28`).
+Resolved with `git pull --rebase` by keeping **both** sides verbatim — their append-only records were
+not edited, reordered, or discarded; only conflict markers were removed. No other file conflicted.
+Their records agree with this one on every shared fact (gates green, F8 = enablement only, Culture is a
+category, 3 anchor rows match live). Two notes that differ only in coverage, not in content: they re-read
+3 rows, this session re-read 5 series + the markets field shape; both remain honest about what was sampled.
+
+Marking T-74a … T-74d **done**.
