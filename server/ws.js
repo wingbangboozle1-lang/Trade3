@@ -167,7 +167,7 @@ export class FrameParser extends EventEmitter {
 
     if (this.requireMask && !masked) return void this.#fail('client frame was not masked (RFC 6455 §5.3)');
 
-    let offset = 2;
+    let offset = 2;          // bytes of the frame header consumed so far
     if (len === 126) {
       if (buf.length < offset + 2) return false;
       len = buf.readUInt16BE(offset);
@@ -179,6 +179,9 @@ export class FrameParser extends EventEmitter {
       len = Number(big);
       offset += 8;
     }
+    // Remember where the payload actually starts. `offset` grows further for the
+    // masking key, so the frame's total header length must be captured here.
+    const payloadStart = offset;
 
     // §5.5: control frames MUST be <= 125 bytes and MUST NOT be fragmented.
     const isControl = (opcode & 0x8) !== 0;
@@ -205,7 +208,11 @@ export class FrameParser extends EventEmitter {
       payload = Buffer.alloc(0);
     }
 
-    this.buffer = buf.subarray(offset + len);
+    // Advance past header + payload. Using `payloadStart` (not `offset`, which
+    // includes the 4-byte mask key) is what keeps the stream aligned for every
+    // frame whose length needs the 16- or 64-bit escape form.
+    const consumed = (masked ? payloadStart + 4 : payloadStart) + len;
+    this.buffer = buf.subarray(consumed);
     this.#dispatch({ fin, opcode, payload });
     return true;
   }
@@ -257,7 +264,7 @@ export class FrameParser extends EventEmitter {
 
 /** A single WebSocket connection over an already-open TCP/TLS socket. */
 export class Connection extends EventEmitter {
-  constructor(socket, { mask, maxPayloadBytes } = {}) {
+  constructor(socket, { mask, maxPayloadBytes, buffered = null } = {}) {
     super();
     this.socket = socket;
     this.mask = Boolean(mask);
@@ -296,6 +303,15 @@ export class Connection extends EventEmitter {
       this.emit('error', err);
       this.close(err.closeCode || CLOSE_CODE.PROTOCOL_ERROR, err.message);
     });
+
+    // Frames can share the TCP segment with the 101 response. They are pushed on
+    // the next tick, not here: the constructor returns to the caller first, so its
+    // 'text' listeners exist before the first message is emitted. Emitting
+    // synchronously from the constructor would silently drop that first frame.
+    if (buffered && buffered.length) {
+      const bytes = Buffer.from(buffered);
+      setImmediate(() => { if (!this.closed) this.parser.push(bytes); });
+    }
   }
 
   #write(frame) {
@@ -343,7 +359,7 @@ export class Connection extends EventEmitter {
  * Validate an inbound HTTP upgrade request per RFC 6455 §4.2.1 and write the
  * 101 response per §4.2.2. Returns a Connection, or null after writing an error.
  */
-export function upgradeRequest(req, socket, { originAllowList = null, maxPayloadBytes } = {}) {
+export function upgradeRequest(req, socket, { checkOrigin = null, maxPayloadBytes } = {}) {
   const reject = (status, message, extraHeaders = {}) => {
     const body = `${message}\n`;
     const head = [`HTTP/1.1 ${status} ${statusText(status)}`, 'Connection: close', 'Content-Type: text/plain; charset=utf-8',
@@ -375,8 +391,11 @@ export function upgradeRequest(req, socket, { originAllowList = null, maxPayload
   }
   // §4.1 step 5: we offer no extensions, so a client offering one is fine — we
   // simply decline it by omitting Sec-WebSocket-Extensions from the response.
+  // §4.2.2 step 4 ("origin"): the server MAY use Origin to decide whether to accept,
+  // and "If the server does not wish to accept this connection, it MUST return an
+  // appropriate HTTP error code (e.g., 403 Forbidden)".
   const origin = header('origin');
-  if (originAllowList && origin && !originAllowList(origin)) {
+  if (checkOrigin && !checkOrigin(origin)) {
     return reject(403, 'Origin not allowed');
   }
 
@@ -451,12 +470,9 @@ export function connectWebSocket(url, { headers = {}, timeoutMs = 15000, maxPayl
     });
 
     let handshakeBuffer = Buffer.alloc(0);
+    let handshakeDone = false;
     const onData = (chunk) => {
-      if (settled) {
-        // Handshake finished: this data belongs to the frame parser.
-        rest(chunk);
-        return;
-      }
+      if (handshakeDone) return;   // Connection owns the socket's data events from then on
       handshakeBuffer = Buffer.concat([handshakeBuffer, chunk]);
       const end = handshakeBuffer.indexOf('\r\n\r\n');
       if (end === -1) return;
@@ -502,17 +518,13 @@ export function connectWebSocket(url, { headers = {}, timeoutMs = 15000, maxPayl
         return;
       }
 
+      // Mark the handshake finished *before* detaching, or a frame that arrived in
+      // the same TCP segment as the 101 would be dropped by the guard above.
+      handshakeDone = true;
       settled = true;
       socket.off('data', onData);
-      const conn = new Connection(socket, { mask: true, maxPayloadBytes });
-      if (leftover.length) conn.parser.push(leftover);
-      resolve(conn);
-    };
-
-    const rest = (chunk) => {
-      // Only reachable for bytes that arrive after resolve; Connection owns the
-      // 'data' handler from then on, so this is a safety net for a lost race.
-      try { socket.emit('data', chunk); } catch { /* ignore */ }
+      // Anything after the CRLFCRLF is already WebSocket frame data.
+      resolve(new Connection(socket, { mask: true, maxPayloadBytes, buffered: leftover }));
     };
 
     socket.on('data', onData);

@@ -316,6 +316,43 @@ await check('client refuses an extension it never offered (§4.1 step 5)', async
   await new Promise((r) => server.close(r));
 });
 
+await check('regression: a frame in the same TCP segment as the 101 is not dropped', async () => {
+  // Bug found during this build: Connection emitted synchronously from its own
+  // constructor, so a frame that arrived with the handshake was emitted before the
+  // caller could attach a listener. Buffered bytes now go out on setImmediate.
+  const server = net.createServer((socket) => {
+    socket.once('data', (chunk) => {
+      const key = /sec-websocket-key: (.*)/i.exec(chunk.toString('latin1'))[1].trim();
+      const head = `HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: ${acceptKey(key)}\r\n\r\n`;
+      const frame = encodeFrame({ opcode: OPCODE.TEXT, payload: '{"first":true}', mask: false });
+      socket.write(Buffer.concat([Buffer.from(head, 'latin1'), frame]));
+    });
+  });
+  await new Promise((r) => server.listen(0, '127.0.0.1', r));
+  const port = server.address().port;
+  const conn = await connectWebSocket(`ws://127.0.0.1:${port}/x`);
+  const first = await new Promise((resolve, reject) => {
+    const t = setTimeout(() => reject(new Error('frame that shared the handshake segment was lost')), 1500);
+    conn.once('text', (text) => { clearTimeout(t); resolve(text); });
+  });
+  assert.equal(first, '{"first":true}');
+  conn.close(1000, 'done');
+  await new Promise((r) => server.close(r));
+});
+
+await check('regression: the frame stream stays aligned after a 16-bit length frame', async () => {
+  // Bug found during this build: the parser advanced the buffer by the mask-key
+  // offset, forgetting the 2 length bytes, which desynchronised every later frame.
+  const parser = new FrameParser();
+  const out = collect(parser);
+  const big = 'x'.repeat(200);                       // forces the 126 / 16-bit form
+  parser.push(Buffer.concat([
+    encodeFrame({ opcode: OPCODE.TEXT, payload: big, mask: true }),
+    encodeFrame({ opcode: OPCODE.TEXT, payload: 'after', mask: true }),
+  ]));
+  assert.deepEqual(out.messages.map((m) => m.text), [big, 'after']);
+});
+
 // ---------------------------------------------------------------------------
 // Kalshi payload mapping — field names from the official market-ticker page
 // ---------------------------------------------------------------------------
