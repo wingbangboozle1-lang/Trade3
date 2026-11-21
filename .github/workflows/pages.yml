@@ -148,6 +148,11 @@ jobs:
       pages: write      # POST /pages/builds (explicit legacy Pages build trigger)
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Full history: the freshness check must read the published commit's tree, and
+          # the publish step builds a commit on top of the gh-pages tip (a shallow clone
+          # breaks that with git exit 128).
+          fetch-depth: 0
 
       # HOW THIS REPO PUBLISHES (verified 2026-11-21 against the live API; integrator
       # update, session arena/ccf26d52-trade3 — supersedes the verify-only design from
@@ -218,13 +223,17 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          set -euo pipefail
+          set -euxo pipefail
           expected="${{ steps.check.outputs.expected }}"
-          git fetch origin gh-pages --depth=1 2>/dev/null || true
-          parent=""
-          if git rev-parse -q --verify FETCH_HEAD >/dev/null; then parent="-p FETCH_HEAD"; fi
-          new=$(git commit-tree "$expected" $parent -m "Publish docs/ from ${GITHUB_SHA}")
-          git push origin "+${new}:refs/heads/gh-pages"
+          git fetch origin gh-pages 2>/dev/null || true
+          parent_args=()
+          if git rev-parse -q --verify FETCH_HEAD >/dev/null 2>&1; then parent_args=(-p FETCH_HEAD); fi
+          new=$(git commit-tree "$expected" "${parent_args[@]}" -m "Publish docs/ from ${GITHUB_SHA}")
+          echo "created ${new} (tree ${expected})"
+          if ! git push origin "+${new}:refs/heads/gh-pages"; then
+            echo "::error title=gh-pages push failed::the workflow token could not push to gh-pages (git exit 128 usually means the remote refused the push: 403 write access not granted, or a ruleset/protection on gh-pages). Check Settings -> Actions -> General -> Workflow permissions (must allow read and write) and any branch rulesets on gh-pages. The verify job above passed; the site artifact is ready."
+            exit 1
+          fi
           echo "pushed ${new} to gh-pages"
 
           # A GITHUB_TOKEN push does not trigger a legacy Pages build (GitHub docs);
