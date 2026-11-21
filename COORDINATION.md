@@ -772,8 +772,8 @@ the moment the owner performs the one-time F8 action.
 | Task | Status | Owner | File scope |
 |---|---|---|---|
 | T-8214-1 Retry Pages enablement via REST (`POST /repos/.../pages`, `build_type=workflow`) | done — **403** again | `arena/8214edf2-trade3` | none (API call only) |
-| T-8214-2 Make `pages.yml` create the Pages site with `actions/configure-pages` `enablement: true` instead of exiting at a 404 pre-check (the pre-check previously stopped the run before that step was ever reached) | in progress | `arena/8214edf2-trade3` | `.github/workflows/pages.yml` |
-| T-8214-3 Merge to `main`, run deploy, record the Pages URL and result | pending | `arena/8214edf2-trade3` | `COORDINATION.md` (record only) |
+| T-8214-2 Make `pages.yml` create the Pages site with `actions/configure-pages` `enablement: true` instead of exiting at a 404 pre-check (the pre-check previously stopped the run before that step was ever reached) | done (merged PR #18, merge commit `a46d67e`) — **enablement still refused: 403** | `arena/8214edf2-trade3` | `.github/workflows/pages.yml` |
+| T-8214-3 Merge to `main`, run deploy, record the Pages URL and result | done — **blocked**: deploy runs `44878359483` and `44878420679` both fail at `Run actions/configure-pages@v5` with `Resource not accessible by integration` (create-site, HTTP 403); `GET /repos/.../pages` → 404; `https://wingbangboozle1-lang.github.io/Trade3/` → no response | `arena/8214edf2-trade3` | `COORDINATION.md` (record only) |
 
 No other session is active; no conflicting claims exist on the board.
 
@@ -881,3 +881,12 @@ No other session has an open claim on the board. Files owned by other sessions a
 ### Merge (T-R4)
 
 - **PR #20:** https://github.com/wingbangboozle1-lang/Trade3/pull/20 (`arena/658d547d-trade3` → `main`). Merge result: see the PR page (`gh pr view 20`). The Pages deploy triggered by this merge is the live test of the `configure-pages enablement: true` step on `main`.
+### Record (this session)
+
+- PR #18 `arena/8214edf2-trade3` → `main`: **MERGED** 2026-11-21T07:02Z, merge commit `a46d67e`. Change: `.github/workflows/pages.yml` pre-check removed; `configure-pages` runs with `enablement: true`.
+- Gates on the branch before merge: `scripts/check_site.py` pass (39 series rows); `scripts/check-links.js` pass (360 refs, 0 broken); `tests/logic.test.mjs` pass; `tests/smoke-test.js` 15/15.
+- Verify job on `main` (run `44878359483`): **success**. Deploy job: **failure** at `configure-pages` (see above).
+- Irregularity **F8 (updated)**: the automation token cannot create the Pages site by either route — the REST `POST /pages` call (`build_type=workflow`) and `configure-pages` `enablement: true` both return 403 "Resource not accessible by integration". The token has repo admin per `gh api`, but the Actions/REST token lacks Pages site-creation scope. This is a platform/token limit, not a site defect; no token or credential was requested or stored.
+- **Owner action (one time, ~30 seconds):** GitHub repo → Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save. Then Actions → "Deploy site to GitHub Pages" → Run workflow. Expected URL: `https://wingbangboozle1-lang.github.io/Trade3/`.
+- Sources for this session's claims: GitHub REST Pages API (`https://docs.github.com/rest/pages/pages`), `actions/configure-pages` (`https://github.com/actions/configure-pages`). Run logs linked from the Actions tab.
+- Not done this session (honest scope): live Kalshi demo portfolio tracking and order placement (need user demo API keys; not in repo); WebSocket live feed (requires authenticated handshake); the sandbox has no direct egress to kalshi.co, so the per-row Kalshi re-check runs in CI (`verify-live.yml`) only.
