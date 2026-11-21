@@ -776,3 +776,37 @@ the moment the owner performs the one-time F8 action.
 | T-8214-3 Merge to `main`, run deploy, record the Pages URL and result | pending | `arena/8214edf2-trade3` | `COORDINATION.md` (record only) |
 
 No other session is active; no conflicting claims exist on the board.
+
+> **Handoff note (session `arena/8373696a-trade3`, 2026-11-21):** While this branch was open, PR #18 from `arena/8214edf2-trade3` merged the same Pages workflow fix (remove 404 pre-check, let `configure-pages` enablement create the site). Both sessions independently reached the same conclusion. Resolution: kept upstream's `pages.yml` (pre-check removed) and kept both COORDINATION records. No work discarded.
+# Session `arena/8373696a-trade3` — final integration + independent re-verification (2026-11-21)
+
+**Session ID:** `arena/8373696a-trade3` · **Branch:** `arena/8373696a-trade3` · **Base:** `4eb92a1` (`origin/main`, PR #17 merged).
+
+## Task claimed
+
+| ID | Task | Status | Owner | Files touched |
+|----|------|--------|-------|---------------|
+| T9 | Independent line-by-line re-verification against official Kalshi docs + live demo API; full test suite; Pages workflow fix attempt; PR to `main`, merge, deploy check | in progress | `arena/8373696a-trade3` | `COORDINATION.md`, `.github/workflows/pages.yml` (deploy-job ordering only, if needed) |
+
+## Independent verification performed this session (fetched live 2026-11-21 via docs proxy)
+
+| Check | Source | Result |
+|-------|--------|--------|
+| Demo REST/WS base URLs (recommended + alternate) | [API Environments](https://docs.kalshi.com/getting_started/api_environments) | Match brief exactly: `external-api.demo.kalshi.co/trade-api/v2`, `demo-api.kalshi.co/trade-api/v2`, `wss://external-api-ws.demo.kalshi.co/trade-api/ws/v2`, `wss://demo-api.kalshi.co/trade-api/ws/v2` |
+| Demo caveat "may not be reflective" | [Demo Environment](https://docs.kalshi.com/getting_started/demo_env) | Confirmed verbatim |
+| `GET /exchange/status` | [Live API](https://external-api.demo.kalshi.co/trade-api/v2/exchange/status) | `exchange_active:true`, `trading_active:true`, shards 0–3 |
+| `GET /series?category=Culture` | [Live API](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture) | 2 series (`KXXBANNEDGROK`, `KXXBANNEDMURRAYHILLGUY1`), each `"category":"Culture"` — confirms F1 correction |
+| `GET /series?category=Gas` / `?category=Golf` | [Live API](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Gas) | Both `{"series":null}` — no such categories; Gas=Economics+Oil & Gas, Golf=Sports+Golf |
+| `GET /series/KXAAAGASM` | [Live API](https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASM) | Economics · Oil & Gas/Oil and energy · scope Gasoline · AAA settlement |
+| `GET /series/KXPGATOUR` | [Live API](https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGATOUR) | Sports · Golf · scope Game · Fox/ESPN/PGA Tour |
+| `GET /series/KXBTCD` | [Live API](https://external-api.demo.kalshi.co/trade-api/v2/series/KXBTCD) | Crypto · Crypto/Hourly/Bitcoin · CF Benchmarks BRTI |
+| `GET /markets?series_ticker=KXAAAGASM&status=open` | [Live API](https://external-api.demo.kalshi.co/trade-api/v2/markets?series_ticker=KXAAAGASM&status=open&limit=2) | Fields `yes_bid_dollars`, `last_price_dollars`, `volume_fp`, `open_interest_fp`, `result`, `status:active` present; titles ship markdown (`**gas prices**`) |
+| Settlement $1/contract, zero fee for yes/no | [Market Settlement](https://docs.kalshi.com/getting_started/market_settlement) | Confirmed |
+| Lifecycle statuses + filter map | [Market Lifecycle](https://docs.kalshi.com/getting_started/market_lifecycle) | 8 statuses; `open`→`active`, `settled`→`finalized`, `result` yes/no/scalar |
+| Candlesticks `period_interval` ∈ {1,60,1440} | [Get Market Candlesticks](https://docs.kalshi.com/api-reference/market/get-market-candlesticks) | Confirmed; shortest candle 1 minute (seconds charts must be own sampling) |
+| Create Order V2 `POST /portfolio/events/orders` | [Create Order V2](https://docs.kalshi.com/api-reference/orders/create-order-v2) | Confirmed (`side` bid/ask, `count` "10.00", `price` "0.5600") |
+| Pages enablement | `gh api POST /repos/.../pages` | 403 "Resource not accessible by integration" (reproduced); `GET /pages` → 404. Owner click still required (F8). |
+
+## Tests (this session, to be recorded after run)
+
+- `npm test`, `python3 scripts/check_site.py`, `node scripts/check-links.js` — results below after run.
