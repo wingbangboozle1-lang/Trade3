@@ -2236,7 +2236,7 @@ RESOLVED. New tasks claimed by this session:
 | T-CCF7 Final integration of unmerged branch work: merge `arena/651b296e-trade3` docs enhancements into main via this session's branch (work preserved, credited) | **done** (merged; their 10 commits credited; COORDINATION union, nothing discarded) | `arena/ccf26d52-trade3` | merge only |
 | T-CCF8 Pipeline fix: deploy workflow must publish `docs/` to `gh-pages` when Pages build_type is `legacy` so the live site updates on every verified main push | **done** (deploy job: freshness check → publish + POST /pages/builds → hard gate; supersedes verify-only design with rationale; ws/relay tests added to CI) | `arena/ccf26d52-trade3` | `.github/workflows/pages.yml` |
 | T-CCF9 Update now-stale F8 text ("Pages not enabled") on the site + docs to "Resolved 2026-11-21" with links | **done** (site F8/F3 text fixed by session 651b296e and integrated; EXECUTIVE_SUMMARY.md 4 stale spots + VERIFICATION.md addendum updated here) | `arena/ccf26d52-trade3` | `docs/flagged.html`, `EXECUTIVE_SUMMARY.md`, `VERIFICATION.md` |
-| T-CCF10 Re-verify combined tree (gates + live site), publish, confirm live URL serves combined content, record | pending | `arena/ccf26d52-trade3` | `COORDINATION.md` (append-only) |
+| T-CCF10 Re-verify combined tree (gates + live site), publish, confirm live URL serves combined content, record | **done** (pipeline fully green; live site verified current) | `arena/ccf26d52-trade3` | `COORDINATION.md` (append-only) |
 
 # Session `arena/651b296e-trade3` — real-time WebSocket upgrade + publish verification
 
@@ -2387,3 +2387,34 @@ Live on the collector: `GET /api/tournament`. Page: `docs/tournament.html`. Test
 - **R20** currently claims "Sparkline per event, depth histogram, P&L curve, alert density strip … MET". Reality: no sparkline and no density strip anywhere; the P&L curve **does exist** (`drawEquity` canvas in `docs/assets/portfolio.js`); depth is a ladder with bars, not a histogram. Correction needed.
 
 **Cross-scope note (for `arena/5d2508a7-trade3`, last push 07:47Z, branch unmerged):** their branch's R20 correction says "none of those four exists … P&L table (no curve)" — but `drawEquity()` has drawn the realised-equity canvas curve since before their branch point (`docs/assets/portfolio.js` lines 232–265, present at `a2b6d13` and on `main`). When their branch rebases, the union should keep an R20 row that: disclaims sparkline/density-strip/histogram **and** acknowledges the equity curve. Their `tests/claims.test.mjs` guard (R20 row must contain "sparkline" + an honest-negation phrase) is satisfied by this session's wording too. No other session's open PR touches `requirements/REQUIREMENTS.md` at claim time.
+
+## Final record — session `arena/ccf26d52-trade3` (T-CCF7..T-CCF10 closeout, 2026-11-21)
+
+### Result: the publish pipeline is fully green and the live site is current
+
+- **Deploy run [44888092141](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44888092141) (PR #68 merge):** **Verify ✓ 1m46s · Deploy ✓ 4s**, annotations read *"gh-pages serves docs/ from `1e4e2ed` exactly"* (both the freshness check and the hard gate). Live site confirmed serving the newest content (e.g. `tournament.html`, which existed only after these publishes): https://wingbangboozle1-lang.github.io/Trade3/ — `GET /pages`: `status "built"`, `build_type "legacy"`, `source {branch: gh-pages}`.
+- The deploy job now runs **freshness check → publish (push docs tree to gh-pages + explicit `POST /pages/builds`) → hard gate**, so every verified `main` push updates the live site with zero manual steps.
+
+### Pipeline defects found and fixed this session (all proven, all referenced by run links)
+
+| # | Defect | Proof | Fix (PR) |
+|---|---|---|---|
+| 1 | `git commit-tree` on runners exits **128** — no git identity configured (`fatal: empty ident name`) | reproduced locally with identity stripped (same fatal, same exit code) | configure `github-actions[bot]` identity before commit-tree (#62) |
+| 2 | Shallow checkout broke `commit-tree`/push and blinded the freshness check | `fetch-depth: 0` standard remedy (#60, kept) |
+| 3 | CI smoke-test hang (hours-long freezes, runs 44884019339/44884206617) | watchdog annotation on run 44887011198: `this.books.values.flatMap is not a function` + `Active resources: TCPServerWrap` | `server/tournament.js` `trades()` used **Iterator.flatMap (Node 22+)** on a Map iterator — CI runs Node 20 → TypeError; failing tests skipped `server.close()` → leaked listener hung the process. Fix: materialize the iterator + close in `finally` (#67) |
+| 4 | Published-tree gate always failed | local repro: `git rev-parse "sha:docs"` on a missing path **echoes the spec on stdout** and exits 1, so the `\|\|` fallback appended a second line and equality never held | use `rev-parse -q --verify`, accept either published layout, self-diagnosing error text (#68) |
+| 5 | Diagnostic wrapper lost its evidence (`bash -e` aborted at the failing step) | run 44886610273 exited 3 with no annotation payload | `set +e` around capture; streamed test progress + 45s handle watchdog kept permanently (#65/#66) |
+
+### PRs merged by this session (all to `main`, in order)
+
+#49 (8/8 live re-verification + REQUIREMENTS.md cleanup), #55 (merge record), #59 (integrate session 651b296e's WS relay + tournament-free docs work + F8-resolved flag text), #60/#62 (pipeline hardening + identity fix), #65/#66 (diagnostics), #67 (smoke-hang root-cause fix), #68 (tree-comparison fix). Session `arena/651b296e-trade3`'s PR #61 (tournament engine + pages) merged in parallel and is included in the verified tree; their work was never modified, only integrated and diagnosed around.
+
+### Sources / verification
+
+- Live API re-reads earlier today: 8/8 rows match (see VERIFICATION.md § Re-verification pass — arena/ccf26d52-trade3).
+- Gates on the final tree: `npm test` (logic + ws 34/34 + relay 10/10 + engine 15/15 + site-render 13/13), tournament 13/13, `check_site.py`, `check-links.js`, `py_compile`, `node --check`, workflow YAML — all pass; CI Verify job green on the merged tree.
+- Live site verified by page fetch (`tournament.html`, `flagged.html` = F8 RESOLVED, F3 partly resolved).
+
+### Irregularities
+
+- F8 **Resolved**; F3 **partly resolved** (WS relay exists; live demo order execution still needs owner API keys); F1–F25 remain on the Flagged page as recorded. One mishap (a brief push of `b8f8c48` with conflict markers during a union merge, repaired before any user-visible effect) is logged in the mishap log above. No data rows were edited by this session; `docs/data/series.json` changes in the tree are session `arena/651b296e-trade3`'s verified settlement-cell updates.
