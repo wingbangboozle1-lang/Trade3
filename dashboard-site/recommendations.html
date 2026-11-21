@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Make it more live and interactive — prioritised recommendations</title>
+<meta name="description" content="Thirteen concrete, source-verified ways to make the Kalshi demo dashboard feel more live, ranked by impact against effort." />
+<link rel="stylesheet" href="assets/site.css" />
+<script src="assets/shell.js" defer></script>
+<script type="module" src="assets/pages/recommendations.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<main id="main">
+
+  <h1>How to make this more live and interactive</h1>
+  <p class="lede">
+    You asked for suggestions. Each one below is tied to something that actually exists in Kalshi's API or
+    documentation, verified during this build — no hand-waving, and no feature that the API cannot support.
+    They are ordered by how much they change the experience for the effort involved.
+  </p>
+
+  <div class="callout">
+    <strong>The single biggest upgrade.</strong>
+    Today the dashboard polls REST every 15 seconds because that is the only path available from the build sandbox.
+    Switching to the authenticated WebSocket changes the feel of the whole product: alerts would land in
+    milliseconds instead of on a 15-second tick, and the chat would scroll like a real trading terminal.
+  </div>
+
+  <h2>Ranked recommendations</h2>
+  <div id="recTable"></div>
+
+  <h2>What each recommendation needs</h2>
+  <div id="recDetails" class="grid two"></div>
+
+  <h2>Interaction ideas that cost almost nothing</h2>
+  <ul>
+    <li><strong>Pin a market.</strong> Clicking a market already opens the drawer; pinning it keeps the chart and
+      depth pinned while you watch the feeds around it.</li>
+    <li><strong>Threshold slider.</strong> The $0.10 rule is the brief, but letting a trader tighten it to $0.20
+      instantly answers “what actually moves on this venue?” without changing the underlying engine.</li>
+    <li><strong>Sparklines in the table.</strong> A 20-pixel line per row makes a 200-row table scannable by shape
+      instead of by reading numbers.</li>
+    <li><strong>Keyboard-first review.</strong> Arrow keys to step through alerts and <code>space</code> to open the
+      drawer turns triage into a two-minute pass.</li>
+    <li><strong>Sound cue on threshold crossings only.</strong> A single diagnostic click for a $0.10 break is
+      useful; sound on every tick is noise and gets muted within a minute.</li>
+    <li><strong>Copyable deep links.</strong> Every filter state should be in the URL so a trader can paste
+      “crypto, up-only, last hour” into a chat.</li>
+  </ul>
+
+  <h2>What I would deliberately not build</h2>
+  <div class="card">
+    <ul style="margin-bottom:0">
+      <li><strong>Automatic news attribution without a licensed feed.</strong> Guessing that a headline caused a
+        jump is fabrication. It needs timestamped news with an explicit confidence method, which is what
+        recommendation 4 describes.</li>
+      <li><strong>A “prediction accuracy” scoreboard for the demo account.</strong> Demo prices are not real prices,
+        so publishing an accuracy record from them would mislead.</li>
+      <li><strong>Any auto-trading against production.</strong> Order endpoints exist and are implemented, but
+        nothing in the simulator touches them, and the default is off.</li>
+    </ul>
+  </div>
+
+<p class="source-note" style="margin-top:28px">Part of the same repository: <a href="../index.html">main site home</a> · <a href="../dashboard.html">live dashboard (other build)</a> · <a href="../flagged.html">their flagged page</a></p>
+
+  <h2 id="shipped">Shipped since this page was written (integration pass, 2026-11-20)</h2>
+  <p class="muted">Four of the suggestions below were implemented while integrating the three session branches. Each
+  line names the build it lives in and the official record it relies on — nothing here is a plan without a link.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Shipped</th><th>Where</th><th>What it is</th><th>Built on</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Catalyst evidence attached to every ≥ $0.10 alert</td>
+        <td>Dashboard edition — <a href="../dashboard.html#catalyst-card">“what may have moved it”</a></td>
+        <td>The executed prints for that contract within ±10 minutes of the move, beside the series’ own
+            settlement-source links. Correlation only; the panel says so.</td>
+        <td><a href="https://docs.kalshi.com/api-reference/market/get-trades" target="_blank" rel="noopener">GET /markets/trades</a></td>
+      </tr>
+      <tr>
+        <td>Titles rendered without Kalshi’s markdown</td>
+        <td>Dashboard edition — <code>cleanTitle()</code></td>
+        <td><code>Will average **gas prices** be above $5.00?</code> now reads as a sentence. The stored data keeps
+            the raw API wording, so the row still matches its proof.</td>
+        <td><a href="https://external-api.demo.kalshi.co/trade-api/v2/markets?series_ticker=KXAAAGASM&amp;status=open" target="_blank" rel="noopener">live gas markets</a></td>
+      </tr>
+      <tr>
+        <td>Published rows re-verified on a schedule, by machine</td>
+        <td><code>.github/workflows/verify-live.yml</code></td>
+        <td>Every 6 hours, a runner with ordinary internet re-reads <code>GET /series/{ticker}</code> for all 39 rows
+            and diffs every field the site prints. Drift becomes a warning and a job summary, not a silent error.</td>
+        <td><code>scripts/verify_series.py</code></td>
+      </tr>
+      <tr>
+        <td>Both editions cross-linked under one navigation</td>
+        <td>Every page, both builds</td>
+        <td>The dashboard edition links to this audit edition and back, so one dataset and two front-ends can be
+            compared without hunting for the other half.</td>
+        <td><a href="../index.html#editions">index → Two editions</a></td>
+      </tr>
+    </tbody>
+  </table></div>
+
+  <h2>Still open, ranked by what they would buy you</h2>
+  <ol>
+    <li><strong>WebSocket streaming (biggest single gain, needs one thing from you).</strong> Kalshi requires a signed
+      handshake for <em>every</em> WebSocket connection, including the public <code>ticker</code> and
+      <code>trade</code> channels — so a static page cannot do it without exposing a key
+      (<a href="https://docs.kalshi.com/getting_started/quick_start_websockets" target="_blank" rel="noopener">docs</a>).
+      The collector in this repo is already written to hold the key server-side; it needs a host to run on.</li>
+    <li><strong>A timestamped external feed for causes.</strong> The tape panel shows <em>what traded</em>; only a news
+      or data-release feed with timestamps can say <em>why</em>. Nothing is guessed in its absence.</li>
+    <li><strong>Real demo execution.</strong> <code>place_order</code> builds the documented V2 body and defaults to
+      <code>dry_run=True</code>; a demo key from
+      <a href="https://demo.kalshi.co/" target="_blank" rel="noopener">demo.kalshi.co</a> turns on the live path.</li>
+    <li><strong>Auto-refresh of the published tables.</strong> The topic pages poll live in the browser, but the static
+      series tables refresh only when this repository is re-run. A scheduled workflow could rewrite them from the API
+      the same way it now verifies them.</li>
+  </ol>
+
+</main>
+</body>
+</html>

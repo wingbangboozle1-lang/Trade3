@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portfolio &amp; Strategies — Trade3 · Kalshi</title>
+<meta name="description" content="Simulated Kalshi portfolio: strategy backtests on live demo data, P&L categorised by topic and strategy, equity curve, and CSV export.">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">Trade3 <span>· Portfolio</span></div>
+  <nav class="main">
+    <a href="index.html">Home</a>
+    <a href="executive-summary.html">Summary</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="index.html#topics">Topics</a>
+    <a href="portfolio.html" class="active">Portfolio</a>
+    <a href="methodology.html">Method</a>
+    <a href="verification.html">Verification</a>
+    <a href="suggestions.html">Suggestions</a>
+    <a href="flagged.html">Flagged</a>
+    <a href="dashboard-site/index.html">Audit edition</a>
+  </nav>
+</header>
+
+<main class="stack">
+
+  <section class="card">
+    <h1>Simulated portfolio &amp; strategy lab</h1>
+    <p class="muted">
+      Everything here is <b>simulated</b>. Trades are priced from live Kalshi demo quotes, never sent to the
+      exchange, and never marked as realised until the exchange publishes a <code>result</code>.
+      Real demo execution needs your own demo API key — the signing client is in the repo
+      (<code>kalshi_client.py</code>) and is documented on the <a href="methodology.html#trading">Method</a> page.
+    </p>
+    <div class="controls">
+      <label>Universe
+        <select id="universe">
+          <option value="all">All five topics</option>
+          <option value="gas">Gas prices</option>
+          <option value="elections">Elections</option>
+          <option value="culture">Culture</option>
+          <option value="crypto">Crypto</option>
+          <option value="golf">Golf</option>
+        </select>
+      </label>
+      <label>Contracts per trade <input id="contracts" type="number" value="10" min="1" max="500" style="width:72px"></label>
+      <label>Starting cash <input id="cash" type="number" value="1000" min="10" max="100000" style="width:92px"></label>
+      <button id="run" class="primary">Run all strategies</button>
+      <span id="run-status" class="pill">idle</span>
+    </div>
+    <p class="dim" style="margin:8px 0 0">
+      The run pulls live open contracts once, then replays every strategy against the same snapshot so the
+      comparison is fair. Settlement comes from Kalshi's <code>result</code> field; unresolved trades stay
+      unrealised and are labelled as such.
+    </p>
+  </section>
+
+  <section class="grid cols-4">
+    <div class="card tight"><div class="kpi-label">Trades taken</div><div class="kpi" id="k-trades">—</div><div class="dim" id="k-trades-sub">across 4 strategies</div></div>
+    <div class="card tight"><div class="kpi-label">Realised P&amp;L</div><div class="kpi" id="k-pnl">—</div><div class="dim">settled only</div></div>
+    <div class="card tight"><div class="kpi-label">Unrealised</div><div class="kpi" id="k-unreal">—</div><div class="dim">marked at last trade price</div></div>
+    <div class="card tight"><div class="kpi-label">Hit rate</div><div class="kpi" id="k-win">—</div><div class="dim" id="k-win-sub">settled trades</div></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>Strategy comparison</h2>
+      <div class="right"><span class="dim">same snapshot, same fill rules</span></div></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Strategy</th><th>Rule</th><th class="num">Trades</th><th class="num">Settled</th>
+        <th class="num">Win rate</th><th class="num">Realised P&amp;L</th><th class="num">ROI on stake</th><th class="num">Avg entry</th></tr></thead>
+      <tbody id="cmp-body"></tbody>
+    </table></div>
+  </section>
+
+  <section class="grid cols-2">
+    <div class="card">
+      <div class="card-head"><h2>Equity curve</h2><span class="dim" id="eq-note"></span></div>
+      <canvas class="equity" id="equity"></canvas>
+      <div class="legend" style="margin-top:8px">
+        <span><i style="background:#22e6a4"></i>realised equity</span>
+        <span><i style="background:#5aa9ff"></i>including unrealised marks</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>P&amp;L by category</h2>
+        <div class="right"><div class="seg" id="cat-mode"><button data-m="topic" class="on">topic</button><button data-m="strategy">strategy</button></div></div>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Category</th><th class="num">Trades</th><th class="num">Settled</th><th class="num">Win rate</th><th class="num">P&amp;L</th><th class="num">Share</th></tr></thead>
+        <tbody id="cat-body"></tbody>
+      </table></div>
+      <p class="dim" style="margin-top:8px">Strategies are grouped by type so results can be compared per trade style, as asked.</p>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>Trade blotter</h2>
+      <div class="right">
+        <label class="switch"><input type="checkbox" id="only-settled"> settled only</label>
+        <button id="export-csv" class="sm ghost">Export CSV</button>
+        <button id="export-json" class="sm ghost">Export JSON</button>
+      </div>
+    </div>
+    <div class="table-wrap" style="max-height:520px;overflow-y:auto"><table>
+      <thead><tr><th>#</th><th>Strategy</th><th>Topic</th><th>Contract</th><th>Side</th><th class="num">Entry</th>
+        <th class="num">Mark / exit</th><th class="num">Qty</th><th class="num">P&amp;L</th><th>Result</th></tr></thead>
+      <tbody id="blotter-body"></tbody>
+    </table></div>
+    <p class="dim" style="margin-top:8px">Fill model: buy at the quoted ask, mark at the last trade price, settle at $1.00 (yes) or $0.00 (no). No fees, no slippage beyond the quoted book — stated plainly so results are reproducible.</p>
+  </section>
+
+  <section class="card">
+    <h2>Reading the results honestly</h2>
+    <ul class="muted">
+      <li><b>One snapshot is not a backtest.</b> This page replays strategies against the current market set. The Python
+        backtest (<code>run_sim.py</code>) samples repeatedly over time; use it for anything you intend to act on.</li>
+      <li><b>Demo prices are synthetic.</b> Kalshi states demo market behaviour may not reflect real markets, so demo P&amp;L
+        is a plumbing test, not an edge measurement.</li>
+      <li><b>Unrealised P&amp;L is not profit.</b> It is a mark against the last trade price and will move.</li>
+      <li><b>Strategy rules are public and fixed</b> (shown above), so you can judge them rather than trust them.</li>
+    </ul>
+  </section>
+
+</main>
+<footer>
+  Trade3 · simulated trading only · <a href="methodology.html">Methodology</a> ·
+  <a href="verification.html">Verification</a> · <a href="flagged.html">Flagged for review</a><br>
+  Not financial advice. Kalshi demo funds are mock funds.
+</footer>
+<script type="module" src="assets/portfolio.js"></script>
+</body>
+</html>

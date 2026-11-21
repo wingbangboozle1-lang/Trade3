@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Resolutions — tracking events until yes or no</title>
+<meta name="description" content="How the dashboard follows each Kalshi event until it settles, and where the yes/no result comes from in the official API." />
+<link rel="stylesheet" href="assets/site.css" />
+<script src="assets/shell.js" defer></script>
+<script type="module" src="assets/pages/resolutions.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<main id="main">
+
+  <h1>Resolutions</h1>
+  <p class="lede">
+    Watching prices is only half the job. A prediction market trade is not finished until the contract resolves, so
+    the dashboard keeps every tracked market until Kalshi publishes a result and records that result exactly once,
+    with its source.
+  </p>
+
+  <h2>Where the yes/no answer comes from</h2>
+  <div class="card">
+    <p>The <code>result</code> field on a market object is the authoritative answer. Kalshi defines it as one of
+    <code>yes</code>, <code>no</code>, <code>scalar</code> or an empty string while undetermined. The dashboard reads it
+    two ways:</p>
+    <ol>
+      <li><strong>While tracking.</strong> Every poll re-reads <code>GET /markets/{ticker}</code> data for tracked
+        markets. When <code>result</code> becomes <code>yes</code> or <code>no</code>, the market is written to the
+        resolution log once and its paper positions settle.</li>
+      <li><strong>Backfill.</strong> Each cycle also calls
+        <code>GET /markets?status=settled&amp;min_settled_ts=…</code> for the last three days, keeps only markets in
+        the five topics, and adds any that are not already in the log.</li>
+    </ol>
+    <p style="margin-bottom:0">Payout follows the official settlement rule: <em>yes</em> outcome pays YES holders
+    <strong>$1 per contract</strong>, <em>no</em> outcome pays NO holders $1 per contract. Only net positions settle.</p>
+    <p class="source-note">
+      Sources: <a href="https://docs.kalshi.com/getting_started/market_settlement" target="_blank" rel="noopener">Market Settlement</a> ·
+      <a href="https://docs.kalshi.com/api-reference/market/get-markets" target="_blank" rel="noopener">Get Markets</a>
+    </p>
+  </div>
+
+  <h2>Resolutions captured in this build</h2>
+  <div class="callout">
+    <strong>Empty, and that is the verified answer.</strong>
+    At capture time the demo environment returned no settled markets in the five topics inside the three-day window.
+    Rather than seed the table with invented history, this page shows the exact query and the empty result.
+    <a href="https://external-api.demo.kalshi.co/trade-api/v2/markets?status=settled&limit=100" target="_blank" rel="noopener">Check it yourself ↗</a>
+  </div>
+  <div id="resolutionTable"></div>
+
+  <h2>Market lifecycle</h2>
+  <p>Kalshi publishes a lifecycle for a market, and the dashboard treats these states differently:</p>
+  <div id="lifecycleTable"></div>
+  <p class="source-note">
+    Source: <a href="https://docs.kalshi.com/getting_started/market_lifecycle" target="_blank" rel="noopener">Market Lifecycle</a>.
+    Status values come from the <code>status</code> enum on the market object.
+  </p>
+
+  <h2>What happens to a simulated trade at resolution</h2>
+  <ul>
+    <li>A winning YES position settles at <code>$1.00</code> per contract; a losing one at <code>$0.00</code>.</li>
+    <li>For a NO position the mirror applies: it wins when the result is <code>no</code>.</li>
+    <li>The closed trade records <code>closeReason = "market_settled"</code> and <code>resolvedByMarket = true</code>,
+      so strategy analytics can separate trades you exited from trades the market decided.</li>
+  </ul>
+
+<p class="source-note" style="margin-top:28px">Part of the same repository: <a href="../index.html">main site home</a> · <a href="../dashboard.html">live dashboard (other build)</a> · <a href="../flagged.html">their flagged page</a></p>
+</main>
+</body>
+</html>

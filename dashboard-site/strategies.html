@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Simulated strategies — testing trade types on the Kalshi demo account</title>
+<meta name="description" content="Four documented simulated strategies with explicit entry and exit rules, and how results are grouped by trade type." />
+<link rel="stylesheet" href="assets/site.css" />
+<script src="assets/shell.js" defer></script>
+<script type="module" src="assets/pages/strategies.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<main id="main">
+
+  <h1>Simulated strategies</h1>
+  <p class="lede">
+    The point of the simulator is not to look profitable. It is to find out which <em>kind</em> of trade is worth doing
+    on this venue, so every strategy here has an explicit thesis, an explicit entry rule and an explicit exit rule —
+    and the results are reported per strategy type rather than as one blended number.
+  </p>
+
+  <div class="callout">
+    <strong>Nothing here places a real order.</strong>
+    Trades are simulated in a local ledger starting at $1,000 of paper cash, with one position per market to keep
+    experiments independent. Reading the real demo portfolio is a separate, read-only feature that needs your API key.
+  </div>
+
+  <h2>The four strategies</h2>
+  <div id="strategyCards" class="grid two"></div>
+
+  <h2>How a trade is routed</h2>
+  <div class="card">
+    <ol>
+      <li>An alert fires only when a contract moves at least $0.10.</li>
+      <li>The alert is scored. Only alerts scoring <strong>45 or higher</strong> reach the high-ROI feed, and only
+        those are eligible to open a paper position.</li>
+      <li>The router picks a strategy deterministically, so replaying the same alert always produces the same trade —
+        that reproducibility is what makes the comparison meaningful.</li>
+      <li>Position size is the smaller of the strategy's default and 5% of available paper cash. Contracts are
+        whole numbers sized against the entry price.</li>
+      <li>Prices within 2 cents of $0.00 or $1.00 are skipped: there is no room left for a payoff to be worth the
+        modelled cost.</li>
+    </ol>
+  </div>
+
+  <h2>Cost model used in the score</h2>
+  <p>
+    Each candidate trade carries an explicit cost per contract: half the bid-ask spread plus Kalshi's published fee,
+    <code>M × 0.07 × C × P × (1 − P)</code>, where <code>M</code> is the series' own <code>fee_multiplier</code>.
+    Those two numbers, and the resulting net edge, are printed on every high-ROI alert.
+  </p>
+  <p class="source-note">
+    Fee formula source: <a href="https://kalshi.com/docs/kalshi-fee-schedule.pdf" target="_blank" rel="noopener">Kalshi fee schedule, effective 2026-07-07</a>.
+    The schedule also states there is <strong>no settlement fee</strong> and no membership fee.
+  </p>
+
+  <h2>Results so far</h2>
+  <div id="strategyResults"></div>
+  <p class="source-note">
+    This is the offline verification harness result, not a live session. Run <code>npm start</code> with normal
+    network access and the same table fills from live demo alerts. Empty is an acceptable, honest answer: on the demo
+    environment many markets sit at $0.00, so qualifying swings are rare.
+  </p>
+
+  <h2>Exit rules</h2>
+  <div id="exitTable"></div>
+
+  <h2>Reading the results honestly</h2>
+  <ul>
+    <li><strong>Small samples lie.</strong> A 70% win rate on 10 trades is noise, not edge.</li>
+    <li><strong>Demo prices are not real.</strong> Kalshi warns the demo “may not be reflective of those in real
+      markets”, so a strategy that wins here may not survive production liquidity.</li>
+    <li><strong>Fills are optimistic.</strong> The simulator assumes you transact at the modelled price. Real resting
+      orders may not fill at all.</li>
+    <li><strong>One position per market</strong> avoids stacking correlated risk, but it also hides how the strategy
+      scales.</li>
+  </ul>
+
+<p class="source-note" style="margin-top:28px">Part of the same repository: <a href="../index.html">main site home</a> · <a href="../dashboard.html">live dashboard (other build)</a> · <a href="../flagged.html">their flagged page</a></p>
+</main>
+</body>
+</html>

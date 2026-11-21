@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trade3 — Kalshi live dashboard, alerts &amp; simulated trading</title>
+<meta name="description" content="A live Kalshi dashboard for gas prices, elections, culture, crypto and golf: $0.10 swing alerts, price charts, order-book liquidity, resolution tracking and simulated strategy testing. Every published figure links to an official source.">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">Trade3 <span>· Kalshi</span></div>
+  <nav class="main">
+    <a href="index.html" class="active">Home</a>
+    <a href="executive-summary.html">Summary</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="index.html#topics">Topics</a>
+    <a href="portfolio.html">Portfolio</a>
+    <a href="methodology.html">Method</a>
+    <a href="verification.html">Verification</a>
+    <a href="suggestions.html">Suggestions</a>
+    <a href="flagged.html">Flagged</a>
+    <a href="dashboard-site/index.html">Audit edition</a>
+  </nav>
+</header>
+
+<main class="stack">
+
+  <!-- hero -->
+  <section class="card" style="padding:22px">
+    <span class="pill live">live data</span>
+    <span class="pill">demo environment</span>
+    <span class="pill">no API key needed</span>
+    <h1 style="margin:12px 0 6px;font-size:30px">Five markets, one screen: gas, elections, culture, crypto, golf.</h1>
+    <p class="muted" style="max-width:78ch;font-size:15px">
+      Trade3 reads Kalshi's public Trade API v2 in your browser and turns it into a trader's working
+      dashboard: the biggest-dollar live events per topic, two scrolling alert streams for any
+      <b>≥ $0.10</b> contract swing, price charts with seconds-to-days windows, order-book liquidity,
+      resolution tracking and simulated strategies whose results are categorised by trade type.
+    </p>
+    <div class="controls" style="margin-top:12px">
+      <a href="dashboard.html"><button class="primary">Open the live dashboard →</button></a>
+      <a href="portfolio.html"><button>Strategy lab</button></a>
+      <a href="executive-summary.html"><button class="ghost">Executive summary</button></a>
+    </div>
+  </section>
+
+  <!-- what it does -->
+  <section class="grid cols-3">
+    <div class="card">
+      <h3>1 · Two alert streams</h3>
+      <p class="muted">Every ≥ $0.10 move posts to the full stream. A second stream applies a
+        published high-ROI screen (price band, move size, spread, dollar volume, book depth) so the
+        noisy tape and the tradeable subset never get mixed up.</p>
+    </div>
+    <div class="card">
+      <h3>2 · Charts you can actually read</h3>
+      <p class="muted">X = time (60s → 7d, from 1-minute / 1-hour / 1-day Kalshi candles), Y = contract
+        price in dollars. Amber dots mark ≥ $0.10 steps, and the liquidity panel shows how many
+        contracts rest at each price on both sides.</p>
+    </div>
+    <div class="card">
+      <h3>3 · Trades that prove the plumbing</h3>
+      <p class="muted">High-ROI alerts open simulated contracts at the quoted ask. Nothing settles
+        until Kalshi publishes <code>result: yes|no</code>. The portfolio page compares four strategies
+        and slices P&amp;L by topic and by strategy.</p>
+    </div>
+  </section>
+
+  <!-- topics -->
+
+  <section class="card" id="editions">
+    <h2>Two editions of this dashboard, one verified dataset</h2>
+    <p class="muted">Both were built and verified independently against the same official sources, and the integration
+    kept both instead of letting one overwrite the other. Start here; jump across from the nav on any page.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Edition</th><th>Where</th><th>How it gets data</th><th>Use it when</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>Dashboard edition</b> (this site)</td>
+          <td><code>docs/</code> — <a href="dashboard.html">live dashboard</a>, <a href="portfolio.html">portfolio</a>, <a href="topics/gas.html">topics</a></td>
+          <td>Static pages calling Kalshi's public REST API straight from your browser. No server, no key, no build step.</td>
+          <td>You want the alert chats, the chart, the depth ladder and the paper strategies, running wherever the page is opened.</td>
+        </tr>
+        <tr>
+          <td><b>Audit edition</b></td>
+          <td><a href="dashboard-site/index.html">dashboard-site/</a> · <code>app/</code> + <code>server/</code></td>
+          <td>A Node collector that polls the same API server-side (<code>npm start</code>), with explicit <code>live</code> / <code>snapshot</code> / <code>demo</code> data modes.</td>
+          <td>You want the requirements traceability, per-topic findings, consolidated source list, or a collector you can run with your own demo keys.</td>
+        </tr>
+      </tbody>
+    </table></div>
+    <p class="dim">Anything the exchange did not return is blank on both sites and listed on
+    <a href="flagged.html">Flagged for review</a> (26 items, F1–F26) — never inferred.</p>
+  </section>
+
+  <section class="card" id="topics">
+    <div class="card-head">
+      <h2>Topics</h2>
+      <div class="right dim">kept separate, events grouped inside each</div>
+    </div>
+    <p class="dim" style="margin:0 0 10px">
+      Kalshi sorts its markets into categories and tags. These five tables map the brief onto that
+      taxonomy exactly, and every series row was re-verified against its own API record on 2026-11-20.
+    </p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Topic</th><th>Kalshi mapping</th><th class="num">Verified series</th><th>Examples</th><th>Where to go</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>Gas prices</b></td>
+          <td><code>Economics</code> + tags <code>Oil and energy</code> / <code>Oil &amp; Gas</code></td>
+          <td class="num">10</td>
+          <td><code>KXAAAGASM</code> US gas price · <code>KXNGASMAX</code> natural gas peak</td>
+          <td><a href="topics/gas.html">Topic page →</a></td>
+        </tr>
+        <tr>
+          <td><b>Elections</b></td>
+          <td><code>Elections</code></td>
+          <td class="num">5</td>
+          <td><code>KXIATREASR</code> Iowa Treasurer · <code>KXELECTUKRAINE</code></td>
+          <td><a href="topics/elections.html">Topic page →</a></td>
+        </tr>
+        <tr>
+          <td><b>Culture</b></td>
+          <td><code>Culture</code> + <code>Entertainment</code> <span class="pill warn">F1 corrected · F15</span></td>
+          <td class="num">10</td>
+          <td><code>KXXBANNEDGROK</code> (the real Culture category; 0 open markets) · <code>KXTOPARTIST</code> Spotify top artist</td>
+          <td><a href="topics/culture.html">Topic page →</a></td>
+        </tr>
+        <tr>
+          <td><b>Crypto</b></td>
+          <td><code>Crypto</code></td>
+          <td class="num">10</td>
+          <td><code>KXETHD</code> ETH above/below · <code>KXBTXMINW</code></td>
+          <td><a href="topics/crypto.html">Topic page →</a></td>
+        </tr>
+        <tr>
+          <td><b>Golf</b></td>
+          <td><code>Sports</code> + tag <code>Golf</code></td>
+          <td class="num">4</td>
+          <td><code>KXPGAGOLFERSCORE</code> round strokes · <code>KXPRESCUPMATCH</code></td>
+          <td><a href="topics/golf.html">Topic page →</a></td>
+        </tr>
+      </tbody>
+    </table></div>
+    <p class="dim" style="margin-top:8px">
+      39 series rows in total (37 from the earlier row-by-row pass, plus the 2 real <code>Culture</code> series added at integration). Each row on a topic page carries the exact API URL that proves it, plus the
+      public Kalshi page (labelled as pattern-derived, since kalshi.com does not answer automated fetches). The culture mapping was re-checked live and corrected during integration: Kalshi does have a Culture category, it simply has no open markets — flagged, not hidden.
+    </p>
+  </section>
+
+  <!-- summary of what was verified -->
+  <section class="grid cols-2">
+    <div class="card">
+      <h2>What is verified, and how</h2>
+      <ul class="muted">
+        <li><b>Endpoints</b> — demo and production REST/WebSocket hosts taken verbatim from Kalshi's
+          <a href="https://docs.kalshi.com/getting_started/api_environments" target="_blank" rel="noopener">API Environments</a> page.</li>
+        <li><b>Field names</b> — <code>yes_bid_dollars</code>, <code>last_price_dollars</code>,
+          <code>volume_fp</code>, <code>result</code>, <code>orderbook_fp</code> … all confirmed against
+          the reference pages before being used, and against live JSON responses.</li>
+        <li><b>Every series row</b> — re-fetched one by one with <code>scripts/verify_series.py</code>;
+          the report is published on <a href="verification.html">Verification</a>.</li>
+        <li><b>Nothing inferred</b> — a missing settlement source stays blank. Two crypto series have no
+          published source in the API, and they are flagged rather than filled in.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>What is a model, not a fact</h2>
+      <ul class="muted">
+        <li><b>$ traded</b> = contracts × last price. Kalshi has no dollar-volume field, so this is a
+          disclosed approximation, labelled everywhere it appears.</li>
+        <li><b>High-ROI screen</b> = five explicit thresholds (price band, move, spread, dollar volume,
+          depth). It is a filter, not a forecast.</li>
+        <li><b>Strategies</b> = four fixed rules you can read in full on the
+          <a href="portfolio.html">portfolio page</a>. Demo P&amp;L tests plumbing, not edge.</li>
+        <li><b>Causes of jumps</b> are never invented. The API carries no news feed, so each contract
+          links to its official settlement source and API record instead.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ideas -->
+  <section class="card">
+    <h2>Suggestions for making this more live and more useful</h2>
+    <div class="grid cols-2" style="margin-top:8px">
+      <div>
+        <h3>Shipped in this build</h3>
+        <ul class="muted">
+          <li>Two-speed alerting: raw tape plus a strict screen, with the reason each alert was filtered out.</li>
+          <li>Per-contract chart with legal Kalshi intervals chosen automatically per window, plus candle bodies where OHLC exists.</li>
+          <li>Liquidity table with cumulative depth bars and implied asks derived by the documented $1.00 − bid rule.</li>
+          <li>Resolution tracker that settles simulated trades only on the exchange's own <code>result</code>.</li>
+          <li>Request pacing, 429 backoff, documented host fallback, and an optional user-supplied CORS proxy.</li>
+          <li>CSV/JSON export of every simulated trade so results can be audited outside the browser.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Next, once you have demo keys</h3>
+        <ul class="muted">
+          <li><b>WebSocket tape</b>: the <code>ticker</code> channel removes polling lag entirely. The handshake needs a signed
+            key (<a href="https://docs.kalshi.com/getting_started/quick_start_websockets" target="_blank" rel="noopener">docs</a>),
+            so it cannot live in a public static page — it belongs in a small relay you run.</li>
+          <li><b>Real demo execution</b>: the repo's <code>kalshi_client.py</code> already signs requests and posts the
+            documented V2 order body.</li>
+          <li><b>News attribution</b>: needs a news API key; without one, causes would be guesses.</li>
+          <li><b>Alerts out of the browser</b>: email/Slack on the same threshold once a relay exists.</li>
+        </ul>
+      </div>
+    </div>
+    <p class="dim" style="margin-top:8px">
+      The full ranked list — with official sources and current status for each item — is on the
+      <a href="suggestions.html">Suggestions</a> page. Full reasoning and the trade-offs behind
+      each choice are on the <a href="methodology.html">Method</a> page.
+    </p>
+  </section>
+
+  <!-- sources -->
+  <section class="card">
+    <h2>Official sources used</h2>
+    <div class="grid cols-2">
+      <ul class="muted">
+        <li><a href="https://docs.kalshi.com/getting_started/api_environments" target="_blank" rel="noopener">API environments &amp; endpoints</a></li>
+        <li><a href="https://docs.kalshi.com/getting_started/demo_env" target="_blank" rel="noopener">Demo environment</a></li>
+        <li><a href="https://docs.kalshi.com/getting_started/quick_start_market_data" target="_blank" rel="noopener">Market data without auth</a></li>
+        <li><a href="https://docs.kalshi.com/getting_started/orderbook_responses" target="_blank" rel="noopener">Order book responses</a></li>
+        <li><a href="https://docs.kalshi.com/api-reference/market/get-market-candlesticks" target="_blank" rel="noopener">Candlesticks (1 / 60 / 1440 min)</a></li>
+      </ul>
+      <ul class="muted">
+        <li><a href="https://docs.kalshi.com/getting_started/rate_limits" target="_blank" rel="noopener">Rate limits</a></li>
+        <li><a href="https://docs.kalshi.com/getting_started/market_settlement" target="_blank" rel="noopener">Market settlement</a></li>
+        <li><a href="https://docs.kalshi.com/getting_started/quick_start_create_order" target="_blank" rel="noopener">Creating an order (V2 body)</a></li>
+        <li><a href="https://docs.kalshi.com/getting_started/quick_start_websockets" target="_blank" rel="noopener">WebSocket quick start</a></li>
+        <li><a href="https://docs.kalshi.com/openapi.yaml" target="_blank" rel="noopener">OpenAPI spec</a></li>
+      </ul>
+    </div>
+  </section>
+
+</main>
+<footer>
+  Trade3 · Kalshi Trade API v2 · built 2026-11-20 ·
+  <a href="methodology.html">Methodology</a> · <a href="verification.html">Verification log</a> ·
+  <a href="flagged.html">Flagged for review</a><br>
+  Demo markets use mock funds and may not reflect real markets. Nothing here is financial advice.
+</footer>
+</body>
+</html>
