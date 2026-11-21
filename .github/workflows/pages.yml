@@ -67,13 +67,17 @@ jobs:
       - name: Collector and engine tests
         run: |
           # Watchdog: a hang must fail fast and name itself. The smoke harness
-          # streams START/PASS lines, so the tail of the output names the hanging
-          # test (and the harness watchdog prints the active handle at 120s).
+          # streams START/PASS lines and prints the active handle at 45s, and the
+          # tail is embedded in an ::error annotation (annotations survive even
+          # when the log receiver is down). set +e first: the Actions shell runs
+          # with -e, which would otherwise abort before the report runs.
+          set +e
           timeout 300 node tests/smoke-test.js > /tmp/smoke.out 2>&1
           code=$?
+          set -e
           cat /tmp/smoke.out
           if [ "$code" != "0" ]; then
-            echo "::error title=Collector and engine tests failed or hung (exit ${code})::last output: $(tr '\n' '|' < /tmp/smoke.out | tail -c 700)"
+            echo "::error title=Collector and engine tests failed or hung (exit ${code})::$(grep -v '^START' /tmp/smoke.out | tail -8 | tr '\n' '|' | tail -c 700)"
             exit "$code"
           fi
 

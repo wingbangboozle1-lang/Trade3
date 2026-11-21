@@ -32,11 +32,11 @@ const test = async (name, fn) => {
 // top-level await with an empty loop exits on its own (code 13); a hang always
 // means an active resource — print exactly which.
 const watchdog = setTimeout(() => {
-  console.log('WATCHDOG: process still alive 120s after the last test start.');
+  console.log('WATCHDOG: process still alive 45s after the last test start.');
   console.log(`Active resources: ${process.getActiveResourcesInfo().join(', ')}`);
   console.log(`Results so far: ${results.length}`);
   process.exit(3);
-}, 120_000);
+}, 45_000);
 watchdog.unref();
 
 // --- swing detector ---------------------------------------------------------
