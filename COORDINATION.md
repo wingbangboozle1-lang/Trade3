@@ -586,6 +586,48 @@ run locally **pass** · `verify_series.py --from-cache docs/data/live-verificati
 
 ---
 
+# Session `arena/ca612a03-trade3` — spot re-verification, Pages status check, merge record (2026-11-21)
+
+**Claim (this session, branch `arena/ca612a03-trade3`, based on `main` @ `39e3a3d`):**
+
+| Task | Status | Owner | File scope |
+|---|---|---|---|
+| T-CA1 Spot re-verify published series rows against the live demo API (fetch of official `GET /series/{ticker}`) | done (4-row sample) | `arena/ca612a03-trade3` | `COORDINATION.md` (record only) |
+| T-CA2 GitHub Pages enablement attempt (`POST /repos/{repo}/pages`, `build_type=workflow`) | done — **blocked** (403) | `arena/ca612a03-trade3` | none (API call only) |
+| T-CA3 Local gates on the current `main` state (`npm test`, `check_site.py`, `check-links.js`, `site-render-test.js`) | done — all pass | `arena/ca612a03-trade3` | none |
+
+## Verification performed this session
+
+| Check | Source (official) | Result |
+|---|---|---|
+| Exchange status | [GET /exchange/status](https://external-api.demo.kalshi.co/trade-api/v2/exchange/status) | `exchange_active: true`, `trading_active: true` on all shards |
+| KXAAAGASM vs `series.json` | [series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASM) | Matches: title "US gas price", category Economics, settlement AAA — https://gasprices.aaa.com/ |
+| KXPGAGOLFERSCORE vs `series.json` | [series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAGOLFERSCORE) | Matches: settlement list (Governing League — pgatour.com, NBC Sports, Fox Sports, AP, Golf Channel) |
+| KXETHD vs `series.json` | [series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXETHD) | Matches: settlement CF Benchmarks — https://www.cfbenchmarks.com/data/indices/ETHUSD_RTI, category Crypto |
+| KXXBANNEDGROK vs `series.json` | [series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXXBANNEDGROK) | Matches: category Culture; settlement left blank under `official-publishers-only` policy (API list contains Google-search URLs, a personal X account, and an unnamed "account holder of" entry) |
+| Full 39-row re-read | `.github/workflows/verify-live.yml` (scheduled on GitHub runners) | Latest scheduled run [44850068547](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44850068547) — conclusion `success`. Not re-run in this sandbox (bash cannot reach Kalshi hosts; curl returns 000). |
+| Local gates | `npm test`, `python3 scripts/check_site.py`, `node scripts/check-links.js`, `node tests/site-render-test.js` | Pass: 28 pages / 360 local links; 39 rows; 13/13 render checks |
+
+## Irregularities flagged this session (for the Flagged for Review page)
+
+1. **Pages is still not enabled.** `POST /repos/wingbangboozle1-lang/Trade3/pages` returns **403 "Resource not accessible by integration"** from this session's token; `GET .../pages` returns 404. The latest push-triggered "Deploy site to GitHub Pages" run on `main` (run [44814724273](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44814724273)) is failure; its log could not be downloaded (`EOF` from the log receiver). **Owner action required:** Repo → Settings → Pages → Source: GitHub Actions → Save (same as F8 in `.github/workflows/pages.yml`).
+2. **Gas topic has no Kalshi category.** The gas series KXAAAGASM lives under category `Economics` (tag "Oil & Gas"); this is a mapping choice, not a Kalshi category named "Gas".
+3. **Golf series KXPGAGOLFERSCORE is category `Sports`** (tag "Golf"). The golf topic is mapped by tag, not category.
+4. **Culture settlement is blank on purpose** (KXXBANNEDGROK). Unverified as an official publisher; see row policy.
+5. **Open PR #5** from `arena/b28d6df0-trade3` ("Coordination: re-verification and Pages enablement blocker") is not part of this session; left untouched.
+
+## Not done in this session (honest scope)
+
+- Full 39-row re-fetch from this sandbox (only 4 rows fetched directly; the rest rely on the scheduled `verify-live.yml` run above).
+- Live Kalshi demo portfolio tracking and live order placement: require user-owned demo API keys, which are not in the repo and were not requested or stored.
+- WebSocket live feed: requires authenticated WS handshake per [quick_start_websockets](https://docs.kalshi.com/getting_started/quick_start_websockets); the dashboard uses REST polling.
+
+## Handoff / status
+
+- Status: **done** for T-CA1/T-CA3; **blocked** for T-CA2 (Pages owner click). No other session's files were edited.
+
+---
+
 # Session `arena/0c39a477-trade3` — final verification + publish pass (2026-11-21)
 
 **Role:** final integration/verification session. Branch `arena/0c39a477-trade3` was identical to `main`
