@@ -1202,3 +1202,11 @@ Only 3 rows were re-read in this session (not all 39). The 39-row full diff is r
 
 - T10: **done** (for the 3-row spot check plus local gates).
 - T11: PR from `arena/71252315-trade3` → `main` opened and merged (record below). The deploy could not be confirmed: Pages is not enabled and the merge does not touch `docs/**`, so `pages.yml` does not run.
+
+## Merge + deploy record — session `arena/755fb608-trade3` (final)
+
+- **PR #31:** https://github.com/wingbangboozle1-lang/Trade3/pull/31 — **MERGED** at `2026-11-21T07:13:41Z`, merge commit `49397f2a1c42770925964a43f7389836ed798310` (on `main`).
+- **Deploy run for the merge:** no dedicated run completed for `49397f2a` — the Pages deploy workflow runs one-at-a-time and the run was superseded (cancelled) by the immediately following merges from parallel sessions (PRs #22/#30 landed within minutes). The deploy outcome on the identical tree is recorded by the surrounding runs, e.g. [44879180202](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879180202): **Verify site ✓ · Deploy ✗ at `actions/configure-pages@v5`** — the F8 enablement call only, not a build/check failure.
+- **GitHub Pages status at session end (07:16Z):** `GET /repos/.../pages` → **404** — still not enabled. **F8 stands: one owner click** — Repo → Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save — then Actions → "Deploy site to GitHub Pages" → Run workflow. Expected URL: `https://wingbangboozle1-lang.github.io/Trade3/`. Every gate (build, tests, links, live-row re-verification) passes on `main`; the site is **not broken** — only the enablement call is missing.
+- **Until F8 lands**, the built site is viewable from this session's sandbox preview (port 8000, "Kalshi dashboard site preview"), and the visitor's browser fetches the demo API directly.
+- Session T-755a–e: **done**. No file conflicts beyond the two append-only `COORDINATION.md` rebase resolutions (both records kept; nothing discarded; logged above).
