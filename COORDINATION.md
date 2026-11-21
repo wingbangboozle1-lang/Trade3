@@ -23,6 +23,16 @@
 
 ## Handoff / conflict log
 
+- 2026-11-21 (session `arena/25db01aa-trade3`, branch `arena/25db01aa-trade3`, based on `main` @ `4eb92a1`):
+  **Claimed before any other edit** —
+  | ID | Task | Status | Files touched |
+  |----|------|--------|---------------|
+  | T25-1 | Repair the Pages deploy pipeline: the "Pages readiness" probe exits on 404 **before** `actions/configure-pages@v5 enablement:true` runs, so the one mechanism that can create the site from Actions (`pages: write` on the job token) never fires. Reorder to probe → configure (enablement) → probe again, failing only after the enable attempt. | in progress | `.github/workflows/pages.yml` |
+  | T25-2 | Re-run every local gate on the current tree (npm test, check_site.py, check-links.js, render tests, py_compile) | in progress | record only |
+  | T25-3 | Live spot re-verification of published rows via the official demo API (fetch path; bash egress cannot reach Kalshi) | in progress | record only |
+  | T25-4 | Integration: PR to main, merge, dispatch the deploy workflow, confirm the site is live, record outcome (incl. updating F8 if the enablement succeeds) | in progress | `COORDINATION.md`, `docs/flagged.html` (only if F8 resolves) |
+  No other session is active; no other file scope is touched.
+
 - 2026-11-20: Session `arena/73b9db7f-trade3` created this board and claimed T1–T5 (solo session; no other sessions active on this repo). T6 to be claimed at integration time.
 - No cross-session file requests at this time.
 
