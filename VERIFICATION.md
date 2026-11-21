@@ -238,3 +238,50 @@ inaccurate and is now stated correctly.
   passes all checks. Owner action required; not fixable from inside the sandbox.
 - Sandbox shell egress to `*.kalshi.co` is still blocked (TLS reset); live values were read through the
   page-fetch path. Non-blocking (see F19).
+
+## Re-verification pass — session `arena/ccf26d52-trade3` (2026-11-21)
+
+Live re-reads performed this session via the official demo REST API (page-fetch path; sandbox shell
+egress to `*.kalshi.co` remains TLS-blocked — F19). Each row below was compared field-by-field with
+`docs/data/series.json` as merged on `main` @ `6414214` (PRs #18–#34).
+
+| Row / claim | Official source (live 2026-11-21) | Result |
+|---|---|---|
+| Exchange status | [GET /exchange/status](https://external-api.demo.kalshi.co/trade-api/v2/exchange/status) | `exchange_active: true`, `trading_active: true`, shards 0–3 all active — matches V27/V29. |
+| Gas `KXAAAGASM` | [GET /series/KXAAAGASM](https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASM) | Matches: `US gas price`, Economics, tags `Oil & Gas`/`Oil and energy`, monthly, scope `Gasoline`, AAA `https://gasprices.aaa.com/`. |
+| Gas `KXNGASMAX` | [GET /series/KXNGASMAX](https://external-api.demo.kalshi.co/trade-api/v2/series/KXNGASMAX) | Matches: `Natural gas price peak`, Economics, annual, EIA `https://www.eia.gov/dnav/ng/NG_PRI_FUT_S1_D.htm`. |
+| Elections `POPVOTEKHVA` | [GET /series/POPVOTEKHVA](https://external-api.demo.kalshi.co/trade-api/v2/series/POPVOTEKHVA) | Matches: `Kamala Virginia`, Elections, one_off, United States Congress `https://www.congress.gov/`. |
+| Culture `KXXBANNEDGROK` | [GET /series/KXXBANNEDGROK](https://external-api.demo.kalshi.co/trade-api/v2/series/KXXBANNEDGROK) | Matches the corrected F10 note exactly: 23 settlement entries — 17 official publishers (ABC, Fox News, MSNBC, WSJ, Semafor, Barchart, NYT, CBS, Washington Post, Axios, CNN, Reuters, Bloomberg, AP, EIA, Politico, TechCrunch) + 6 non-official (Google-search URLs for "account holder of", Ars Technica, Engadget, Mashable, Verge; personal X account Elon Musk). ABC present; blank settlement under official-publishers-only policy unchanged. |
+| Crypto `KXLINKPERP` | [GET /series/KXLINKPERP](https://external-api.demo.kalshi.co/trade-api/v2/series/KXLINKPERP) | Matches: `1 LINK`, Crypto, frequency `often`, `settlement_sources: null`, empty `contract_url` — confirms F18. |
+| Golf `KXPGAGOLFERSCORE` | [GET /series/KXPGAGOLFERSCORE](https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAGOLFERSCORE) | Matches: `Golf Round Strokes`, Sports, tag `Golf`, settlement the Governing League (pgatour.com) + NBC Sports, Fox Sports, AP, Golf Channel (5 sources). |
+| Golf `KXPGAT20` | [GET /series/KXPGAT20](https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAT20) | Matches: `T 20`, Sports, custom, tag `Golf`, scope `Finishing Position`, settlement the Governing League (pgatour.com) + Fox Sports, ESPN. |
+
+**Result: 8/8 live re-reads match the published rows. No new discrepancies found this session.**
+
+### Gates re-run this session (tree = `main` @ `6414214` + this session's commits)
+
+- `npm test` (logic + smoke 15/15 + site-render 13/13) → **pass**
+- `node tests/render.test.mjs` (jsdom, 6 dashboard checks) → **pass**
+- `python3 scripts/check_site.py` → **pass** (29 pages, 387 local links, 20 JS modules, 39 series rows)
+- `node scripts/check-links.js` → **pass** (387 local references resolve; 0 broken)
+- `python3 -m py_compile` (6 files) · `node --check` (app, server, scripts, tests) → **pass**
+
+### Doc defect found and fixed this session
+
+**`requirements/REQUIREMENTS.md` stale paths + malformed row.** R6/R25/R26 still cited the never-merged
+`site/` layout in their "Where"/description cells, and R19 was missing its "Where" cell (5 columns,
+shifting `MET` and `[K24]` one column left). Fixed: cells now name `docs/`, R19 has all 6 columns,
+and the path-audit note records the cleanup. Verified: all 32 requirement rows now parse with 6
+columns; no `site/` references remain outside the historical audit note and the real `docs/dashboard-site/`
+directory.
+
+### Still open (environment-level, not a code defect)
+
+- **F8 — GitHub Pages still not enabled (re-reproduced this session).** `GET /repos/wingbangboozle1-lang/Trade3/pages`
+  → **404**; `POST /repos/…/pages` (`build_type=workflow`) → **403 "Resource not accessible by integration"**.
+  Fresh deploy run on `main` ([44879350060](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879350060),
+  2026-11-21): **Verify site ✓** (all gates green) · **Deploy ✗ only at `actions/configure-pages@v5`**,
+  with the workflow's own owner-action annotation. Every automation credential (CLI/App token, Actions
+  `GITHUB_TOKEN`) lacks Pages-admin scope. **One-time owner action:** Repo → Settings → Pages → Build and
+  deployment → Source: **GitHub Actions** → Save; then Actions → "Deploy site to GitHub Pages" → Run workflow.
+  Expected URL: `https://wingbangboozle1-lang.github.io/Trade3/`.

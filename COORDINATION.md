@@ -1760,3 +1760,80 @@ Marking T-74a … T-74d **done**.
 - Rebase conflicted only while replaying this session's claim in `COORDINATION.md`; kept the entire upstream block (143 lines) and the claim, then all four remaining session commits replayed cleanly. No external session content or product files were changed.
 - Since the site code is unchanged after `bf08e73`, the full local suite from `91e748f` remains applicable; the current diff from `origin/main` is only this session's `COORDINATION.md` entries. Latest Pages run remains [44879704914](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879704914) (verify green, Pages readiness failure F8).
 - PRs #44–#46 were merged by their owners; this session did not edit or merge them. PR #33 is the only deliverable from this branch; its updated head is next.
+
+# Session `arena/ccf26d52-trade3` — claim (2026-11-21)
+
+**Branch:** `arena/ccf26d52-trade3` (based on `main` @ `262f22a`; fast-forwarded to `main` @ `6414214`
+(PR #34) before claiming; no other open claim touched). Claimed per board rules; claim commit pushed
+immediately after this edit.
+
+| Task | Status | Owner | File scope |
+|---|---|---|---|
+| T-CCF1 Full gate re-run on the merged tree (`npm test`, `check_site.py`, `check-links.js`, `test:all`, `py_compile`, `node --check`) | **done** | `arena/ccf26d52-trade3` | none (read-only) |
+| T-CCF2 Live re-verification of published rows + newest merged claims against the official demo API; fix any discrepancy | **done** (8/8 match; no new discrepancies) | `arena/ccf26d52-trade3` | `VERIFICATION.md` (record); `docs/data/series.json`, `EXECUTIVE_SUMMARY.md` reviewed, unchanged |
+| T-CCF3 GitHub Pages (F8) retry + monitor deploy run `44879350060`; record outcome | **done** (F8 reproduced; run 44879350060: Verify ✓, Deploy ✗ at `configure-pages` only) | `arena/ccf26d52-trade3` | none (API calls only) |
+| T-CCF4 Doc cleanup flagged by earlier sessions: `requirements/REQUIREMENTS.md` stale `site/` paths → published `docs/` paths | **done** (R6/R25/R26 paths fixed; R19 missing "Where" cell restored) | `arena/ccf26d52-trade3` | `requirements/REQUIREMENTS.md` |
+| T-CCF5 Sandbox live preview of the built site (`docs/`) so the dashboard is viewable before F8 | **done** (port 8000, 16 key URLs all HTTP 200) | `arena/ccf26d52-trade3` | none (runtime only) |
+| T-CCF6 Final integration: PR to `main`, merge, deploy check, record | in progress | `arena/ccf26d52-trade3` | `COORDINATION.md` (append-only) |
+
+## Results — session `arena/ccf26d52-trade3` (2026-11-21)
+
+### T-CCF1 Gates on the merged tree (base `main` @ `6414214`, PRs #18–#34 included) — all pass
+
+| Gate | Result |
+|---|---|
+| `npm test` (logic + engine + site render) | **pass** — logic OK, engine 15/15, site render 13/13 |
+| `node tests/render.test.mjs` (jsdom@25) | **pass** — 6/6 dashboard checks (order book both sides, candles, settlement citation, resolution tracker, multivariate exclusion, phone alert feed) |
+| `python3 scripts/check_site.py` | **pass** — 29 pages, 387 local links, 20 JS modules, 39 series rows |
+| `node scripts/check-links.js` | **pass** — 387 local references resolve; 0 broken links/anchors/imports/DOM targets |
+| `python3 -m py_compile` (6 files) · `node --check` (app, server, scripts, tests) | **pass** |
+
+### T-CCF2 Live re-verification (official demo REST API, page-fetch path, 2026-11-21)
+
+8/8 spot re-reads match the published rows field-by-field: [KXAAAGASM](https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASM),
+[KXNGASMAX](https://external-api.demo.kalshi.co/trade-api/v2/series/KXNGASMAX), [POPVOTEKHVA](https://external-api.demo.kalshi.co/trade-api/v2/series/POPVOTEKHVA),
+[KXXBANNEDGROK](https://external-api.demo.kalshi.co/trade-api/v2/series/KXXBANNEDGROK) (23 settlement entries / 17 official publishers — corrected F10 note confirmed exact),
+[KXLINKPERP](https://external-api.demo.kalshi.co/trade-api/v2/series/KXLINKPERP) (F18 confirmed), [KXPGAGOLFERSCORE](https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAGOLFERSCORE),
+[KXPGAT20](https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAT20), [exchange/status](https://external-api.demo.kalshi.co/trade-api/v2/exchange/status)
+(active, trading, shards 0–3). Full table: [VERIFICATION.md § Re-verification pass — arena/ccf26d52-trade3](VERIFICATION.md).
+No new discrepancies; no data rows changed.
+
+### T-CCF3 F8 reproduced again — still owner-only
+
+`GET /repos/wingbangboozle1-lang/Trade3/pages` → 404; `POST /repos/…/pages` (`build_type=workflow`) →
+403 "Resource not accessible by integration" ([Pages REST docs](https://docs.github.com/rest/pages/pages)).
+Deploy run [44879350060](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879350060) (fresh push
+to `main`, 2026-11-21): **Verify site ✓** (all gates green) · **Deploy ✗ only at `actions/configure-pages@v5`**,
+which now prints the owner-action annotation. No workaround attempted (no second token, no `gh-pages` branch —
+trust model unchanged). **Owner action (one click):** Repo → Settings → Pages → Build and deployment →
+Source: **GitHub Actions** → Save; then Actions → "Deploy site to GitHub Pages" → Run workflow.
+Expected URL: `https://wingbangboozle1-lang.github.io/Trade3/`.
+
+### T-CCF4 Doc cleanup (the item flagged by sessions 25db01aa / b47b1c48)
+
+`requirements/REQUIREMENTS.md`: R6/R25/R26 "Where"/description cells no longer cite the never-merged
+`site/` layout (now `docs/`); R19's missing "Where" cell restored (the row previously had 5 columns,
+shifting `MET`/`[K24]` left); path-audit note updated. Verified: all 32 requirement rows parse with 6
+columns; no stale `site/` refs remain outside the historical audit note and the real `docs/dashboard-site/` dir.
+
+### T-CCF5 Sandbox live preview
+
+`docs/` served on port 8000 ("Kalshi dashboard site preview"). `/`, `/dashboard.html`, `/portfolio.html`,
+`/suggestions.html`, `/flagged.html`, `/executive-summary.html`, `/methodology.html`, `/verification.html`,
+all five `/topics/*.html`, `/dashboard-site/`, `/data/series.json` → **HTTP 200**. Live Kalshi data renders
+in the visitor's browser (browser-side fetch); sandbox shell egress to `*.kalshi.co` remains TLS-blocked (F19).
+
+### Sources / verification / irregularities
+
+- Sources: official demo REST API endpoints listed above + [docs.kalshi.com](https://docs.kalshi.com) refs in `VERIFICATION.md`/`research/sources.json`.
+- Verification: gates table above; 8/8 live row re-reads; 32/32 requirement rows well-formed post-fix.
+- Irregularities: F8 (Pages enablement, owner-only) re-reproduced; F19 (sandbox→Kalshi egress) unchanged;
+  no new flags raised, no data changed.
+
+### Conflict log — session `arena/ccf26d52-trade3`
+
+- 2026-11-21: `git pull --rebase origin main` before the integration push collided on `COORDINATION.md`
+  (append collision — `main` had advanced to `a2b6d13` with PRs #44–#46 records from sessions
+  `arena/d9cfd60b-trade3`/`arena/7457e87c-trade3`/`arena/77ec3a0e-trade3`). Resolved as a **union**:
+  upstream `COORDINATION.md` kept byte-for-byte, this session's claim block re-appended after it.
+  No other session's work modified or discarded. Remaining commits replayed cleanly.
