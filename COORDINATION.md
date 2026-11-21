@@ -2099,6 +2099,28 @@ re-checked at integration time below; no code change.
 **Handoff:** no other session's files were edited. Scope stayed inside `requirements/REQUIREMENTS.md` + this
 append-only record, exactly as claimed.
 
+### T-3A3 — final integration record (session `arena/3a5fe603-trade3`, 2026-11-21)
+
+**PR and merge**
+- **PR #54** — https://github.com/wingbangboozle1-lang/Trade3/pull/54 — "Requirements traceability audit: correct 16 cells to match the code + T-3A2 verification record".
+- **Result: MERGED** 2026-11-21, merge commit `b504936` (`arena/3a5fe603-trade3` → `main`). Contents: `requirements/REQUIREMENTS.md` audit fixes (16 cells + K25/K26 refs) and the append-only `COORDINATION.md` claim/scope/T-3A2 records.
+- **Conflicts resolved this session (nothing discarded):**
+  1. Rebase onto `main` @ `3178447`: `COORDINATION.md` (kept upstream in full + this session's records re-appended) and `requirements/REQUIREMENTS.md` (union with session `arena/ccf26d52-trade3`'s overlapping R6/R19/R25/R26 fixes — both sessions' corrections kept; their precise R6 Where folded in). One leftover conflict marker and one swapped R6 cell from the rebase were cleaned up in commit `12483ec`.
+  2. Merge of updated `origin/main` (PRs #53… #56 rounds, sessions `1abd6620`/`63bd9b8c`): `COORDINATION.md` union-resolved — all parallel records kept in full, this session's records re-appended (`c4c826a`).
+- **Gates re-run on the merged tree:** `npm test` 15/15 + 13/13 · `test:render` 46 checks · `check_site.py` 29 pages/387 links/39 rows · `check-links.js` 387 refs 0 broken · REQUIREMENTS integrity (32 rows, 0 bad cells, 0 undefined `[K…]` refs). Then on `main` after merge: **Verify site job = success** (run `44881626290`).
+
+**GitHub Pages — SITE IS LIVE (deploy confirmed)**
+- **Live URL: https://wingbangboozle1-lang.github.io/Trade3/** — fetched successfully this session: landing page, `/dashboard.html` (dual alert streams, 60s–7d chart windows, liquidity ladder, resolutions, paper trades) and `/flagged.html` (F1–F26 with source links) all serve real content.
+- `GET /repos/…/pages` → **200** (was 404 all week): `build_type: legacy`, source branch **`gh-pages`**, `status: built`, latest build `built` at 2026-11-21T07:46:17Z from `gh-pages` commit `3b87077`.
+- Publish route: parallel session **`arena/651b296e-trade3`** published `docs/` to `gh-pages` (`f2252f9` "Publish via gh-pages instead of the artifact route (Pages is now enabled)", then `1990bd3` "Correct the published site: F8 resolved, F3 partly resolved, transports documented"). **That branch is not yet merged to `main`** — the live site currently serves its corrected docs (a superset of `main`'s `docs/`, incl. the `/live` relay transport documentation); it reaches `main` through that session's own PR. No files of that session were touched here.
+- **Actions deploy path still fails (non-blocking now):** run `44881626290` (workflow_dispatch on `main` post-merge) → **Verify site: success**, **Deploy: failure** at `actions/configure-pages`; `POST /repos/…/pages` re-tested this session at 07:44Z → **403 "Resource not accessible by integration"** (F8, owner-only token scope). Because the `gh-pages` route publishes the site, F8 no longer blocks delivery; the workflow's Actions-source path remains an owner setting (Settings → Pages → Source) if the repo should switch back to Actions deploys.
+- Public URL fetch of `/Trade3/` root initially failed mid-build and succeeded after the 07:46Z build completed — transient, not a defect.
+
+**Sources used this session (official):** demo REST (`exchange/status`, `series?category=Culture`, `series/{KXAAAGASM,KXPGAGOLFERSCORE,KXPGAT20,KXETHD,POPVOTEKHVA}`), docs.kalshi.com (api_environments, demo_env, quick_start_websockets, orderbook_responses, get-markets, get-series-list, get-market-candlesticks, get-trades, create-order-v2, get-balance, get-positions, market_lifecycle, market_settlement), kalshi-fee-schedule.pdf (via repo ledger), GitHub Pages REST API (`/pages`, `/pages/builds`), GitHub Actions runs.
+
+**Irregularities logged this session (all non-blocking):** F8 status evolved (Pages now enabled via legacy `gh-pages`; Actions-source enablement still 403) — site `flagged.html` F8 text on `main` is stale and is already corrected on session `651b296e`'s branch (their PR will carry it; not edited here to avoid a conflict). Shared-token GitHub API rate limit was exhausted 07:27–07:39Z (0 remaining; reset honored) — no data impact. F26 (golf "PGA Tour" vs "the Governing League" label) unchanged and still flagged. Doc-vs-code corrections (16 cells) are recorded under T-3A1 above.
+
+**Status: T-3A1 done · T-3A2 done · T-3A3 done — PR #54 merged, site confirmed live at https://wingbangboozle1-lang.github.io/Trade3/.**
 
 ## Merge record (session `arena/ccf26d52-trade3`, T-CCF6) — 2026-11-21
 
@@ -2132,6 +2154,75 @@ append-only record, exactly as claimed.
   Repaired in the next commit on this branch (this one): the file is now a clean union — all parallel
   records kept in full, this session's blocks re-applied. No other session's content was lost at any
   point (the markers were confined to this one file and fixed before any merge to `main`).
+# Session `arena/6eecc9df-trade3` — final integration & publish verification (2026-11-21)
+
+**Branch:** `arena/6eecc9df-trade3` (fast-forwarded to `main` @ `a2b6d13` = PR #46 merge; **0 ahead /
+0 behind main** at session start, so this session carried no unmerged content — its job is the final
+integration gate, a line-by-line re-verification, a fresh publish attempt, and this record).
+**Scope:** `COORDINATION.md` only (append-only record). No other session's file was edited.
+
+## T-FIN1 Repo review + line-by-line verification (done)
+
+Re-reviewed the whole tree against the brief and re-ran every gate on the current tree:
+
+| Check | Tool / official source | Result |
+|---|---|---|
+| Logic + engine + site suites | `npm test` (`logic.test.mjs`, `smoke-test.js`, `site-render-test.js`) | **pass** — logic pass, smoke 15/15, site-render 13/13 |
+| Full suite incl. headless render | `npm run test:all` | **pass** |
+| Static site gate | `python3 scripts/check_site.py` | **pass** — 29 pages, 387 local links, 20 JS modules, 39 series rows |
+| Link/anchor/import/DOM check (both builds) | `node scripts/check-links.js` | **pass** — 387 local references resolve, 0 broken |
+| Published-row contract (offline) | `verify_series.py --from-cache … --skip-uncached` | **pass** — 4/4 cached rows match; 35 reported NOT CHECKED (absent from cache) |
+| Python layer syntax | `python3 -m py_compile` (6 files) | **pass** |
+| Live preview | `server/index.js` on `0.0.0.0:3000`, `DATA_MODE=snapshot ALLOW_DEMO_FALLBACK=0` | `/api/health` ok, `trackedMarkets:12`, `effectiveMode:snapshot`; all 14 static pages + `/app/`, `/site/` → **200**; `/api/topics`, `/api/alerts`, `/api/resolutions`, `/api/portfolio` all answer |
+
+**Data contract re-confirmed:** `docs/data/series.json` holds **39 series rows** across the five topics
+(gas 10 · elections 5 · culture 10 · crypto 10 · golf 4); **every row carries an official
+`source_url`** (`GET /series/{ticker}`), none missing. Topic mapping re-confirmed: gas = `Economics` +
+`Oil & Gas`/`Oil and energy`; golf = `Sports` + `Golf`; culture = `Culture` (+ labelled `Entertainment`
+supplement, F15/F20); elections = `Elections`; crypto = `Crypto`. The core ≥ $0.10 swing rule is
+verified in **integer 1/10,000-dollar tick space** (`ticks`/`movedTicks`/`isSwing` in
+`docs/assets/app.js`, consumed by `dashboard.js` and `portfolio.js`), with the exactly-$0.10 regression
+case (`0.42 − 0.32`) asserted in `tests/logic.test.mjs`.
+
+**No new irregularities found.** The 26-item flag ledger (F1–F26) stands; nothing published
+contradicts a live API record or an official doc.
+
+## T-FIN2 Publish attempt — GitHub Pages (F8 stands; not a site defect)
+
+Re-attempted Pages enablement from this session's credentials after the GitHub API rate limit reset:
+
+| Step | Command / source | Result |
+|---|---|---|
+| Pages site exists? | `GET /repos/wingbangboozle1-lang/Trade3/pages` | **404 Not Found** — never created |
+| Create Pages site | `POST /repos/…/pages` (`build_type=workflow`) | **403 "Resource not accessible by integration"** — automation token lacks Pages permission |
+| Fresh deploy run | `gh workflow run pages.yml` → run [44881305054](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44881305054) | **Verify site → success** · **Deploy → failure**, failing step = **"Pages readiness"** only (configure-pages enablement + the create attempt); upload/deploy steps never ran |
+
+**Conclusion:** the site is **complete, gated green, and deploy-ready**. The single remaining blocker is
+the environment-level **F8** owner permission: per the official
+[`actions/configure-pages` action.yml](https://github.com/actions/configure-pages/blob/main/action.yml),
+the `enablement` option (the only automated route to create a Pages site) "requires a token other than
+`GITHUB_TOKEN`" (a PAT with the `repo` scope / Pages write permission, or a GitHub App with
+`administration:write` + `pages:write`). No such token exists in this environment, so **one owner click**
+publishes the site with no code change:
+**Repo → Settings → Pages → Build and deployment → Source: GitHub Actions → Save**, then
+Actions → "Deploy site to GitHub Pages" → Run workflow. Expected URL:
+`https://wingbangboozle1-lang.github.io/Trade3/`.
+
+## T-FIN3 Merge / PR status (no new content PR needed)
+
+This branch is **at `main` (a2b6d13) with no content changes**, so there is nothing new to merge — the
+content build (dashboard, topic pages, portfolio, methodology, verification, flagged, both editions,
+workflows, tests) is already merged on `main` via PRs #1–#46. The only open PR is **#47** (a
+coordination record from session `arena/6d7662fe-trade3`); it is append-only and was left untouched.
+This session's record is appended to `COORDINATION.md` and committed on the session branch.
+
+## Status
+
+- T-FIN1 repo review + line-by-line verification — **done**
+- T-FIN2 publish attempt + F8 evidence — **done** (blocker is owner permission, not code)
+- T-FIN3 integration/merge status — **done**
+
+- **Record PR #57** (this record): https://github.com/wingbangboozle1-lang/Trade3/pull/57 — **MERGED** 2026-11-21, merge commit `76c7ffc`. Final state: T-3A1/T-3A2/T-3A3 all **done**; live site confirmed at https://wingbangboozle1-lang.github.io/Trade3/.
 
 # Session `arena/ccf26d52-trade3` — second claim round (2026-11-21, post-Pages-enablement)
 
