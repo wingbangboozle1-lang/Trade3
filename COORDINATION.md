@@ -1715,13 +1715,13 @@ Marking T-74a … T-74d **done**.
 | Crypto KXETHD | [series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXETHD) | "Ethereum price Above/below", Crypto, CF Benchmarks settlement — matches |
 | Base URLs / WS | [API Environments](https://docs.kalshi.com/getting_started/api_environments) | Demo REST `external-api.demo.kalshi.co`, WS `external-api-ws.demo.kalshi.co` — exactly as specified in the task |
 
-### T-22b Gates on latest merged tree (`main` @ `7e85db2`; site tree `bf08e73`, after PR #49 documentation cleanup)
+### T-22b Gates on latest merged tree (`main` @ `7a97edd`; site tree `bf08e73`, after PRs #49/#51/#48)
 
 | Gate | Result |
 |---|---|
 | `npm test` | **pass** — logic tests, engine 15/15, site render 13/13 |
-| `npm run test:all` | **pass on `main` @ `7e85db2`** — logic, headless render (with `jsdom@25`), engine 15/15, site render 13/13 |
-| Latest GitHub Actions Verify site job | **pass** — [run 44879704914](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879704914) on the latest site-bearing tree (`bf08e73`); PR #49 changed only `COORDINATION.md`, `VERIFICATION.md`, and `requirements/REQUIREMENTS.md` afterward, not site code/workflow |
+| `npm run test:all` | **pass on `main` @ `7a97edd`** — logic, headless render (with `jsdom@25`), engine 15/15, site render 13/13 |
+| Latest GitHub Actions Verify site job | **pass** — [run 44879704914](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879704914) on the latest site-bearing tree (`bf08e73`); PR #49 changed only `COORDINATION.md`, `VERIFICATION.md`, and `requirements/REQUIREMENTS.md`, and PRs #51/#48 changed only `COORDINATION.md` afterward |
 | `python3 scripts/check_site.py` | **pass** — 29 pages, 387 local links, 20 JS modules, 39 series rows |
 | `node scripts/check-links.js` | **pass** — 387 references resolve, 0 broken |
 | `py_compile` (6 files) · `node --check` (`app/app.js`, all `server/*.js`) | **pass** |
@@ -2015,3 +2015,9 @@ Marking T-63a … T-63e **done**.
 - Replaying this session's PR #33 merge/election record conflicted only in `COORDINATION.md`. Union resolution kept all 76 upstream lines and this session's 6-line record; the final retry-outcome commit replayed cleanly. No other session's edits or product files were changed.
 - Re-ran the full local suite on `main` @ `7e85db2` plus this session's coordination record; all gates pass (see T-22b). The site-bearing tree remains `bf08e73`, so run 44879704914 remains the latest deployment evidence (Verify ✓, Pages readiness ✗ / F8). The only diff for follow-up PR #50 remains `COORDINATION.md`.
 - A third manual workflow-dispatch retry at 2026-11-21 07:29:53Z returned **HTTP 403 API rate limit exceeded**; no additional Pages run was created.
+
+### T-22 rebase after PRs #51/#48 (latest main @ `7a97edd`)
+
+- The required pre-push pull fetched PR #51 (merged `07:28:03Z`) and PR #48 (merged `07:29:34Z`); both touched `COORDINATION.md` only.
+- Rebase conflicted only while replaying this session's PR #33 merge/election record. Union resolution kept all 80 upstream lines and this session's 6-line record; the two remaining session commits replayed cleanly. No other session's edits or non-owned files were changed.
+- Re-ran the full local suite on `main` @ `7a97edd`; all tests, page/link checks, Python compile, and JS syntax pass (see T-22b). The site-bearing tree remains `bf08e73`; the only outstanding branch diff is `COORDINATION.md`.
