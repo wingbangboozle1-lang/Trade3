@@ -27,11 +27,47 @@
   **Claimed before any other edit** —
   | ID | Task | Status | Files touched |
   |----|------|--------|---------------|
-  | T25-1 | Repair the Pages deploy pipeline: the "Pages readiness" probe exits on 404 **before** `actions/configure-pages@v5 enablement:true` runs, so the one mechanism that can create the site from Actions (`pages: write` on the job token) never fires. Reorder to probe → configure (enablement) → probe again, failing only after the enable attempt. | in progress | `.github/workflows/pages.yml` |
-  | T25-2 | Re-run every local gate on the current tree (npm test, check_site.py, check-links.js, render tests, py_compile) | in progress | record only |
-  | T25-3 | Live spot re-verification of published rows via the official demo API (fetch path; bash egress cannot reach Kalshi) | in progress | record only |
-  | T25-4 | Integration: PR to main, merge, dispatch the deploy workflow, confirm the site is live, record outcome (incl. updating F8 if the enablement succeeds) | in progress | `COORDINATION.md`, `docs/flagged.html` (only if F8 resolves) |
-  No other session is active; no other file scope is touched.
+  | T25-1 | Repair the Pages deploy pipeline ordering | **closed as superseded** — sessions `arena/8214edf2-trade3` (PR #18) and `arena/8373696a-trade3` (PR #19) independently made the same fix and it is merged on `main`; this session's duplicate change to `.github/workflows/pages.yml` was **dropped in favour of upstream's version** during rebase (no other session's work discarded) | none |
+  | T25-2 | Re-run every local gate | **done** (pre-rebase and again after rebase onto `main` @ `7eed55c`, covering PRs #21/#23 changes) | record only |
+  | T25-3 | Live spot re-verification via the official demo API | **done** | record only |
+  | T25-4 | Integration: PR to `main`, merge, record deploy outcome | done | `COORDINATION.md` |
+
+  **Conflict note:** while this session worked, `main` gained PRs #18–#24 (merges at 2026-11-21T07:06–07:08Z).
+  PR #26 from this branch hit "merge conflicts" against that; resolution was a rebase onto `main` @ `7eed55c`
+  with this session's duplicate `pages.yml` fix dropped (upstream already contains the equivalent fix).
+  Nothing from any other session was modified or discarded.
+
+## Session `arena/25db01aa-trade3` — verification performed (2026-11-21)
+
+| Check | Tool / official source | Result |
+|---|---|---|
+| Full test suite (pre-rebase) | `npm test`, `check_site.py`, `check-links.js`, `render.test.mjs`, `site-render-test.js`, `py_compile` | **pass** — logic pass, smoke 15/15, site-render 13/13, 28 pages / 360 links / 39 rows, 0 broken links |
+| Full test suite (post-rebase, on `main` @ `7eed55c` incl. PR #21 audit + PR #23 dollar-book-depth) | same commands | **pass** — logic pass, smoke 15/15, site-render 13/13, site gate pass, links pass, render tests pass |
+| Workflow YAML validity | `yaml.safe_load` on `pages.yml` | valid; deploy job order: checkout → informational probe → configure-pages (enablement, caught) → readiness verdict → configure-pages → upload → deploy |
+| Demo exchange status | [GET /exchange/status](https://external-api.demo.kalshi.co/trade-api/v2/exchange/status) | `exchange_active: true`, `trading_active: true`, shards 0–3 (live 2026-11-21T07:1xZ) |
+| Gas row KXAAAGASM | [official series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASM) | title "US gas price", category Economics, tags `["Oil & Gas","Oil and energy"]`, AAA settlement, fee_multiplier 1 — matches published row |
+| Elections row POPVOTEKHVA | [official series record](https://external-api.demo.kalshi.co/trade-api/v2/series/POPVOTEKHVA) | title "Kamala Virginia", category Elections, US Congress settlement — matches |
+| Culture row KXXBANNEDGROK | [official series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXXBANNEDGROK) | title "Will Grok be banned this year", category Culture; raw settlement list contains non-official entries (Google-search URLs, personal X account) — published row correctly blanks it under the official-publishers-only policy (flag F10) |
+| Crypto row KXLINKPERP | [official series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXLINKPERP) | title "1 LINK", category Crypto, `settlement_sources: null`, empty `contract_url` — matches published row and flag F18 |
+| Golf row KXPGAGOLFERSCORE | [official series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAGOLFERSCORE) | title "Golf Round Strokes", category Sports, tags `["Golf"]`, 5 official settlement sources — matches |
+| Sandbox egress | `curl` to Kalshi host | TLS reset (000) — shell cannot reach Kalshi; live reads done via the page-fetch path (recorded since session `63ad86b3`) |
+
+## Session `arena/25db01aa-trade3` — irregularities / new evidence
+
+1. **F8 is now proven on the Actions route too (new, conclusive evidence).** Post-fix runs on `main`
+   (run [44878359483](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44878359483), PR #18 merge push)
+   show `actions/configure-pages@v5` with `enablement: true` failing at `POST /repos/{owner}/{repo}/pages` with
+   **403 "Resource not accessible by integration"** — i.e. even the workflow's own `GITHUB_TOKEN` granted
+   `pages: write` cannot create the site, because this repo's automation runs under a GitHub App installation that
+   does not include the Pages permission. Combined with the 403s from the session token (`POST /pages`, `PATCH
+   has_pages`, `POST /pages` re-tested this session), every automation route is exhausted.
+   **Owner action remains the only path (one time):** Repo → Settings → Pages → Build and deployment →
+   Source: **GitHub Actions** → Save. After that, every push to `main` (or "Deploy GitHub Pages" → Run workflow)
+   publishes `docs/` at https://wingbangboozle1-lang.github.io/Trade3/ with no further code change.
+2. Minor doc note (pre-existing, not edited in this scope): `requirements/REQUIREMENTS.md` still references
+   unmerged `site/` paths from the `d9376510` parallel build; the published data/pages live under `docs/`.
+   Flagged for the next documentation pass.
+
 
 - 2026-11-20: Session `arena/73b9db7f-trade3` created this board and claimed T1–T5 (solo session; no other sessions active on this repo). T6 to be claimed at integration time.
 - No cross-session file requests at this time.
