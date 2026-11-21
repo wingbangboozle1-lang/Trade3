@@ -225,6 +225,10 @@ jobs:
         run: |
           set -euxo pipefail
           expected="${{ steps.check.outputs.expected }}"
+          # Runners configure no git identity; commit-tree fails with exit 128
+          # ("unable to auto-detect email address") without one.
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git fetch origin gh-pages 2>/dev/null || true
           parent_args=()
           if git rev-parse -q --verify FETCH_HEAD >/dev/null 2>&1; then parent_args=(-p FETCH_HEAD); fi
