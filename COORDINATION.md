@@ -1590,6 +1590,10 @@ to synthetic demo data; here it would have produced that switch, so the preview 
 
 ### Conflict log (board rule)
 
+Hit twice, same shape both times — parallel sessions appending to the end of this file. Both resolved by
+`git pull --rebase` keeping **both** records verbatim (markers deleted only; no reordering, no edits inside
+another session's text): (1) `main` `80b662d`/`3243d28` (PRs #38, #39), (2) `main` `c7c04d0` (PR #37).
+
 Pushing this record hit a `COORDINATION.md` conflict because `main` advanced twice mid-session
 (PR #38 `arena/71252315-trade3` @ `80b662d`, then PR #39 `arena/755fb608-trade3` @ `3243d28`).
 Resolved with `git pull --rebase` by keeping **both** sides verbatim — their append-only records were
