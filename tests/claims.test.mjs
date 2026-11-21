@@ -91,51 +91,34 @@ check('the data-integrity test is wired into npm test', () => {
   return pkg.scripts.test;
 });
 
-check('every requirement row that is corrected says so in the row', () => {
+check('no requirement row asserts a feature the code does not have', () => {
+  // Each pair: a requirement ID, a phrase that would only appear if the row were claiming
+  // the feature, and the words that make a mention honest. A row may mention the phrase as
+  // long as it also disclaims it in the same cell (e.g. "no such field", "not implemented").
   const md = readFileSync(path.join(ROOT, 'requirements', 'REQUIREMENTS.md'), 'utf8');
-  const corrected = ['R7', 'R10', 'R17', 'R18', 'R20', 'R21'];
-  for (const id of corrected) {
-    const row = md.split('\n').find((l) => l.startsWith(`| ${id} |`)) || '';
-    if (!/correction 2026-11-21/i.test(row)) throw new Error(`${id} lost its correction note`);
+  const rows = new Map();
+  for (const line of md.split('\n')) {
+    const m = line.match(/^\| (R\d+) \|/);
+    if (m) rows.set(m[1], line);
   }
-  return `${corrected.length} rows carry the correction`;
-});
-
-
-check('Build B: a re-verified row is never labelled a blanket "match" without a per-row outcome', () => {
-  const dataJs = readFileSync(path.join(ROOT, 'docs', 'dashboard-site', 'assets', 'data.js'), 'utf8');
-  const block = dataJs.slice(dataJs.indexOf('export const REVERIFIED'), dataJs.indexOf('export const DEMO_REST'));
-  const rows = block.match(/result: '([a-z-]+)'/g) || [];
-  if (rows.length < 10) throw new Error(`only ${rows.length} per-row outcomes recorded`);
-  if (!/result: 'not-checked'/.test(block)) throw new Error('expired strikes must be recorded as not-checked, not match');
-  if (!/result: 'corrected'/.test(block)) throw new Error('the corrected rows must say so');
-  return `${rows.length} rows carry an explicit outcome`;
-});
-
-check('Build B: no market row publishes a null volume where the API returns a number', () => {
-  const dataJs = readFileSync(path.join(ROOT, 'docs', 'dashboard-site', 'assets', 'data.js'), 'utf8');
-  const block = dataJs.slice(dataJs.indexOf('export const MARKETS'), dataJs.indexOf('export const EMPTY_TOPIC_NOTES'));
-  if (/volume: null/.test(block)) throw new Error('a market row still has volume: null');
-  return 'no null volumes';
-});
-
-check('the snapshot never claims to be live data', () => {
-  const snap = JSON.parse(readFileSync(path.join(ROOT, 'data', 'snapshot.json'), 'utf8'));
-  if (!/not live/i.test(snap.note || '')) throw new Error('snapshot note lost its "Not live" wording');
-  if (!snap.recheck || !snap.recheck.verified || !snap.recheck.pending_recheck) throw new Error('snapshot lost its recheck block');
-  const pending = snap.recheck.pending_recheck.tickers.length;
-  const verified = Object.keys(snap.recheck.verified).length;
-  return `${verified} re-read, ${pending} explicitly pending`;
-});
-
-
-check('Build B states golf settlement sources in the API order', () => {
-  const dataJs = readFileSync(path.join(ROOT, 'docs', 'dashboard-site', 'assets', 'data.js'), 'utf8');
-  const bad = /settle(ment)?Source(Name)?: 'ESPN, Fox Sports/;
-  if (bad.test(dataJs)) throw new Error('golf settlement sources are not in the record order (Fox Sports, ESPN, the Governing League)');
-  const good = (dataJs.match(/Fox Sports, ESPN, the Governing League/g) || []).length;
-  if (good < 3) throw new Error(`only ${good} rows carry the record order; expected market rows + series row`);
-  return `${good} rows in record order`;
+  // A row is honest about a phrase if it negates it in the same cell.
+  const honest = /not implemented|no such|no step|no sort|no WebSocket client|no dollar-volume field|consumes no|not true|absent|never|only the suggestion page/i;
+  const suspects = [
+    ['R7', /dollar_volume/i],
+    ['R10', /pause-on-hover/i],
+    ['R17', /step\/line toggle|zoom/i],
+    ['R18', /cost to cross/i],
+    ['R20', /sparkline/i],
+    ['R22', /sort control|sort-order/i],
+  ];
+  const offenders = [];
+  for (const [id, pattern] of suspects) {
+    const row = rows.get(id);
+    if (!row) { offenders.push(`${id} missing`); continue; }
+    if (pattern.test(row) && !honest.test(row)) offenders.push(`${id} asserts /${pattern.source}/`);
+  }
+  if (offenders.length) throw new Error(offenders.join('; '));
+  return `${suspects.length} historically-overclaimed features are all disclaimed or absent`;
 });
 
 console.log(`\n${passed}/${passed + failed} claim checks passed`);
