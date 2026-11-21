@@ -17,6 +17,7 @@ import { KalshiClient, topOfBook, midPrice, liquidity, round4 } from './kalshi.j
 import { TOPICS, classifyMarket, kalshiMarketUrl, seriesMeta } from './topics.js';
 import { SwingDetector, roiScore, moveDollars, SWING_THRESHOLD_DOLLARS, HIGH_ROI_MIN_SCORE } from './alerts.js';
 import { PaperBroker, decideTrade, analyzeTrades, STRATEGY_META, STRATEGIES } from './paper.js';
+import { StrategyTournament } from './tournament.js';
 import { syntheticMarkets, syntheticBook, SYNTHETIC_SERIES, DEMO_MODE_NOTICE } from './demo-data.js';
 
 // Categories that actually exist on Kalshi (verified against GET /series?category=...).
@@ -59,6 +60,9 @@ export class Collector extends EventEmitter {
 
     this.client = client ?? new KalshiClient({ env, onLog: (lvl, msg) => this.logger[lvl]?.(msg) });
     this.detector = new SwingDetector({ threshold: SWING_THRESHOLD_DOLLARS });
+    // Every detected swing is also offered to all four shadow strategies at the
+    // same quote, so their results are comparable. Nothing here sends an order.
+    this.tournament = new StrategyTournament();
     this.paper = new PaperBroker({
       statePath: path.join(dataDir, 'paper-state.json'),
       logger,
@@ -501,6 +505,21 @@ export class Collector extends EventEmitter {
       if (this.modelAlerts.length > 300) this.modelAlerts.length = 300;
       this.#maybeTrade(enriched, market);
     }
+
+    // Shadow tournament: the same swing, for every strategy, at the same quote.
+    this.tournament.onSwing({
+      swing: {
+        ticker: alert.ticker,
+        title: market.title,
+        topicId: market.topicId,
+        from: alert.fromPrice,
+        to: alert.toPrice,
+        delta: alert.toPrice - alert.fromPrice,
+        at: alert.at ?? Date.now(),
+      },
+      quote: { yesBidDollars: market.yesBid, yesAskDollars: market.yesAsk },
+    });
+
     this.emit('alert', enriched);
   }
 
@@ -578,6 +597,12 @@ export class Collector extends EventEmitter {
   /** Record a market resolution once, with the official result Kalshi reports. */
   #recordResolution(market, result) {
     if (this.resolutions.some((r) => r.ticker === market.ticker)) return;
+    // Settle the shadow books against the exchange's own result field. This is the
+    // same signal the paper broker uses; nothing is settled on an estimate.
+    const shadow = this.tournament.settle({ ticker: market.ticker, result });
+    if (shadow.length) {
+      this.logger.info?.(`tournament settled ${shadow.length} shadow positions for ${market.ticker} (result ${result})`);
+    }
     this.resolutions.unshift({
       ticker: market.ticker,
       title: market.title,
@@ -606,6 +631,7 @@ export class Collector extends EventEmitter {
         const match = classifyMarket(m, { seriesTicker, ...(this.seriesMeta.get(seriesTicker) ?? {}) });
         if (!match) continue;
         if (this.resolutions.some((r) => r.ticker === m.ticker)) continue;
+        this.tournament.settle({ ticker: m.ticker, result: m.result });
         this.resolutions.unshift({
           ticker: m.ticker,
           title: m.title,
@@ -690,6 +716,9 @@ export class Collector extends EventEmitter {
         openPositions: open,
         closedTrades: closedTrades.slice(-100).reverse(),
         analysis,
+        // Four strategies on the same swing stream; see server/tournament.js.
+        tournament: this.tournament.report(),
+        tournamentTrades: this.tournament.trades(120),
         kalshiDemoAccount: null,
         strategies: Object.entries(STRATEGY_META).map(([id, meta]) => ({ id, ...meta })),
       },
