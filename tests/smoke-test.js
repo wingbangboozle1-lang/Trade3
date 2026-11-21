@@ -221,6 +221,9 @@ await test('collector poll populates all five topics and produces alerts + paper
 await test('every HTTP route answers', async () => {
   const server = createServer({ collector, logger: quiet });
   await new Promise((r) => server.listen(0, '127.0.0.1', r));
+  // Close in finally: a failed assertion must never leave the listener open —
+  // a leaked TCPServerWrap keeps the process alive and hangs CI (watchdog, 2026-11-21).
+  try {
   const { port } = server.address();
   const get = async (p) => {
     const res = await fetch(`http://127.0.0.1:${port}${p}`);
@@ -270,8 +273,9 @@ await test('every HTTP route answers', async () => {
   const { value } = await reader.read();
   assert.match(new TextDecoder().decode(value), /event: hello/);
   await reader.cancel();
-
-  await new Promise((r) => server.close(r));
+  } finally {
+    await new Promise((r) => server.close(r));
+  }
 });
 
 // --- snapshot and synthetic demo modes -------------------------------------
