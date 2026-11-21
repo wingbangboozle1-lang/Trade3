@@ -51,14 +51,21 @@ const $ = (id) => document.getElementById(id);
           <td><span class="mono">${esc(s.ticker)}</span></td>
           <td>${esc(s.title)}</td>
           <td>${esc(s.frequency)}</td>
-          <td>${flagged ? `<span class="pill warn">not published</span>` : esc(s.settlement)}</td>
+          <td>${flagged ? `<span class="pill warn">blank on purpose</span>` : esc(s.settlement)}${s.settlement_all ? `<div class="dim" style="font-size:12px">also: ${esc(s.settlement_all.slice(1).join(" · "))}</div>` : ""}</td>
           <td><a href="${esc(s.source)}" target="_blank" rel="noopener">API record</a></td>
-          <td>${flagged ? `<span class="pill warn">blank — F9</span>` : `<span class="pill live">matches</span>`}</td>
+          <td>${flagged
+            ? `<span class="pill warn">blank — F10/F18/F26</span>`
+            : (s.verified_on === "2026-11-21"
+                ? `<span class="pill live">verbatim · re-checked 2026-11-21</span>`
+                : `<span class="pill warn">not re-checked since ${esc(s.verified_on || "?")}</span>`)}</td>
         </tr>`);
       }
     }
     $("v-body").innerHTML = rows.join("") || `<tr><td colspan="8" class="muted">No rows.</td></tr>`;
     const total = Object.values(data.topics).reduce((a, t) => a + t.series.length, 0);
+    // "Result" is a statement about provenance, never about a comparison this page
+    // performed: a row reads "verbatim" only when its value was copied from the official
+    // record on 2026-11-21, and the comparison itself lives in the published report.
     $("v-rows").textContent = total;
     $("v-ok").textContent = total - blank;
     $("v-flag").textContent = blank;

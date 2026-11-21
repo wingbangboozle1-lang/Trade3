@@ -1,0 +1,688 @@
+{
+ "checked": 39,
+ "total": 39,
+ "mismatches": 0,
+ "rows": [
+  {
+   "ticker": "KXAAAGASM",
+   "topic": "gas",
+   "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASM",
+   "checked": true,
+   "ok": true,
+   "diffs": [],
+   "notes": [],
+   "api": {
+    "title": "US gas price",
+    "category": "Economics",
+    "frequency": "monthly",
+    "tags": [
+     "Oil & Gas",
+     "Oil and energy"
+    ]
+   }
+  },
+  {
+   "ticker": "KXAAAGASMIN",
+   "topic": "gas",
+   "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASMIN",
+   "checked": true,
+   "ok": true,
+   "diffs": [],
+   "notes": [],
+   "api": {
+    "title": "US lowest gas price yearly",
+    "category": "Economics",
+    "frequency": "annual",
+    "tags": [
+     "Oil & Gas",
+     "Oil and energy"
+    ]
+   }
+  },
+  {
+   "ticker": "KXAAAGASY",
+   "topic": "gas",
+   "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASY",
+   "checked": true,
+   "ok": true,
+   "diffs": [],
+   "notes": [],
+   "api": {
+    "title": "US gas price up",
+    "category": "Economics",
+    "frequency": "annual",
+    "tags": [
+     "Oil & Gas"
+    ]
+   }
+  },
+  {
+   "ticker": "KXAAAGASED",
+   "topic": "gas",
+   "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASED",
+   "checked": true,
+   "ok": true,
+   "diffs": [],
+   "notes": [],
+   "api": {
+    "title": "US gas price on Election Day",
+    "category": "Economics",
+    "frequency": "one_off",
+    "tags": [
+     "Oil & Gas",
+     "Oil and energy"
+    ]
+   }
+  },
+  {
+   "ticker": "KXAAAGASMAX",
+   "topic": "gas",
+   "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASMAX",
+   "checked": true,
+   "ok": true,
+   "diffs": [],
+   "notes": [],
+   "api": {
+    "title": "US highest gas price yearly",
+    "category": "Economics",
+    "frequency": "annual",
+    "tags": [
+     "Oil & Gas",
+     "Oil and energy"
+    ]
+   }
+  },
+  {
+   "ticker": "KXAAAGASMAXCA",
+   "topic": "gas",
+   "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASMAXCA",
+   "checked": true,
+   "ok": true,
+   "diffs": [],
+   "notes": [],
+   "api": {
+    "title": "California highest gas price yearly",
+    "category": "Economics",
+    "frequency": "annual",
+    "tags": [
+     "Oil & Gas",
+     "Oil and energy"
+    ]
+   }
+  },
+  {
+   "ticker": "KXAAAGASMAXTX",
+   "topic": "gas",
+   "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASMAXTX",
+   "checked": true,
+   "ok": true,
+   "diffs": [],
+   "notes": [],
+   "api": {
+    "title": "Texas highest gas price yearly",
+    "category": "Economics",
+    "frequency": "annual",
+    "tags": [
+     "Oil & Gas",
+     "Oil and energy"
+    ]
+   }
+  },
+  {
+   "ticker": "KXAAAGASMINFL",
+   "topic": "gas",
+   "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASMINFL",
+   "checked": true,
+   "ok": true,
+   "diffs": [],
+   "notes": [],
+   "api": {
+    "title": "Florida lowest gas price yearly",
+    "category": "Economics",
+    "frequency": "annual",
+    "tags": [
+     "Oil & Gas",
+     "Oil and energy"
+    ]
+   }
+  },
+  {
+   "ticker": "KXAAAGASMAXFL",
+   "topic": "gas",
+   "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASMAXFL",
+   "checked": true,
+   "ok": true,
+   "diffs": [],
+   "notes": [],
+   "api": {
+    "title": "Florida highest gas price yearly",
+    "category": "Economics",
+    "frequency": "annual",
+    "tags": [
+     "Oil & Gas",
+     "Oil and energy"
+    ]
+   }
+  },
+  {
+   "ticker": "KXNGASMAX",
+   "topic": "gas",
+   "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXNGASMAX",
+   "checked": true,
+   "ok": true,
+   "diffs": [],
+   "notes": [],
+   "api": {
+    "title": "Natural gas price peak",
+    "category": "Economics",
+    "frequency": "annual",
+    "tags": [
+     "Oil & Gas",
+     "Oil and energy"
+    ]
+   }
+  },
+  {
+   "ticker": "POPVOTEKHVA",
+   "topic": "elections",
+   "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/POPVOTEKHVA",
+   "checked": true,
+   "ok": true,
+   "diffs": [],
+   "notes": [],
+   "api": {
+    "title": "Kamala Virginia",
+    "category": "Elections",
+    "frequency": "one_off",
+    "tags": [
+     "US Elections"
+    ]
+   }
+  },
+  {
+   "ticker": "KXGOVNJNOMR",
+   "topic": "elections",
+   "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXGOVNJNOMR",
+   "checked": true,
+   "ok": true,
+   "diffs": [],
+   "notes": [],
+   "api": {
+    "title": "New Jersey Governor Republican nominee",
+    "category": "Elections",
+    "frequency": "custom",
+    "tags": [
+     "Primaries"
+    ]
+   }
+  },
+  {
+   "ticker": "KXIATREASR",
+   "topic": "elections",
+   "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXIATREASR",
+   "checked": true,
+   "ok": true,
+   "diffs": [],
+   "notes": [],
+   "api": {
+    "title": "Iowa Treasurer winner",
+    "category": "Elections",
+    "frequency": "custom",
+    "tags": [
+     "US Elections"
+    ]
+   }
+  },
+  {
+   "ticker": "KXFRPRESCANDCOUNT",
+   "topic": "elections",
+   "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXFRPRESCANDCOUNT",
+   "checked": true,
+   "ok": true,
+   "diffs": [],
+   "notes": [],
+   "api": {
+    "title": "How many candidates will be on the French presidential first-round ballot?",
+    "category": "Elections",
+    "frequency": "one_off",
+    "tags": [
+     "International elections",
+     "Germany & France"
+    ]
+   }
+  },
+  {
+   "ticker": "KXELECTUKRAINE",
+   "topic": "elections",
+   "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXELECTUKRAINE",
+   "checked": true,
+   "ok": true,
+   "diffs": [],
+   "notes": [
+    "settlement blank on purpose under official-publishers-only (F10)"
+   ],
+   "api": {
+    "title": "Ukraine elections",
+    "category": "Elections",
+    "frequency": "custom",
+    "tags": [
+     "International elections"
+    ]
+   }
+  },
+  {
+   "ticker": "KXXBANNEDGROK",
+   "topic": "culture",
+   "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXXBANNEDGROK",
+   "checked": true,
+   "ok": true,
+   "diffs": [],
+   "notes": [
+    "settlement blank on purpose under official-publishers-only (F10)"
+   ],
+   "api": {
+    "title": "Will Grok be banned this year",
+    "category": "Culture",
+    "frequency": "one_off",
+    "tags": [
+     "AI"
+    ]
+   }
+  },
+  {
+   "ticker": "KXXBANNEDMURRAYHILLGUY1",
+   "topic": "culture",
+   "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXXBANNEDMURRAYHILLGUY1",
+   "checked": true,
+   "ok": true,
+   "diffs": [],
+   "notes": [
+    "settlement blank on purpose under official-publishers-only (F10)"
+   ],
+   "api": {
+    "title": "Will @MurrayHillGuy1 get banned from X this year?",
+    "category": "Culture",
+    "frequency": "one_off",
+    "tags": null
+   }
+  },
+  {
+   "ticker": "KXBOOKERPRIZE",
+   "topic": "culture",
+   "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXBOOKERPRIZE",
+   "checked": true,
+   "ok": true,
+   "diffs": [],
+   "notes": [],
+   "api": {
+    "title": "who will win the booker prize",
+    "category": "Entertainment",
+    "frequency": "one_off",
+    "tags": null
+   }
+  },
+  {
+   "ticker": "KXWORLDCUPHALFTIME",
+   "topic": "culture",
+   "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXWORLDCUPHALFTIME",
+   "checked": true,
+   "ok": true,
+   "diffs": [],
+   "notes": [],
+   "api": {
+    "title": "Who will perform at event",
+    "category": "Entertainment",
+    "frequency": "one_off",
+    "tags": [
+     "Live Music"
+    ]
+   }
+  },
+  {
+   "ticker": "KXTOPARTIST",
+   "topic": "culture",
+   "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXTOPARTIST",
+   "checked": true,
+   "ok": true,
+   "diffs": [],
+   "notes": [],
+   "api": {
+    "title": "Top Artist on Spotify",
+    "category": "Entertainment",
+    "frequency": "annual",
+    "tags": [
+     "Music"
+    ]
+   }
+  },
+  {
+   "ticker": "RTKRAVEN",
+   "topic": "culture",
+   "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/RTKRAVEN",
+   "checked": true,
+   "ok": true,
+   "diffs": [],
+   "notes": [],
+   "api": {
+    "title": "Kraven Rotten Tomatoes score",
+    "category": "Entertainment",
+    "frequency": "custom",
+    "tags": [
+     "Movies",
+     "Rotten Tomatoes"
+    ]
+   }
+  },
+  {
+   "ticker": "KXVMALATIN",
+   "topic": "culture",
+   "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXVMALATIN",
+   "checked": true,
+   "ok": true,
+   "diffs": [],
+   "notes": [],
+   "api": {
+    "title": "BEST LATIN",
+    "category": "Entertainment",
+    "frequency": "one_off",
+    "tags": [
+     "VMA",
+     "Awards"
+    ]
+   }
+  },
+  {
+   "ticker": "KXGAMEAWARDSBGD",
+   "topic": "culture",
+   "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXGAMEAWARDSBGD",
+   "checked": true,
+   "ok": true,
+   "diffs": [],
+   "notes": [],
+   "api": {
+    "title": "Game Awards Best Game Direction",
+    "category": "Entertainment",
+    "frequency": "annual",
+    "tags": [
+     "Video games",
+     "The Game Awards",
+     "Awards"
+    ]
+   }
+  },
+  {
+   "ticker": "KXCLDPLAY",
+   "topic": "culture",
+   "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXCLDPLAY",
+   "checked": true,
+   "ok": true,
+   "diffs": [],
+   "notes": [],
+   "api": {
+    "title": "Coldplay album drop",
+    "category": "Entertainment",
+    "frequency": "one_off",
+    "tags": null
+   }
+  },
+  {
+   "ticker": "KXMANOFTHEYEAR",
+   "topic": "culture",
+   "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXMANOFTHEYEAR",
+   "checked": true,
+   "ok": true,
+   "diffs": [],
+   "notes": [],
+   "api": {
+    "title": "How many streams will Man of The Year have?",
+    "category": "Entertainment",
+    "frequency": "custom",
+    "tags": [
+     "Music"
+    ]
+   }
+  },
+  {
+   "ticker": "KXLINKPERP",
+   "topic": "crypto",
+   "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXLINKPERP",
+   "checked": true,
+   "ok": true,
+   "diffs": [],
+   "notes": [
+    "API returns no settlement_sources (published blank \u2014 correct)"
+   ],
+   "api": {
+    "title": "1 LINK",
+    "category": "Crypto",
+    "frequency": "often",
+    "tags": null
+   }
+  },
+  {
+   "ticker": "KXXRPMAXY",
+   "topic": "crypto",
+   "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXXRPMAXY",
+   "checked": true,
+   "ok": true,
+   "diffs": [],
+   "notes": [],
+   "api": {
+    "title": "XRP Max",
+    "category": "Crypto",
+    "frequency": "annual",
+    "tags": null
+   }
+  },
+  {
+   "ticker": "KXSOL26500",
+   "topic": "crypto",
+   "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXSOL26500",
+   "checked": true,
+   "ok": true,
+   "diffs": [],
+   "notes": [],
+   "api": {
+    "title": "Sol above 500 in 2026",
+    "category": "Crypto",
+    "frequency": "one_off",
+    "tags": [
+     "Crypto",
+     "Solana"
+    ]
+   }
+  },
+  {
+   "ticker": "KXBTXMINW",
+   "topic": "crypto",
+   "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXBTXMINW",
+   "checked": true,
+   "ok": true,
+   "diffs": [],
+   "notes": [],
+   "api": {
+    "title": "How low will Bitcoin get this week?",
+    "category": "Crypto",
+    "frequency": "weekly",
+    "tags": null
+   }
+  },
+  {
+   "ticker": "KXBTC2025100",
+   "topic": "crypto",
+   "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXBTC2025100",
+   "checked": true,
+   "ok": true,
+   "diffs": [],
+   "notes": [],
+   "api": {
+    "title": "Will Bitcoin reach 100k again this year? ",
+    "category": "Crypto",
+    "frequency": "one_off",
+    "tags": [
+     "Crypto",
+     "Bitcoin"
+    ]
+   }
+  },
+  {
+   "ticker": "KXSOLPERP",
+   "topic": "crypto",
+   "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXSOLPERP",
+   "checked": true,
+   "ok": true,
+   "diffs": [],
+   "notes": [
+    "API returns no settlement_sources (published blank \u2014 correct)"
+   ],
+   "api": {
+    "title": ".1 SOL",
+    "category": "Crypto",
+    "frequency": "often",
+    "tags": null
+   }
+  },
+  {
+   "ticker": "KXETHD",
+   "topic": "crypto",
+   "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXETHD",
+   "checked": true,
+   "ok": true,
+   "diffs": [],
+   "notes": [],
+   "api": {
+    "title": "Ethereum price Above/below",
+    "category": "Crypto",
+    "frequency": "hourly",
+    "tags": [
+     "Crypto",
+     "Hourly",
+     "Ethereum"
+    ]
+   }
+  },
+  {
+   "ticker": "KXFDVBIRB",
+   "topic": "crypto",
+   "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXFDVBIRB",
+   "checked": true,
+   "ok": true,
+   "diffs": [],
+   "notes": [],
+   "api": {
+    "title": "BIRB FDV",
+    "category": "Crypto",
+    "frequency": "one_off",
+    "tags": [
+     "Crypto",
+     "Pre-Market"
+    ]
+   }
+  },
+  {
+   "ticker": "KXSOLSTABLESUPP",
+   "topic": "crypto",
+   "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXSOLSTABLESUPP",
+   "checked": true,
+   "ok": true,
+   "diffs": [],
+   "notes": [],
+   "api": {
+    "title": "sol stable supp",
+    "category": "Crypto",
+    "frequency": "custom",
+    "tags": [
+     "Crypto",
+     "Solana"
+    ]
+   }
+  },
+  {
+   "ticker": "KXNEARY",
+   "topic": "crypto",
+   "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXNEARY",
+   "checked": true,
+   "ok": true,
+   "diffs": [],
+   "notes": [],
+   "api": {
+    "title": "NEAR Yearly",
+    "category": "Crypto",
+    "frequency": "annual",
+    "tags": [
+     "Crypto",
+     "Hourly",
+     "NEAR Protocol"
+    ]
+   }
+  },
+  {
+   "ticker": "KXPGAGOLFERSCORE",
+   "topic": "golf",
+   "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAGOLFERSCORE",
+   "checked": true,
+   "ok": true,
+   "diffs": [],
+   "notes": [],
+   "api": {
+    "title": "Golf Round Strokes",
+    "category": "Sports",
+    "frequency": "custom",
+    "tags": [
+     "Golf"
+    ]
+   }
+  },
+  {
+   "ticker": "KXPGAEAGLE",
+   "topic": "golf",
+   "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAEAGLE",
+   "checked": true,
+   "ok": true,
+   "diffs": [],
+   "notes": [],
+   "api": {
+    "title": "Player to Record an Eagle in Round",
+    "category": "Sports",
+    "frequency": "custom",
+    "tags": [
+     "Golf"
+    ]
+   }
+  },
+  {
+   "ticker": "KXPRESCUPMATCH",
+   "topic": "golf",
+   "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXPRESCUPMATCH",
+   "checked": true,
+   "ok": true,
+   "diffs": [],
+   "notes": [],
+   "api": {
+    "title": "Presidents Cup Match Winner",
+    "category": "Sports",
+    "frequency": "custom",
+    "tags": [
+     "Golf"
+    ]
+   }
+  },
+  {
+   "ticker": "KXPGAT20",
+   "topic": "golf",
+   "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAT20",
+   "checked": true,
+   "ok": true,
+   "diffs": [],
+   "notes": [],
+   "api": {
+    "title": "T 20",
+    "category": "Sports",
+    "frequency": "custom",
+    "tags": [
+     "Golf"
+    ]
+   }
+  }
+ ]
+}

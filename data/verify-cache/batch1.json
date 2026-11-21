@@ -1,0 +1,1119 @@
+{
+ "KXAAAGASM": {
+  "series": {
+   "category": "Economics",
+   "categories": [
+    "Economics"
+   ],
+   "frequency": "monthly",
+   "settlement_sources": [
+    {
+     "name": "AAA",
+     "url": "https://gasprices.aaa.com/"
+    }
+   ],
+   "tags": [
+    "Oil & Gas",
+    "Oil and energy"
+   ],
+   "ticker": "KXAAAGASM",
+   "title": "US gas price",
+   "product_metadata": {
+    "scope": "Gasoline"
+   },
+   "last_updated_ts": "2026-11-21T04:28:09.088611Z"
+  }
+ },
+ "KXAAAGASMIN": {
+  "series": {
+   "category": "Economics",
+   "categories": [
+    "Economics"
+   ],
+   "frequency": "annual",
+   "settlement_sources": [
+    {
+     "name": "AAA",
+     "url": "https://gasprices.aaa.com/"
+    }
+   ],
+   "tags": [
+    "Oil & Gas",
+    "Oil and energy"
+   ],
+   "ticker": "KXAAAGASMIN",
+   "title": "US lowest gas price yearly",
+   "product_metadata": {
+    "scope": "Gasoline"
+   },
+   "last_updated_ts": "2026-11-21T04:28:10.789468Z"
+  }
+ },
+ "KXAAAGASY": {
+  "series": {
+   "category": "Economics",
+   "categories": [
+    "Economics"
+   ],
+   "frequency": "annual",
+   "settlement_sources": [
+    {
+     "name": "AAA",
+     "url": "https://gasprices.aaa.com/"
+    }
+   ],
+   "tags": [
+    "Oil & Gas"
+   ],
+   "ticker": "KXAAAGASY",
+   "title": "US gas price up",
+   "product_metadata": {
+    "scope": "Gasoline"
+   },
+   "last_updated_ts": "2026-11-21T04:28:09.067928Z"
+  }
+ },
+ "KXAAAGASED": {
+  "series": {
+   "category": "Economics",
+   "categories": [
+    "Economics"
+   ],
+   "frequency": "one_off",
+   "settlement_sources": [
+    {
+     "name": "AAA",
+     "url": "https://gasprices.aaa.com/"
+    }
+   ],
+   "tags": [
+    "Oil & Gas",
+    "Oil and energy"
+   ],
+   "ticker": "KXAAAGASED",
+   "title": "US gas price on Election Day",
+   "product_metadata": {
+    "scope": "Gasoline"
+   },
+   "last_updated_ts": "2026-11-21T04:28:09.026562Z"
+  }
+ },
+ "KXAAAGASMAX": {
+  "series": {
+   "category": "Economics",
+   "categories": [
+    "Economics"
+   ],
+   "frequency": "annual",
+   "settlement_sources": [
+    {
+     "name": "AAA",
+     "url": "https://gasprices.aaa.com/"
+    }
+   ],
+   "tags": [
+    "Oil & Gas",
+    "Oil and energy"
+   ],
+   "ticker": "KXAAAGASMAX",
+   "title": "US highest gas price yearly",
+   "product_metadata": {
+    "scope": "Gasoline"
+   },
+   "last_updated_ts": "2026-11-21T04:28:10.812321Z"
+  }
+ },
+ "KXAAAGASMAXCA": {
+  "series": {
+   "category": "Economics",
+   "categories": [
+    "Economics"
+   ],
+   "frequency": "annual",
+   "settlement_sources": [
+    {
+     "name": "AAA",
+     "url": "https://gasprices.aaa.com/"
+    }
+   ],
+   "tags": [
+    "Oil & Gas",
+    "Oil and energy"
+   ],
+   "ticker": "KXAAAGASMAXCA",
+   "title": "California highest gas price yearly",
+   "product_metadata": {
+    "scope": "Gasoline"
+   },
+   "last_updated_ts": "2026-11-21T04:28:10.762451Z"
+  }
+ },
+ "KXAAAGASMAXTX": {
+  "series": {
+   "category": "Economics",
+   "categories": [
+    "Economics"
+   ],
+   "frequency": "annual",
+   "settlement_sources": [
+    {
+     "name": "AAA",
+     "url": "https://gasprices.aaa.com/"
+    }
+   ],
+   "tags": [
+    "Oil & Gas",
+    "Oil and energy"
+   ],
+   "ticker": "KXAAAGASMAXTX",
+   "title": "Texas highest gas price yearly",
+   "product_metadata": {
+    "scope": "Gasoline"
+   },
+   "last_updated_ts": "2026-11-21T04:28:10.782166Z"
+  }
+ },
+ "KXPGATOUR": {
+  "series": {
+   "category": "Sports",
+   "categories": [
+    "Sports"
+   ],
+   "frequency": "custom",
+   "settlement_sources": [
+    {
+     "name": "Fox Sports",
+     "url": "https://www.foxsports.com"
+    },
+    {
+     "name": "ESPN",
+     "url": "https://www.espn.com/"
+    },
+    {
+     "name": "the Governing League",
+     "url": "https://www.pgatour.com/"
+    }
+   ],
+   "tags": [
+    "Golf"
+   ],
+   "ticker": "KXPGATOUR",
+   "title": "PGA Tour",
+   "product_metadata": {
+    "scope": "Game"
+   },
+   "last_updated_ts": "2026-11-21T06:03:27.562467Z"
+  }
+ },
+ "KXBTCD": {
+  "series": {
+   "category": "Crypto",
+   "categories": [
+    "Crypto"
+   ],
+   "frequency": "hourly",
+   "settlement_sources": [
+    {
+     "name": "CF Benchmarks",
+     "url": "https://www.cfbenchmarks.com/data/indices/BRTI?ref=blog.cfbenchmarks.com"
+    }
+   ],
+   "tags": [
+    "Crypto",
+    "Hourly",
+    "Bitcoin"
+   ],
+   "ticker": "KXBTCD",
+   "title": "Bitcoin price Above/below",
+   "last_updated_ts": "2026-10-21T17:17:53.591928Z"
+  }
+ },
+ "KXPGAGOLFERSCORE": {
+  "series": {
+   "category": "Sports",
+   "categories": [
+    "Sports"
+   ],
+   "frequency": "custom",
+   "settlement_sources": [
+    {
+     "name": "NBC Sports",
+     "url": "http://www.nbcsports.com/"
+    },
+    {
+     "name": "Fox Sports",
+     "url": "https://foxsports.com"
+    },
+    {
+     "name": "the Governing League",
+     "url": "https://www.pgatour.com/"
+    },
+    {
+     "name": "the Associated Press",
+     "url": "https://apnews.com/"
+    },
+    {
+     "name": "Golf Channel",
+     "url": "https://golfchannel.com"
+    }
+   ],
+   "tags": [
+    "Golf"
+   ],
+   "ticker": "KXPGAGOLFERSCORE",
+   "title": "Golf Round Strokes",
+   "product_metadata": {
+    "scope": "Golfer Score"
+   },
+   "last_updated_ts": "2026-11-21T05:25:18.194125Z"
+  }
+ },
+ "KXAAAGASMINFL": {
+  "series": {
+   "category": "Economics",
+   "categories": [
+    "Economics"
+   ],
+   "frequency": "annual",
+   "settlement_sources": [
+    {
+     "name": "AAA",
+     "url": "https://gasprices.aaa.com/"
+    }
+   ],
+   "tags": [
+    "Oil & Gas",
+    "Oil and energy"
+   ],
+   "ticker": "KXAAAGASMINFL",
+   "title": "Florida lowest gas price yearly",
+   "product_metadata": {
+    "scope": "Gasoline"
+   },
+   "last_updated_ts": "2026-11-21T04:28:10.744147Z"
+  }
+ },
+ "KXAAAGASMAXFL": {
+  "series": {
+   "category": "Economics",
+   "categories": [
+    "Economics"
+   ],
+   "frequency": "annual",
+   "settlement_sources": [
+    {
+     "name": "AAA",
+     "url": "https://gasprices.aaa.com/"
+    }
+   ],
+   "tags": [
+    "Oil & Gas",
+    "Oil and energy"
+   ],
+   "ticker": "KXAAAGASMAXFL",
+   "title": "Florida highest gas price yearly",
+   "product_metadata": {
+    "scope": "Gasoline"
+   },
+   "last_updated_ts": "2026-11-21T04:28:10.804986Z"
+  }
+ },
+ "KXNGASMAX": {
+  "series": {
+   "category": "Economics",
+   "categories": [
+    "Economics"
+   ],
+   "frequency": "annual",
+   "settlement_sources": [
+    {
+     "name": "Energy Information Administration",
+     "url": "https://www.eia.gov/dnav/ng/NG_PRI_FUT_S1_D.htm"
+    }
+   ],
+   "tags": [
+    "Oil & Gas",
+    "Oil and energy"
+   ],
+   "ticker": "KXNGASMAX",
+   "title": "Natural gas price peak",
+   "product_metadata": {
+    "scope": "Natural Gas"
+   },
+   "last_updated_ts": "2026-11-21T06:57:01.436762Z"
+  }
+ },
+ "POPVOTEKHVA": {
+  "series": {
+   "category": "Elections",
+   "categories": [
+    "Elections"
+   ],
+   "frequency": "one_off",
+   "settlement_sources": [
+    {
+     "name": "United States Congress",
+     "url": "https://www.congress.gov/"
+    }
+   ],
+   "tags": [
+    "US Elections"
+   ],
+   "ticker": "POPVOTEKHVA",
+   "title": "Kamala Virginia",
+   "last_updated_ts": "2026-11-21T06:57:46.344759Z"
+  }
+ },
+ "KXGOVNJNOMR": {
+  "series": {
+   "category": "Elections",
+   "categories": [
+    "Elections"
+   ],
+   "frequency": "custom",
+   "settlement_sources": [
+    {
+     "name": "Republican Party",
+     "url": "https://gop.com/"
+    }
+   ],
+   "tags": [
+    "Primaries"
+   ],
+   "ticker": "KXGOVNJNOMR",
+   "title": "New Jersey Governor Republican nominee",
+   "last_updated_ts": "2026-11-21T05:14:12.439456Z"
+  }
+ },
+ "KXIATREASR": {
+  "series": {
+   "category": "Elections",
+   "categories": [
+    "Elections"
+   ],
+   "frequency": "custom",
+   "settlement_sources": [
+    {
+     "name": "Iowa Secretary of State",
+     "url": "https://sos.iowa.gov/iowans/election-results-statistics"
+    }
+   ],
+   "tags": [
+    "US Elections"
+   ],
+   "ticker": "KXIATREASR",
+   "title": "Iowa Treasurer winner",
+   "last_updated_ts": "2026-11-21T04:58:49.757802Z"
+  }
+ },
+ "KXFRPRESCANDCOUNT": {
+  "series": {
+   "category": "Elections",
+   "categories": [
+    "Elections"
+   ],
+   "frequency": "one_off",
+   "settlement_sources": [
+    {
+     "name": "Conseil constitutionnel",
+     "url": "https://www.conseil-constitutionnel.fr/"
+    }
+   ],
+   "tags": [
+    "International elections",
+    "Germany & France"
+   ],
+   "ticker": "KXFRPRESCANDCOUNT",
+   "title": "How many candidates will be on the French presidential first-round ballot?",
+   "last_updated_ts": "2026-11-21T06:04:47.686125Z"
+  }
+ },
+ "KXELECTUKRAINE": {
+  "series": {
+   "category": "Elections",
+   "categories": [
+    "Elections"
+   ],
+   "frequency": "custom",
+   "settlement_sources": [
+    {
+     "name": "ABC",
+     "url": "https://abcnews.go.com/"
+    },
+    {
+     "name": "Fox News",
+     "url": "https://www.foxnews.com/"
+    },
+    {
+     "name": "MSNBC",
+     "url": "https://www.msnbc.com/"
+    },
+    {
+     "name": "The Wall Street Journal",
+     "url": "https://www.wsj.com/"
+    },
+    {
+     "name": "Semafor",
+     "url": "https://www.semafor.com/"
+    },
+    {
+     "name": "Bloomberg News",
+     "url": "https://www.bloomberg.com/news"
+    },
+    {
+     "name": "The Information",
+     "url": "https://www.theinformation.com/"
+    },
+    {
+     "name": "CBS",
+     "url": "https://www.cbsnews.com/"
+    },
+    {
+     "name": "NBC",
+     "url": "https://www.nbcnews.com/"
+    },
+    {
+     "name": "The Washington Post",
+     "url": "https://www.washingtonpost.com/"
+    },
+    {
+     "name": "Axios",
+     "url": "https://www.axios.com/"
+    },
+    {
+     "name": "CNN",
+     "url": "https://www.cnn.com/"
+    },
+    {
+     "name": "Reuters",
+     "url": "https://www.reuters.com/"
+    },
+    {
+     "name": "The New York Times",
+     "url": "https://www.nytimes.com/"
+    },
+    {
+     "name": "the Associated Press",
+     "url": "https://apnews.com/"
+    },
+    {
+     "name": "Politico",
+     "url": "https://www.politico.com/"
+    }
+   ],
+   "tags": [
+    "International elections"
+   ],
+   "ticker": "KXELECTUKRAINE",
+   "title": "Ukraine elections",
+   "last_updated_ts": "2026-11-21T04:59:03.372144Z"
+  }
+ },
+ "KXXBANNEDGROK": {
+  "series": {
+   "category": "Culture",
+   "categories": [
+    "Culture"
+   ],
+   "frequency": "one_off",
+   "settlement_sources": [
+    {
+     "name": "ABC",
+     "url": "https://abcnews.go.com/"
+    },
+    {
+     "name": "account holder of ",
+     "url": "https://www.google.com/search?q=account+holder+of+"
+    },
+    {
+     "name": "Fox News",
+     "url": "https://www.foxnews.com/"
+    },
+    {
+     "name": "MSNBC",
+     "url": "https://www.msnbc.com/"
+    },
+    {
+     "name": "The Wall Street Journal",
+     "url": "https://www.wsj.com/"
+    },
+    {
+     "name": "Semafor",
+     "url": "https://www.semafor.com/"
+    },
+    {
+     "name": "Barchart",
+     "url": "https://www.barchart.com/stocks/quotes/$INX/overview"
+    },
+    {
+     "name": "Ars Technica",
+     "url": "https://www.google.com/search?q=Ars+Technica"
+    },
+    {
+     "name": "New York Times",
+     "url": "https://www.nytimes.com/"
+    },
+    {
+     "name": "CBS",
+     "url": "https://www.cbsnews.com/"
+    },
+    {
+     "name": "The Washington Post",
+     "url": "https://www.washingtonpost.com/"
+    },
+    {
+     "name": "Axios",
+     "url": "https://www.axios.com/"
+    },
+    {
+     "name": "CNN",
+     "url": "https://www.cnn.com/"
+    },
+    {
+     "name": "Engadget",
+     "url": "https://www.google.com/search?q=Engadget"
+    },
+    {
+     "name": "Reuters",
+     "url": "https://www.reuters.com/"
+    },
+    {
+     "name": "Mashable",
+     "url": "https://www.google.com/search?q=Mashable"
+    },
+    {
+     "name": "Bloomberg News",
+     "url": "https://www.bloomberg.com"
+    },
+    {
+     "name": "Elon Musk",
+     "url": "https://x.com/elonmusk"
+    },
+    {
+     "name": "the Associated Press",
+     "url": "https://apnews.com/"
+    },
+    {
+     "name": "Energy Information Administration",
+     "url": "https://www.eia.gov/totalenergy/data/monthly/index.php"
+    },
+    {
+     "name": "Politico",
+     "url": "https://www.politico.com/"
+    },
+    {
+     "name": "TechCrunch",
+     "url": "https://techcrunch.com/"
+    },
+    {
+     "name": "Verge",
+     "url": "https://www.google.com/search?q=Verge"
+    }
+   ],
+   "tags": [
+    "AI"
+   ],
+   "ticker": "KXXBANNEDGROK",
+   "title": "Will Grok be banned this year",
+   "last_updated_ts": "2026-11-21T06:57:53.472808Z"
+  }
+ },
+ "KXXBANNEDMURRAYHILLGUY1": {
+  "series": {
+   "category": "Culture",
+   "categories": [
+    "Culture"
+   ],
+   "frequency": "one_off",
+   "settlement_sources": [
+    {
+     "name": "ABC",
+     "url": "https://abcnews.go.com/"
+    },
+    {
+     "name": "account holder of ",
+     "url": "https://www.google.com/search?q=account+holder+of+"
+    }
+   ],
+   "tags": null,
+   "ticker": "KXXBANNEDMURRAYHILLGUY1",
+   "title": "Will @MurrayHillGuy1 get banned from X this year?",
+   "last_updated_ts": "2026-11-21T06:57:11.626219Z"
+  }
+ },
+ "KXBOOKERPRIZE": {
+  "series": {
+   "category": "Entertainment",
+   "categories": [
+    "Entertainment"
+   ],
+   "frequency": "one_off",
+   "settlement_sources": [
+    {
+     "name": "National Book Awards",
+     "url": "https://www.nationalbook.org/"
+    }
+   ],
+   "tags": null,
+   "ticker": "KXBOOKERPRIZE",
+   "title": "who will win the booker prize",
+   "product_metadata": {
+    "important_info": {
+     "id": "KXBOOKERPRIZE-2026-09-23"
+    }
+   },
+   "last_updated_ts": "2026-11-21T05:24:53.632144Z"
+  }
+ },
+ "KXWORLDCUPHALFTIME": {
+  "series": {
+   "category": "Entertainment",
+   "categories": [
+    "Entertainment"
+   ],
+   "frequency": "one_off",
+   "settlement_sources": [
+    {
+     "name": "Deadline",
+     "url": "https://deadline.com"
+    },
+    {
+     "name": "official broadcaster of ",
+     "url": "https://www.google.com/search?q=official+broadcaster+of+"
+    }
+   ],
+   "tags": [
+    "Live Music"
+   ],
+   "ticker": "KXWORLDCUPHALFTIME",
+   "title": "Who will perform at event",
+   "product_metadata": {
+    "scope": "Halftime Show"
+   },
+   "last_updated_ts": "2026-11-21T06:02:34.177458Z"
+  }
+ },
+ "KXTOPARTIST": {
+  "series": {
+   "category": "Entertainment",
+   "categories": [
+    "Entertainment"
+   ],
+   "frequency": "annual",
+   "settlement_sources": [
+    {
+     "name": "Spotify",
+     "url": "https://open.spotify.com/"
+    }
+   ],
+   "tags": [
+    "Music"
+   ],
+   "ticker": "KXTOPARTIST",
+   "title": "Top Artist on Spotify",
+   "last_updated_ts": "2026-11-21T06:56:47.977816Z"
+  }
+ },
+ "RTKRAVEN": {
+  "series": {
+   "category": "Entertainment",
+   "categories": [
+    "Entertainment"
+   ],
+   "frequency": "custom",
+   "settlement_sources": [
+    {
+     "name": "Rotten Tomatoes",
+     "url": "https://www.rottentomatoes.com/"
+    }
+   ],
+   "tags": [
+    "Movies",
+    "Rotten Tomatoes"
+   ],
+   "ticker": "RTKRAVEN",
+   "title": "Kraven Rotten Tomatoes score",
+   "last_updated_ts": "2026-11-02T23:01:49.58459Z"
+  }
+ },
+ "KXVMALATIN": {
+  "series": {
+   "category": "Entertainment",
+   "categories": [
+    "Entertainment"
+   ],
+   "frequency": "one_off",
+   "settlement_sources": [
+    {
+     "name": "MTV",
+     "url": "https://www.mtv.com/event/vma"
+    }
+   ],
+   "tags": [
+    "VMA",
+    "Awards"
+   ],
+   "ticker": "KXVMALATIN",
+   "title": "BEST LATIN",
+   "last_updated_ts": "2026-11-21T06:55:44.97257Z"
+  }
+ },
+ "KXGAMEAWARDSBGD": {
+  "series": {
+   "category": "Entertainment",
+   "categories": [
+    "Entertainment"
+   ],
+   "frequency": "annual",
+   "settlement_sources": [
+    {
+     "name": "Game Awards",
+     "url": "https://thegameawards.com/"
+    }
+   ],
+   "tags": [
+    "Video games",
+    "The Game Awards",
+    "Awards"
+   ],
+   "ticker": "KXGAMEAWARDSBGD",
+   "title": "Game Awards Best Game Direction",
+   "last_updated_ts": "2026-11-21T05:10:20.626264Z"
+  }
+ },
+ "KXCLDPLAY": {
+  "series": {
+   "category": "Entertainment",
+   "categories": [
+    "Entertainment"
+   ],
+   "frequency": "one_off",
+   "settlement_sources": [
+    {
+     "name": "Alpha Data LLC (A division of Penske Media Corporation)",
+     "url": "https://music.alphadata.fm/"
+    }
+   ],
+   "tags": null,
+   "ticker": "KXCLDPLAY",
+   "title": "Coldplay album drop",
+   "last_updated_ts": "2026-11-21T04:48:01.993352Z"
+  }
+ },
+ "KXMANOFTHEYEAR": {
+  "series": {
+   "category": "Entertainment",
+   "categories": [
+    "Entertainment"
+   ],
+   "frequency": "custom",
+   "settlement_sources": [
+    {
+     "name": "Spotify",
+     "url": "https://open.spotify.com/"
+    }
+   ],
+   "tags": [
+    "Music"
+   ],
+   "ticker": "KXMANOFTHEYEAR",
+   "title": "How many streams will Man of The Year have?",
+   "last_updated_ts": "2026-11-21T06:54:57.205797Z"
+  }
+ },
+ "KXLINKPERP": {
+  "series": {
+   "category": "Crypto",
+   "categories": [
+    "Crypto"
+   ],
+   "frequency": "often",
+   "settlement_sources": null,
+   "tags": null,
+   "ticker": "KXLINKPERP",
+   "title": "1 LINK",
+   "last_updated_ts": "2026-11-21T06:01:13.384206Z",
+   "contract_url": "",
+   "fee_multiplier": 1
+  }
+ },
+ "KXXRPMAXY": {
+  "series": {
+   "category": "Crypto",
+   "categories": [
+    "Crypto"
+   ],
+   "frequency": "annual",
+   "settlement_sources": [
+    {
+     "name": "CF Benchmarks",
+     "url": "https://www.cfbenchmarks.com/"
+    }
+   ],
+   "tags": null,
+   "ticker": "KXXRPMAXY",
+   "title": "XRP Max",
+   "last_updated_ts": "2026-11-21T06:10:44.350389Z"
+  }
+ },
+ "KXSOL26500": {
+  "series": {
+   "category": "Crypto",
+   "categories": [
+    "Crypto"
+   ],
+   "frequency": "one_off",
+   "settlement_sources": [
+    {
+     "name": "CF Benchmarks",
+     "url": "https://www.cfbenchmarks.com/"
+    }
+   ],
+   "tags": [
+    "Crypto",
+    "Solana"
+   ],
+   "ticker": "KXSOL26500",
+   "title": "Sol above 500 in 2026",
+   "last_updated_ts": "2026-10-07T07:03:23.211115Z"
+  }
+ },
+ "KXBTXMINW": {
+  "series": {
+   "category": "Crypto",
+   "categories": [
+    "Crypto"
+   ],
+   "frequency": "weekly",
+   "settlement_sources": [
+    {
+     "name": "CF Benchmarks",
+     "url": "https://www.cfbenchmarks.com/"
+    }
+   ],
+   "tags": null,
+   "ticker": "KXBTXMINW",
+   "title": "How low will Bitcoin get this week?",
+   "last_updated_ts": "2026-11-21T04:52:55.358829Z"
+  }
+ },
+ "KXBTC2025100": {
+  "series": {
+   "category": "Crypto",
+   "categories": [
+    "Crypto"
+   ],
+   "frequency": "one_off",
+   "settlement_sources": [
+    {
+     "name": "CF Benchmarks",
+     "url": "https://www.cfbenchmarks.com/data/indices/BRTI?ref=blog.cfbenchmarks.com"
+    }
+   ],
+   "tags": [
+    "Crypto",
+    "Bitcoin"
+   ],
+   "ticker": "KXBTC2025100",
+   "title": "Will Bitcoin reach 100k again this year? ",
+   "last_updated_ts": "2026-11-21T04:43:18.522593Z"
+  }
+ },
+ "KXSOLPERP": {
+  "series": {
+   "category": "Crypto",
+   "categories": [
+    "Crypto"
+   ],
+   "frequency": "often",
+   "settlement_sources": null,
+   "tags": null,
+   "ticker": "KXSOLPERP",
+   "title": ".1 SOL",
+   "last_updated_ts": "2026-11-21T06:01:15.344356Z",
+   "contract_url": ""
+  }
+ },
+ "KXETHD": {
+  "series": {
+   "category": "Crypto",
+   "categories": [
+    "Crypto"
+   ],
+   "frequency": "hourly",
+   "settlement_sources": [
+    {
+     "name": "CF Benchmarks",
+     "url": "https://www.cfbenchmarks.com/data/indices/ETHUSD_RTI"
+    }
+   ],
+   "tags": [
+    "Crypto",
+    "Hourly",
+    "Ethereum"
+   ],
+   "ticker": "KXETHD",
+   "title": "Ethereum price Above/below",
+   "last_updated_ts": "2026-11-21T05:03:07.989133Z"
+  }
+ },
+ "KXFDVBIRB": {
+  "series": {
+   "category": "Crypto",
+   "categories": [
+    "Crypto"
+   ],
+   "frequency": "one_off",
+   "settlement_sources": [
+    {
+     "name": "CoinGecko",
+     "url": "https://www.coingecko.com"
+    }
+   ],
+   "tags": [
+    "Crypto",
+    "Pre-Market"
+   ],
+   "ticker": "KXFDVBIRB",
+   "title": "BIRB FDV",
+   "last_updated_ts": "2026-11-21T05:27:42.387605Z"
+  }
+ },
+ "KXSOLSTABLESUPP": {
+  "series": {
+   "category": "Crypto",
+   "categories": [
+    "Crypto"
+   ],
+   "frequency": "custom",
+   "settlement_sources": [
+    {
+     "name": "Artemis",
+     "url": "https://artemis.org"
+    }
+   ],
+   "tags": [
+    "Crypto",
+    "Solana"
+   ],
+   "ticker": "KXSOLSTABLESUPP",
+   "title": "sol stable supp",
+   "last_updated_ts": "2026-11-21T06:56:17.471012Z"
+  }
+ },
+ "KXNEARY": {
+  "series": {
+   "category": "Crypto",
+   "categories": [
+    "Crypto"
+   ],
+   "frequency": "annual",
+   "settlement_sources": [
+    {
+     "name": "CF Benchmarks",
+     "url": "https://www.cfbenchmarks.com/"
+    }
+   ],
+   "tags": [
+    "Crypto",
+    "Hourly",
+    "NEAR Protocol"
+   ],
+   "ticker": "KXNEARY",
+   "title": "NEAR Yearly",
+   "last_updated_ts": "2026-11-21T04:53:12.20444Z"
+  }
+ },
+ "KXPGAEAGLE": {
+  "series": {
+   "category": "Sports",
+   "categories": [
+    "Sports"
+   ],
+   "frequency": "custom",
+   "settlement_sources": [
+    {
+     "name": "Fox Sports",
+     "url": "https://www.foxsports.com"
+    },
+    {
+     "name": "ESPN",
+     "url": "https://espn.com"
+    },
+    {
+     "name": "the Governing League",
+     "url": "https://www.pgatour.com/"
+    }
+   ],
+   "tags": [
+    "Golf"
+   ],
+   "ticker": "KXPGAEAGLE",
+   "title": "Player to Record an Eagle in Round",
+   "product_metadata": {
+    "scope": "Eagles"
+   },
+   "last_updated_ts": "2026-11-21T05:26:51.544933Z"
+  }
+ },
+ "KXPRESCUPMATCH": {
+  "series": {
+   "category": "Sports",
+   "categories": [
+    "Sports"
+   ],
+   "frequency": "custom",
+   "settlement_sources": [
+    {
+     "name": "ESPN",
+     "url": "https://www.espn.com/"
+    },
+    {
+     "name": "the Governing League",
+     "url": "https://www.pgatour.com/"
+    }
+   ],
+   "tags": [
+    "Golf"
+   ],
+   "ticker": "KXPRESCUPMATCH",
+   "title": "Presidents Cup Match Winner",
+   "product_metadata": {
+    "scope": "Matchups"
+   },
+   "last_updated_ts": "2026-11-21T06:55:33.228772Z"
+  }
+ },
+ "KXPGAT20": {
+  "series": {
+   "category": "Sports",
+   "categories": [
+    "Sports"
+   ],
+   "frequency": "custom",
+   "settlement_sources": [
+    {
+     "name": "Fox Sports",
+     "url": "https://www.foxsports.com"
+    },
+    {
+     "name": "ESPN",
+     "url": "https://www.espn.com"
+    },
+    {
+     "name": "the Governing League",
+     "url": "https://www.pgatour.com/"
+    }
+   ],
+   "tags": [
+    "Golf"
+   ],
+   "ticker": "KXPGAT20",
+   "title": "T 20",
+   "product_metadata": {
+    "scope": "Finishing Position"
+   },
+   "last_updated_ts": "2026-04-02T00:15:05.211022Z"
+  }
+ }
+}

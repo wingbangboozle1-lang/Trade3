@@ -68,6 +68,59 @@
     </table></div>
   </section>
 
+
+  <section class="card" id="recheck-2026-11-21">
+    <div class="card-head">
+      <h2>Full re-check — 2026-11-21 (all 39 rows)</h2>
+      <div class="right dim">39/39 rows compared · 0 mismatches after fixes</div>
+    </div>
+    <p class="muted">
+      This pass re-read <b>every</b> published series row from its official
+      <code>GET /series/{ticker}</code> record (not a sample), compared the published title, frequency,
+      category and settlement cell against the raw response, and wrote the raw records to
+      <code>data/verify-cache/batch1.json</code> so the comparison can be reproduced without trusting this page.
+      Run it yourself:
+      <code>python3 scripts/verify_series_bulk.py --from-cache data/verify-cache/batch1.json</code>.
+    </p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Check</th><th>Tool / official source</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td>All 39 series rows vs raw official records</td>
+            <td><a href="https://github.com/wingbangboozle1-lang/Trade3/blob/main/scripts/verify_series_bulk.py" target="_blank" rel="noopener">verify_series_bulk.py</a> · raw cache in <code>data/verify-cache/</code></td>
+            <td><b>39/39 pass</b> after correcting 8 settlement cells (flag F28)</td></tr>
+        <tr><td>Why the earlier 4/4 result was not coverage</td>
+            <td><code>verify_series.py --from-cache docs/data/live-verification-2026-11-20.json --skip-uncached</code></td>
+            <td>That evidence bundle holds 4 records, so 35 rows were skipped, not verified (flag F29)</td></tr>
+        <tr><td>Demo exchange status</td>
+            <td><a href="https://external-api.demo.kalshi.co/trade-api/v2/exchange/status" target="_blank" rel="noopener">GET /exchange/status</a></td>
+            <td><code>exchange_active: true</code>, <code>trading_active: true</code>, shards 0–3 (2026-11-21T07:2xZ)</td></tr>
+        <tr><td>Market field names used by the code</td>
+            <td><a href="https://external-api.demo.kalshi.co/trade-api/v2/markets?status=open&amp;mve_filter=exclude&amp;limit=2" target="_blank" rel="noopener">GET /markets</a></td>
+            <td><code>mve_filter=exclude</code> accepted; <code>last_price_dollars</code>, <code>previous_price_dollars</code>, <code>yes_bid_dollars</code>, <code>no_bid_dollars</code>, <code>volume_fp</code>, <code>open_interest_fp</code>, <code>result</code>, <code>status</code>, <code>price_ranges[].step</code> all present</td></tr>
+        <tr><td>Order book shape <code>[price, count]</code>, bids only</td>
+            <td><a href="https://external-api.demo.kalshi.co/trade-api/v2/markets/KXDEMOFUTHOURLY-26NOV21H08-UP/orderbook?depth=5" target="_blank" rel="noopener">GET /markets/{ticker}/orderbook</a></td>
+            <td><code>{"orderbook_fp":{"yes_dollars":[["0.0100","457.36"]],"no_dollars":[["0.0100","1.00"]]}}</code> — matches the documented rule (implied YES ask = 1 − best NO bid)</td></tr>
+        <tr><td>Events carry <code>category</code> + <code>series_ticker</code></td>
+            <td><a href="https://external-api.demo.kalshi.co/trade-api/v2/events?status=open&amp;limit=1" target="_blank" rel="noopener">GET /events</a></td>
+            <td>Both fields present (e.g. <code>KXELONMARS-99</code>, category <code>World</code>) — the topic router's inputs are real</td></tr>
+        <tr><td>Gas and Golf are still not categories</td>
+            <td><a href="https://external-api.demo.kalshi.co/trade-api/v2/series?category=Gas" target="_blank" rel="noopener">?category=Gas</a> · <a href="https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture" target="_blank" rel="noopener">?category=Culture</a></td>
+            <td>Gas → <code>{"series":null}</code>; Culture → 2 series. Unchanged from the 2026-11-20 finding</td></tr>
+        <tr><td>Snapshot values published by the site</td>
+            <td>Six gas strikes re-read from their <a href="https://external-api.demo.kalshi.co/trade-api/v2/markets/KXAAAGASM-26NOV30-4.50" target="_blank" rel="noopener">official market record</a></td>
+            <td>All six match; one volume figure corrected (0.00 → 55597.52). The other six snapshot records are listed as not re-read (flag F27)</td></tr>
+        <tr><td>Sandbox egress</td>
+            <td><code>curl</code> to <code>external-api.demo.kalshi.co</code></td>
+            <td>TLS reset (HTTP 000) from the shell; live reads above were made through the agent's page-fetch path and are quoted verbatim</td></tr>
+      </tbody>
+    </table></div>
+    <p class="dim">
+      Reproduce: <code>python3 scripts/verify_series_bulk.py --emit-requests</code> writes the official URL for every row;
+      store each response under its ticker in a JSON file, then <code>--from-cache</code> that file. Rows absent from the
+      cache are reported <b>NOT CHECKED</b>, never as passing.
+    </p>
+  </section>
+
   <section class="card" id="integration-recheck">
     <div class="card-head">
       <h2>Integration re-check — 2026-11-20T20:0x UTC</h2>

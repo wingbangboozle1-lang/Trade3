@@ -172,11 +172,13 @@
      "ticker": "KXELECTUKRAINE",
      "title": "Ukraine elections",
      "frequency": "custom",
-     "settlement": "See series record for full source list",
+     "settlement": "",
      "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXELECTUKRAINE",
-     "verified_on": "2026-11-20",
+     "verified_on": "2026-11-21",
      "category": "Elections",
-     "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXELECTUKRAINE"
+     "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXELECTUKRAINE",
+     "settlement_policy": "official-publishers-only",
+     "settlement_note": "The record lists 16 official publishers (ABC, Fox News, MSNBC, WSJ, Semafor, Bloomberg, The Information, CBS, NBC, WaPo, Axios, CNN, Reuters, NYT, AP, Politico). Not paraphrased here: the API record is the source. Flag F26."
     }
    ],
    "kalshi_site": "https://kalshi.com/markets/popvotekhva",
@@ -191,7 +193,7 @@
    "kalshi_category": "Culture",
    "kalshi_tags": [],
    "source": "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture",
-    "flag": "Kalshi's Culture category has 2 series and no markets at capture (2026-11-20). The dashboards additionally query Entertainment as a clearly-labelled supplement so the topic still has live markets — owner decision pending (flags F15/F20); this table lists only the Culture category's own series. Settlement sources are left blank on purpose: each Culture series record carries a MIXED settlement_sources list — mostly official publishers, but also non-official entries (Google-search URLs and a personal X account) — and the official-publishers-only policy cites none of it rather than an unverifiable mix (flag F10, re-checked 2026-11-21).",
+   "flag": "Kalshi's Culture category has 2 series and no markets at capture (2026-11-20). The dashboards additionally query Entertainment as a clearly-labelled supplement so the topic still has live markets — owner decision pending (flags F15/F20); this table lists only the Culture category's own series. Settlement sources are left blank on purpose: each Culture series record carries a MIXED settlement_sources list — mostly official publishers, but also non-official entries (Google-search URLs and a personal X account) — and the official-publishers-only policy cites none of it rather than an unverifiable mix (flag F10, re-checked 2026-11-21).",
    "series": [
     {
      "ticker": "KXXBANNEDGROK",
@@ -367,11 +369,13 @@
      "ticker": "KXLINKPERP",
      "title": "1 LINK",
      "frequency": "often",
-     "settlement": "None listed by Kalshi (settlement_sources is null on the series record; flag F18)",
+     "settlement": "",
      "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXLINKPERP",
      "verified_on": "2026-11-21",
      "category": "Crypto",
-     "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXLINKPERP"
+     "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXLINKPERP",
+     "settlement_policy": "official-publishers-only",
+     "settlement_note": "The series record returns settlement_sources: null and contract_url: \"\" — nothing is published, so nothing is filled in. Flag F18."
     },
     {
      "ticker": "KXXRPMAXY",
@@ -407,9 +411,9 @@
      "ticker": "KXBTC2025100",
      "title": "Will Bitcoin reach 100k again this year?",
      "frequency": "one_off",
-     "settlement": "CF Benchmarks — https://www.cfbenchmarks.com/data/indices/BRTI?ref=blog.cfbenchmarks.com (URL exactly as the API returns it)",
+     "settlement": "CF Benchmarks — https://www.cfbenchmarks.com/data/indices/BRTI?ref=blog.cfbenchmarks.com",
      "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXBTC2025100",
-     "verified_on": "2026-11-20",
+     "verified_on": "2026-11-21",
      "category": "Crypto",
      "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXBTC2025100"
     },
@@ -417,11 +421,13 @@
      "ticker": "KXSOLPERP",
      "title": ".1 SOL",
      "frequency": "often",
-     "settlement": "None listed by Kalshi (settlement_sources is null on the series record; flag F18)",
+     "settlement": "",
      "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXSOLPERP",
-     "verified_on": "2026-11-20",
+     "verified_on": "2026-11-21",
      "category": "Crypto",
-     "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXSOLPERP"
+     "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXSOLPERP",
+     "settlement_policy": "official-publishers-only",
+     "settlement_note": "The series record returns settlement_sources: null and contract_url: \"\" — nothing is published, so nothing is filled in. Flag F18."
     },
     {
      "ticker": "KXETHD",
@@ -483,41 +489,62 @@
      "ticker": "KXPGAGOLFERSCORE",
      "title": "Golf Round Strokes",
      "frequency": "custom",
-     "settlement": "the Governing League — https://www.pgatour.com/ (also NBC Sports, Fox Sports, AP, Golf Channel)",
+     "settlement": "NBC Sports — http://www.nbcsports.com/",
      "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAGOLFERSCORE",
-     "verified_on": "2026-11-20",
+     "verified_on": "2026-11-21",
      "category": "Sports",
-     "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAGOLFERSCORE"
+     "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAGOLFERSCORE",
+     "settlement_all": [
+      "NBC Sports — http://www.nbcsports.com/",
+      "Fox Sports — https://foxsports.com",
+      "the Governing League — https://www.pgatour.com/",
+      "the Associated Press — https://apnews.com/",
+      "Golf Channel — https://golfchannel.com"
+     ]
     },
     {
      "ticker": "KXPGAEAGLE",
      "title": "Player to Record an Eagle in Round",
      "frequency": "custom",
-     "settlement": "PGA Tour — https://www.pgatour.com/ (also Fox Sports, ESPN)",
+     "settlement": "Fox Sports — https://www.foxsports.com",
      "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAEAGLE",
-     "verified_on": "2026-11-20",
+     "verified_on": "2026-11-21",
      "category": "Sports",
-     "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAEAGLE"
+     "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAEAGLE",
+     "settlement_all": [
+      "Fox Sports — https://www.foxsports.com",
+      "ESPN — https://espn.com",
+      "the Governing League — https://www.pgatour.com/"
+     ]
     },
     {
      "ticker": "KXPRESCUPMATCH",
      "title": "Presidents Cup Match Winner",
      "frequency": "custom",
-     "settlement": "PGA Tour — https://www.pgatour.com/ (also ESPN)",
+     "settlement": "ESPN — https://www.espn.com/",
      "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXPRESCUPMATCH",
-     "verified_on": "2026-11-20",
+     "verified_on": "2026-11-21",
      "category": "Sports",
-     "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXPRESCUPMATCH"
+     "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXPRESCUPMATCH",
+     "settlement_all": [
+      "ESPN — https://www.espn.com/",
+      "the Governing League — https://www.pgatour.com/"
+     ]
     },
     {
      "ticker": "KXPGAT20",
      "title": "T 20",
      "frequency": "custom",
-     "settlement": "PGA Tour — https://www.pgatour.com/ (also Fox Sports, ESPN)",
+     "settlement": "Fox Sports — https://www.foxsports.com",
      "source_url": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAT20",
      "verified_on": "2026-11-21",
      "category": "Sports",
-     "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAT20"
+     "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAT20",
+     "settlement_all": [
+      "Fox Sports — https://www.foxsports.com",
+      "ESPN — https://www.espn.com",
+      "the Governing League — https://www.pgatour.com/"
+     ]
     }
    ],
    "kalshi_site": "https://kalshi.com/markets/kxpgatour",
@@ -528,7 +555,7 @@
    "why": "Golf contracts are Sports series carrying the Golf tag, settled from PGA Tour / ESPN / Fox Sports / NBC Sports."
   }
  },
- "verified_at": "2026-11-20T13:20Z row-by-row re-fetch (session 4f9f13c8); 2026-11-20 second full review (session 2100849c); 2026-11-20T20:0xZ integration re-check of 6 rows + 5 discovery queries (session ec2f5c59)",
+ "verified_at": "2026-11-21T07:4xZ third line-by-line re-fetch of ALL 39 rows against raw official GET /series/{ticker} responses (session arena/5d2508a7-trade3) — every row PASS",
  "protocol_docs": "https://docs.kalshi.com/getting_started/api_environments",
  "integration_recheck": {
   "at": "2026-11-20T20:20Z",
@@ -555,5 +582,6 @@
   ],
   "last_row_sample_recheck": "2026-11-21",
   "last_row_sample_recheck_by": "arena/6c20e938-trade3 (5 of 39 rows re-read live: KXNGASMAX, KXXBANNEDGROK, KXLINKPERP, POPVOTEKHVA, KXPGAT20; full 39-row sweep runs every 6h via .github/workflows/verify-live.yml)"
- }
+ },
+ "settlement_rule": "Every row's `settlement` is copied verbatim from the official GET /series/{ticker} record: `settlement` = settlement_sources[0] formatted 'NAME — URL'. `settlement_all` (when present) lists every source the record returned. Rows with settlement_sources null, or whose entries are not official publishers (Google-search URLs, a personal account), are LEFT BLANK and flagged (F10, F18, F26) — never paraphrased or inferred."
 }
