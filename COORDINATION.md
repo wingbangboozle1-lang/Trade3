@@ -1715,13 +1715,13 @@ Marking T-74a … T-74d **done**.
 | Crypto KXETHD | [series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXETHD) | "Ethereum price Above/below", Crypto, CF Benchmarks settlement — matches |
 | Base URLs / WS | [API Environments](https://docs.kalshi.com/getting_started/api_environments) | Demo REST `external-api.demo.kalshi.co`, WS `external-api-ws.demo.kalshi.co` — exactly as specified in the task |
 
-### T-22b Gates on latest merged tree (`main` @ `a2b6d13`; site tree `bf08e73`, after PRs #29, #37/#42, #40, #43, #41/#45, #44/#46)
+### T-22b Gates on latest merged tree (`main` @ `7e85db2`; site tree `bf08e73`, after PR #49 documentation cleanup)
 
 | Gate | Result |
 |---|---|
 | `npm test` | **pass** — logic tests, engine 15/15, site render 13/13 |
-| `npm run test:all` | **pass** — logic, headless render (with `jsdom@25`), engine 15/15, site render 13/13 |
-| Latest GitHub Actions Verify site job | **pass** — [run 44879704914](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879704914) on the latest site-bearing tree (`bf08e73`); PRs #41/#44/#45/#46 afterward only add coordination records |
+| `npm run test:all` | **pass on `main` @ `7e85db2`** — logic, headless render (with `jsdom@25`), engine 15/15, site render 13/13 |
+| Latest GitHub Actions Verify site job | **pass** — [run 44879704914](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879704914) on the latest site-bearing tree (`bf08e73`); PR #49 changed only `COORDINATION.md`, `VERIFICATION.md`, and `requirements/REQUIREMENTS.md` afterward, not site code/workflow |
 | `python3 scripts/check_site.py` | **pass** — 29 pages, 387 local links, 20 JS modules, 39 series rows |
 | `node scripts/check-links.js` | **pass** — 387 references resolve, 0 broken |
 | `py_compile` (6 files) · `node --check` (`app/app.js`, all `server/*.js`) | **pass** |
@@ -1740,6 +1740,7 @@ Marking T-74a … T-74d **done**.
 ### T-22e PR + merge record
 
 - **PR #33:** https://github.com/wingbangboozle1-lang/Trade3/pull/33 — "Final integration 2026-11-21: live re-verification, gates, preview + Pages blocker evidence (22ed9fdf)". Coordination-record only; **merged** at `2026-11-21T07:25:19Z` as `0607b1adc8bd7a36d17d412367cc8f53208b6218`. Post-merge Pages status is recorded below.
+- **Follow-up PR #50:** https://github.com/wingbangboozle1-lang/Trade3/pull/50 — carries the post-merge record and the official election-series spot check into `main` (coordination-only).
 
 ### T-22 branch update after concurrent merges
 
@@ -2005,5 +2006,12 @@ Marking T-63a … T-63e **done**.
 
 ### T-22 post-merge retry after PR #47
 
-- Main advanced to `c0f5266` via PR #47 from session `arena/6d7662fe-trade3`, which changed only `COORDINATION.md`; the local branch rebased cleanly and its only outstanding diff is this session's post-merge record.
-- Retried `gh workflow run pages.yml --ref main` at 2026-11-21 07:26:50Z; GitHub again returned **HTTP 403 API rate limit exceeded**, so no Pages run was dispatched. The site-bearing tree is unchanged from `bf08e73`; the latest run remains 44879704914 (Verify ✓, Pages readiness ✗ / F8).
+- Main advanced to `c0f5266` via PR #47 from session `arena/6d7662fe-trade3`, which changed only `COORDINATION.md`; the local branch rebased cleanly and its only outstanding diff was this session's post-merge record.
+- Retried `gh workflow run pages.yml --ref main` at 2026-11-21 07:26:50Z; GitHub again returned **HTTP 403 API rate limit exceeded**, so no Pages run was dispatched. The site-bearing tree was unchanged from `bf08e73`; the latest run remains 44879704914 (Verify ✓, Pages readiness ✗ / F8).
+
+### T-22 rebase after PR #49 (latest main @ `7e85db2`)
+
+- `git pull --rebase origin main` fetched PR #49 from session `arena/ccf26d52-trade3` (merged `2026-11-21T07:27:11Z`); it changed `COORDINATION.md`, `VERIFICATION.md`, and `requirements/REQUIREMENTS.md`, not site code.
+- Replaying this session's PR #33 merge/election record conflicted only in `COORDINATION.md`. Union resolution kept all 76 upstream lines and this session's 6-line record; the final retry-outcome commit replayed cleanly. No other session's edits or product files were changed.
+- Re-ran the full local suite on `main` @ `7e85db2` plus this session's coordination record; all gates pass (see T-22b). The site-bearing tree remains `bf08e73`, so run 44879704914 remains the latest deployment evidence (Verify ✓, Pages readiness ✗ / F8). The only diff for follow-up PR #50 remains `COORDINATION.md`.
+- A third manual workflow-dispatch retry at 2026-11-21 07:29:53Z returned **HTTP 403 API rate limit exceeded**; no additional Pages run was created.
