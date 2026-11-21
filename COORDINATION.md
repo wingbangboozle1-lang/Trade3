@@ -2002,3 +2002,8 @@ Marking T-63a … T-63e **done**.
 - Because this merge changed no `docs/**`, `app/**`, `server/**`, tests, or Pages workflow files, the Pages push workflow's path filter did not create a new run. The latest site-bearing run remains [44879704914](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879704914): Verify site **passed**; Deploy **failed at `Pages readiness`** (F8). The later commits through the PR #33 merge are coordination-only, so the verified site tree is unchanged.
 - Attempted a post-merge manual retry with `gh workflow run pages.yml --ref main`; GitHub returned **HTTP 403 API rate limit exceeded** at 2026-11-21 07:25:31Z, so no additional run was created. `GET /repos/wingbangboozle1-lang/Trade3/pages` still returned **404** on the latest check; previous POST create attempts returned **403 `Resource not accessible by integration`**.
 - **F8 remains owner-only:** Repository Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save, then run the Pages workflow. The code/site verification passes; Pages is not yet live. All tasks T-22a through T-22e are complete, with the F8 environment blocker documented and published on Flagged for Review.
+
+### T-22 post-merge retry after PR #47
+
+- Main advanced to `c0f5266` via PR #47 from session `arena/6d7662fe-trade3`, which changed only `COORDINATION.md`; the local branch rebased cleanly and its only outstanding diff is this session's post-merge record.
+- Retried `gh workflow run pages.yml --ref main` at 2026-11-21 07:26:50Z; GitHub again returned **HTTP 403 API rate limit exceeded**, so no Pages run was dispatched. The site-bearing tree is unchanged from `bf08e73`; the latest run remains 44879704914 (Verify ✓, Pages readiness ✗ / F8).
