@@ -1154,3 +1154,51 @@ deploy job fails **only** at "Pages readiness"; every verify step is green. **Ow
 
 No other session is active; no cross-session file requests. Status: **done** for the review/fix and the
 integration; **blocked** only on the environment-level F8 Pages enablement, which requires the owner.
+
+# Session `arena/71252315-trade3` — claim + integration pass (2026-11-21)
+
+**Branch:** `arena/71252315-trade3` (the only branch this session works on; based on `main` @ `262f22a`).
+Status at claim: `main` == this branch base; no other session has commits ahead of `main`.
+
+| Task | Status | Owner | File scope |
+|---|---|---|---|
+| T10 | Repo re-review: local gates, live spot re-verification of published rows, Pages status check | **in progress** | `COORDINATION.md` (log only) |
+| T11 | Final integration: PR this branch → `main`, merge, confirm Pages deploy (or record the blocker) | **in progress** | integration only |
+
+Open PRs from other sessions at claim time (not touched by this session, flagged for the owner):
+- PR #29 `arena/77ec3a0e-trade3` — CONFLICTING (DIRTY) against `main`
+- PR #33 `arena/22ed9fdf-trade3` — CONFLICTING (DIRTY) against `main`; touches `COORDINATION.md` only
+
+## Results — session `arena/71252315-trade3` (2026-11-21)
+
+### T10 verification performed
+
+| Check | Source / tool | Result |
+|---|---|---|
+| Exchange status (demo) | [GET /exchange/status](https://external-api.demo.kalshi.co/trade-api/v2/exchange/status) | `exchange_active: true`, `trading_active: true`, shards 0–3 |
+| Gas row `KXAAAGASM` | [GET /series/KXAAAGASM](https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASM) | title "US gas price", category Economics, tags Oil & Gas, monthly, AAA settlement — **matches `docs/data/series.json`** |
+| Crypto row `KXETHD` | [GET /series/KXETHD](https://external-api.demo.kalshi.co/trade-api/v2/series/KXETHD) | title "Ethereum price Above/below", category Crypto, hourly, CF Benchmarks ETHUSD_RTI — **matches** |
+| Golf row `KXPGAGOLFERSCORE` | [GET /series/KXPGAGOLFERSCORE](https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAGOLFERSCORE) | title "Golf Round Strokes", category Sports, tag Golf, custom frequency, 5 settlement sources — **matches** |
+| Local gates on `main` | `npm test` (logic, engine 15/15, site-render 13/13), `python3 scripts/check_site.py` (29 pages, 387 links, 39 rows), `node scripts/check-links.js` (0 broken) | **all pass** |
+| Scheduled live re-verify | workflow `verify-live.yml`, last scheduled run [44850068547](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44850068547) | success |
+| Pages site | `https://wingbangboozle1-lang.github.io/Trade3/` | **not live** (fetch fails) |
+
+Only 3 rows were re-read in this session (not all 39). The 39-row full diff is run by `verify-live.yml`, and `scripts/verify_series.py` can rerun it.
+
+### T11 Pages status (reproduced again, this session)
+
+- `POST /repos/wingbangboozle1-lang/Trade3/pages` (`build_type=workflow`) → **403 "Resource not accessible by integration"**; `GET .../pages` → **404**; `has_pages: false` ([Pages REST docs](https://docs.github.com/rest/pages/pages)).
+- Result: the deploy job cannot succeed until the repository owner enables Pages once: **Repo → Settings → Pages → Build and deployment → Source: GitHub Actions → Save**. After that, `pages.yml` deploys on the next push to `main` that touches `docs/**`, or via "Deploy site to GitHub Pages" → Run workflow.
+- This is an environment permission, not a site defect. The automation token cannot enable Pages, so this session did not work around it.
+
+### Irregularities (for the Flagged for Review page, none block the merge)
+
+1. **Pages not enabled** — see above; owner one-time action (F8 in `docs/flagged.html`).
+2. **Two open conflicting PRs from other sessions** — PR #29 (`arena/77ec3a0e-trade3`) and PR #33 (`arena/22ed9fdf-trade3`) are DIRTY against `main`. Not touched here; their owners should rebase or close them.
+3. **Staging contract links** — the official `contract_url` for `KXAAAGASM` and `KXETHD` points to `kalshi-public-docs-staging.s3.us-east-1.amazonaws.com`, a staging bucket, not a production host. The published rows use it as returned; flagged for human review.
+4. **Unverified (sample only)** — the 36 rows not re-read in this session rely on the 2026-11-20 verification and the scheduled `verify-live.yml`.
+
+### Handoff / status
+
+- T10: **done** (for the 3-row spot check plus local gates).
+- T11: PR from `arena/71252315-trade3` → `main` opened and merged (record below). The deploy could not be confirmed: Pages is not enabled and the merge does not touch `docs/**`, so `pages.yml` does not run.
