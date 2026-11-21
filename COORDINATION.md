@@ -1047,3 +1047,50 @@ No other session has an open claim on the board. Files owned by other sessions a
 - **Main verification run:** [44878773776](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44878773776). Verify site job **success** (all checks, including live-row re-verification, green). Deploy job **failure** at `actions/configure-pages@v5`; upload/deploy were skipped. GitHub's log receiver returned EOF when requesting the failure text, but `gh run view` lists the exact failing step. This is F8 / Pages enablement, not a build or link-check failure.
 - Re-checked Pages with `gh api repos/wingbangboozle1-lang/Trade3/pages`: 404 (no Pages site). The workflow and site files were not changed by this addendum; PR #26's separate Pages work was left to its owner.
 - No deployment success or public Pages URL is claimed. Owner action remains Settings → Pages → Build and deployment → Source: GitHub Actions, unless the separate PR #26 resolves the site-creation limitation.
+
+# Session `arena/755fb608-trade3` — claim (2026-11-21)
+
+**Branch:** `arena/755fb608-trade3` (fast-forwarded to `main` @ `433eccd` before claiming; no other open
+claim touched). Claimed per board rules; commit pushed immediately after this edit.
+
+| Task | Status | Owner | File scope |
+|---|---|---|---|
+| T-755a Independent final review of merged `main` newest UX changes (`app/app.js` #21, `docs/assets/dashboard.js` #23, `docs/suggestions.html` #24-series) against official Kalshi docs | in progress | `arena/755fb608-trade3` | none (read-only unless a defect is found; any fix would be scoped in an update here) |
+| T-755b Full gate re-run on the merged tree (`npm test`, `check_site.py`, `check-links.js`, `py_compile`, `node --check`) | in progress | `arena/755fb608-trade3` | none (read-only) |
+| T-755c GitHub Pages enablement retry + deploy-run status confirmation (F8) | in progress | `arena/755fb608-trade3` | none (API calls only) |
+| T-755d Sandbox live preview of the built site (`docs/`) so the dashboard is viewable before F8 | in progress | `arena/755fb608-trade3` | none (runtime only) |
+| T-755e Final record + PR to `main` + merge + deploy check | pending | `arena/755fb608-trade3` | `COORDINATION.md` (append-only) |
+
+## Results — session `arena/755fb608-trade3` (2026-11-21)
+
+### T-755a Independent line-by-line review of the newest merged UX changes — no defects found
+
+| File (PR) | Reviewed | Verdict |
+|---|---|---|
+| `app/app.js` (#21) | Overview KPI now reads "24h contract volume" as a contract count (`volume_24h_fp` is contracts per [Get Markets](https://docs.kalshi.com/api-reference/market/get-markets)); markets table labels 24h volume + open interest as contracts; default ranking labeled "order-book liquidity ($)" as available bid depth per [Orderbook Responses](https://docs.kalshi.com/getting_started/orderbook_responses) | Correct + honestly labeled |
+| `docs/assets/dashboard.js` (#23) | Event "$ traded" = Σ(volume_fp × last price); dashboard header discloses it as an approximation (F4) because Kalshi's volume fields are contract counts, not dollars; ranking uses book depth for quote-side metrics | Correct + disclosed |
+| `docs/suggestions.html` (new) | Every suggestion row carries an official source link (WebSockets auth, `market_lifecycle_v2` resolution events, `min_updated_ts`, orderbook `depth=1–100`, candlestick `period_interval ∈ {1,60,1440}`, trades `min_ts`/`max_ts`/`is_block_trade`) — all consistent with VERIFICATION.md and the live checks recorded by prior sessions | Correct, sources verified |
+
+### T-755b Gates on the merged tree (all run in this sandbox, 2026-11-21)
+
+| Gate | Result |
+|---|---|
+| `npm test` (logic + engine + site render) | **pass** — logic OK, engine 15/15, site render 13/13 |
+| `python3 scripts/check_site.py` | **pass** — 29 pages, 387 local links, 20 JS modules, 39 series rows |
+| `node scripts/check-links.js` | **pass** — 387 local references resolve; 0 broken links/anchors/imports/DOM targets |
+| `node tests/logic.test.mjs` | **pass** |
+| `python3 -m py_compile` (6 files) · `node --check` (app, server, scripts, tests) | **pass** |
+
+### T-755c GitHub Pages (F8) — reproduced, still owner-only
+
+- `POST /repos/wingbangboozle1-lang/Trade3/pages` (`build_type=workflow`) → **403 "Resource not accessible by integration"**; `GET .../pages` → **404** ([Pages REST docs](https://docs.github.com/rest/pages/pages)). Same result as sessions 8214edf2 / 8373696a / 658d547d / ca612a03 / 0c39a477.
+- Latest deploy run on `main` ([44878773776](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44878773776)): **Verify site ✓** · **Deploy ✗ at `actions/configure-pages@v5`** ([action](https://github.com/actions/configure-pages)) — the enablement call only; no site defect.
+- Conclusion unchanged: **one owner click** — Repo → Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save — then "Deploy site to GitHub Pages" → Run workflow. Expected URL: `https://wingbangboozle1-lang.github.io/Trade3/`.
+
+### T-755d Sandbox live preview (works before F8)
+
+- `docs/` served on **port 8000** ("Kalshi dashboard site preview"); `/index.html`, `/dashboard.html`, `/suggestions.html`, `/flagged.html` all **HTTP 200**. The page fetches Kalshi from the visitor's browser (sandbox egress cannot reach `*.kalshi.co` — flagged F-series), so live data appears for the human visitor even though the sandbox shell cannot verify it.
+
+### T-755e Final PR + merge record (session `arena/755fb608-trade3`)
+
+- See the merge record appended below after PR creation (number, result, deploy-run outcome recorded there).
