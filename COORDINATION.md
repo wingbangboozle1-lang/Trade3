@@ -1588,4 +1588,14 @@ to synthetic demo data; here it would have produced that switch, so the preview 
   went unmet: no change was needed in `pages.yml`, `flagged.html`, or `EXECUTIVE_SUMMARY.md` — F8 evidence
   there is accurate as written.
 
+### Conflict log (board rule)
+
+Pushing this record hit a `COORDINATION.md` conflict because `main` advanced twice mid-session
+(PR #38 `arena/71252315-trade3` @ `80b662d`, then PR #39 `arena/755fb608-trade3` @ `3243d28`).
+Resolved with `git pull --rebase` by keeping **both** sides verbatim — their append-only records were
+not edited, reordered, or discarded; only conflict markers were removed. No other file conflicted.
+Their records agree with this one on every shared fact (gates green, F8 = enablement only, Culture is a
+category, 3 anchor rows match live). Two notes that differ only in coverage, not in content: they re-read
+3 rows, this session re-read 5 series + the markets field shape; both remain honest about what was sampled.
+
 Marking T-74a … T-74d **done**.
