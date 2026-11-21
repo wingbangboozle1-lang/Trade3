@@ -9,6 +9,7 @@
  *   GET /api/chart/:ticker?window=seconds|minutes|hours
  *   GET /api/resolutions           resolved events (yes/no) while tracked
  *   GET /api/portfolio             simulated portfolio + Kalshi demo account (if keyed)
+ *   GET /api/tournament            four shadow strategies on one swing stream
  *   GET /api/health                liveness + data mode + docs links
  *   GET /api/stream                Server-Sent Events (live push)
  *   GET /api/live                  WebSocket relay status (Kalshi socket + browser clients)
@@ -243,6 +244,16 @@ async function handleApi({ req, res, url, collector, sseClients, wsClients, feed
     if (!m) return sendJson(res, 404, { error: { message: `unknown ticker ${ticker}` } });
     const windowId = url.searchParams.get('window') || 'minutes';
     return sendJson(res, 200, buildChart(m, windowId));
+  }
+
+  if (p === '/tournament') {
+    return sendJson(res, 200, {
+      ...collector.tournament.toJSON(),
+      docs: {
+        pricing: 'https://docs.kalshi.com/api-reference/market/get-market-orderbook',
+        settlement: 'https://docs.kalshi.com/getting_started/market_settlement',
+      },
+    });
   }
 
   if (p === '/portfolio') {

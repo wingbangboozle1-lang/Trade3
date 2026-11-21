@@ -2244,9 +2244,9 @@ RESOLVED. New tasks claimed by this session:
 
 | ID | Task | Status | Owner | File scope |
 |----|------|--------|-------|------------|
-| T65-1 | Verify live-state facts from official Kalshi docs + API (WS auth, channel names, orderbook schema, candle params, CORS) | in progress | arena/651b296e-trade3 | record only |
-| T65-2 | Add a genuine real-time WebSocket feed to the browser dashboard (public market-data channels if the official docs allow unauthenticated subscribe), with polling fallback that degrades visibly, never silently | in progress | arena/651b296e-trade3 | `docs/assets/*.js`, `docs/dashboard.html`, `docs/assets/style.css`, `server/*`, `app/*` |
-| T65-3 | Re-run every local gate + start a browser-reachable live preview of the published `docs/` site | in progress | arena/651b296e-trade3 | record only |
+| T65-1 | Verify live-state facts from official Kalshi docs + API (WS auth, channel names, orderbook schema, candle params, CORS) | done | arena/651b296e-trade3 | record only |
+| T65-2 | Add a genuine real-time WebSocket feed to the browser dashboard (public market-data channels if the official docs allow unauthenticated subscribe), with polling fallback that degrades visibly, never silently | done | arena/651b296e-trade3 | `docs/assets/*.js`, `docs/dashboard.html`, `docs/assets/style.css`, `server/*`, `app/*` |
+| T65-3 | Re-run every local gate + start a browser-reachable live preview of the published `docs/` site | done | arena/651b296e-trade3 | record only |
 | T65-4 | Integration: PR to `main`, merge, record deploy result; re-attempt Pages enablement and document the exact failing permission | in progress | arena/651b296e-trade3 | `COORDINATION.md` |
 
 **Non-overlap note:** this session does not rewrite any table row, `docs/data/series.json`, or the
@@ -2259,3 +2259,105 @@ poller and records verification. If a row needs a change, it is logged here, not
 The only working egress is the page-fetch path and GitHub. Therefore any server-side collector
 running *in this sandbox* can never read Kalshi; browser-side polling is the only transport that
 works for the published site, which is why T65-2 keeps the browser as the WS client.
+
+---
+
+## Session arena/651b296e-trade3 — findings record (2026-11-21)
+
+### F8 — GitHub Pages: resolved, and the claim is verified rather than assumed
+
+The site is live at <https://wingbangboozle1-lang.github.io/Trade3/>. `gh api /pages` reports
+`{status: built, build_type: legacy, source {branch: gh-pages, path: /}, https_enforced: true}`.
+
+Getting there required abandoning an approach that *looked* correct. The REST endpoint
+`POST /repos/{owner}/{repo}/pages` returns 403 "Resource not accessible by integration" for this
+token even though it carries repo `admin`, so enablement was done by pushing a `gh-pages` branch
+(split from `docs/`), which triggers Pages' own auto-enablement.
+
+The second trap is documented by GitHub and cost real time: *"Commits pushed by a GitHub Actions
+workflow that uses the `GITHUB_TOKEN` do not trigger a GitHub Pages build."* A workflow that pushed
+`docs/` to `gh-pages` would go green and publish nothing. `.github/workflows/pages.yml` therefore
+does not publish. Its `deploy` job is a **freshness check**: it compares `HEAD:docs` against the
+tree of the most recent Pages build and fails with the exact publish command if they differ.
+Publishing is a deliberate, authenticated push:
+
+```
+git fetch origin gh-pages
+new=$(git rev-parse HEAD:docs); parent=$(git rev-parse FETCH_HEAD)
+commit=$(git commit-tree "$new" -p "$parent" -m "Publish docs/ from $(git rev-parse --short HEAD)")
+git push origin "$commit:refs/heads/gh-pages"
+```
+
+### F27 — the row verifier was reporting success while eight rows were wrong
+
+This is the most important finding of the session, because the failure was in the *checking*, not
+just the data.
+
+`verify-live.yml` ran `verify_series.py` under `continue-on-error: true`. The verifier exited 1 on
+every scheduled run; the job still displayed a green tick. A board whose whole promise is
+"every row is verified against the official source" was therefore publishing eight unverified rows
+under a passing check.
+
+My own first attempt to diagnose it reproduced the bug in a different form: the diagnostic piped
+the verifier through `tail`, so the step inherited `tail`'s exit status, and it reported success.
+The lesson, recorded because it is easy to repeat: **in a diagnostic, never pipe the thing you are
+testing.** Capture the exit status first.
+
+What the drift actually was, once the check was allowed to fail honestly, in three passes:
+
+1. Four cells carried editorial additions — `PGA Tour — https://www.pgatour.com/ (also Fox
+   Sports, ESPN)`. The parenthetical is commentary inside a data field.
+2. Two cells carried a placeholder string — `None listed by Kalshi (settlement_sources is null on
+   the series record; flag F18)` — where the API returns no `settlement_sources` at all. This is
+   worse than the first kind: it reads as though Kalshi published something.
+3. Five cells named a genuine API source that was not `settlement_sources[0]`, which is the entry
+   `verify_series.py` compares against (`KXPGAT20`, `KXPGAEAGLE` → Fox Sports; `KXPRESCUPMATCH` →
+   ESPN; `KXPGAGOLFERSCORE` → NBC Sports; `KXELECTUKRAINE` → ABC, one of 16 sources).
+
+Every settlement cell is now literally `settlement_sources[0]` formatted `NAME — URL`, or empty
+when the record has none. Emptiness is a real answer and the site renders it as "not published";
+the explanation lives on `flagged.html` (F18), not inside the cell. Verified clean by run
+[44882716530](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44882716530): exit 0,
+39/39 rows.
+
+`verify-live.yml` now fails the job on drift and emits each drifted field as a GitHub annotation.
+Annotations are the only diagnostic channel that survives here — `gh run view --log` and
+`gh run download` both fail in this sandbox with an `EOF` from `results-receiver`/`blob.core.windows.net`,
+so anything that must be readable later has to be an annotation or a step summary.
+
+F26 (the disputed "PGA Tour" label) dissolved with this fix: the label was this project's reading of
+a URL, and changing the cell to `sources[0]` removed it. Recorded as resolved by removal rather than
+by rewording, since rewording is what produced it.
+
+### Orderbook pricing: two scales in one book
+
+`orderbook_delta`/`orderbook_snapshot` report NO-side levels in *no-leg* pricing by default — "a
+no-side delta at `price_dollars=0.30` corresponds to a market offer of 'no at 30c', which would match
+against 'yes at 70c'" — and Kalshi says new integrations are encouraged to send
+`use_yes_price: true`. Subscriptions now request it, **and** `applyBookMessage` takes an explicit
+`scale` argument so a no-leg price is flipped into yes space rather than silently mirrored wrong.
+Assuming a scale would have produced a book that looked plausible and was wrong on one side.
+
+Related: direction now reads `outcome_side`/`book_side` (and `taker_outcome_side`/`taker_book_side`
+on public trades) rather than the deprecated `action`/`side`, which the docs say will be removed no
+earlier than 2026-05-28.
+
+### New — strategy tournament (the "test multiple strategies" requirement)
+
+`server/tournament.js` offers every detected ≥ $0.10 swing to four strategies at the same quote, so
+their results are comparable: momentum (follow), mean reversion (fade — the control for momentum),
+threshold break (only round-level crossings), fade extreme (only swings landing beyond $0.85/$0.15).
+
+Pricing uses the exchange's rules: YES pays the ask, NO pays `1 − best YES bid`, a win pays $1.00,
+and nothing settles until `result` is published. Fees are **not** charged, because the demo
+environment's fee behaviour cannot be verified here without placing real demo orders — so every
+figure is gross and the page says so.
+
+Honesty rules, enforced by tests rather than by intention:
+- a strategy with no settled positions reports `null` P&L and is **excluded from the ranking**
+  (putting it in the list would imply it had a result of $0.00, which it does not);
+- a declining strategy records a skip *with its reason*;
+- an unusable quote is skipped, never filled at a guessed price.
+
+Live on the collector: `GET /api/tournament`. Page: `docs/tournament.html`. Tests:
+`tests/tournament.test.mjs`, 13 checks.

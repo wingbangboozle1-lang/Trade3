@@ -16,6 +16,7 @@
     <a href="dashboard.html">Dashboard</a>
     <a href="index.html#topics">Topics</a>
     <a href="portfolio.html">Portfolio</a>
+    <a href="index.html#topics">Topics</a><a href="tournament.html">Tournament</a>
     <a href="methodology.html">Method</a>
     <a href="verification.html">Verification</a>
     <a href="suggestions.html">Suggestions</a>
@@ -59,7 +60,7 @@
           <td>Settled markets are polled per series and displayed with the exchange's <code>result</code>; simulated trades settle on that same field.</td>
           <td>Demo markets often resolve slowly or not at all; an empty table reflects the exchange, not a bug.</td></tr>
         <tr><td>Automated simulated trading + strategy analysis</td>
-          <td>Four explicit strategies, fills at quoted ask, P&amp;L by topic and by strategy, CSV/JSON export, plus a Python backtester in the repo.</td>
+          <td>Four explicit strategies, fills at quoted ask, P&amp;L by topic and by strategy, CSV/JSON export, plus a Python backtester in the repo. The <a href="tournament.html">tournament</a> runs all four against one shared swing stream so they are directly comparable, and ranks only strategies that have actually settled a position.</td>
           <td>Single-snapshot runs test plumbing, not edge. Demo prices are synthetic by Kalshi's own warning.</td></tr>
         <tr><td>Live charts, x = time, y = price, seconds-to-hours</td>
           <td>Seven windows (60 s → 7 d) with Kalshi's legal candle intervals (1/60/1440 min) chosen automatically, live poll points merged in, ≥ $0.10 steps marked.</td>

@@ -5,8 +5,11 @@
 # this workflow can do what the build sandbox could not (see docs/flagged.html#F12): re-read
 # GET /series/{ticker} for all 39 published rows and diff every field the site prints.
 #
-# It never blocks a publish (continue-on-error). Drift is reported as a warning + job summary,
-# which is the board's "needs review" state: it goes to the Flagged page, not to a red X.
+# FAILURE POLICY: this job must be RED when rows drift. It used to run the verifier with
+# continue-on-error, which meant the job showed a green tick while the step inside it exited 1
+# - a scheduled run spent six weeks reporting success while eight rows had drifted. The verifier
+# step now fails the job. The only tolerated failure is the snapshot dry run, which exercises an
+# unrelated script and is annotated with the reason.
 
 name: Re-verify published rows against the live API
 
@@ -44,7 +47,6 @@ jobs:
 
       - name: Verify every published series row
         id: rows
-        continue-on-error: true
         run: |
           python scripts/verify_series.py --json verification-report.json | tee verification.txt
           status=${PIPESTATUS[0]}
@@ -59,8 +61,19 @@ jobs:
             if [ "$status" -eq 0 ]; then
               echo "**All published rows match their official API records.**"
             else
-              echo "::warning title=Published rows drifted from the API::Some rows no longer match GET /series/{ticker}. Update the row from the API record (never from memory) or move it to the Flagged page."
               echo "**Drift detected — the affected rows must be corrected or flagged.**"
+              echo
+              echo "Drifted fields, one per line:"
+              echo
+              echo '```'
+              grep -E '^FAIL|^       !' verification.txt || true
+              echo '```'
+              grep -E '^       !' verification.txt | sed 's/^       ! //' | head -20 | while IFS= read -r reason; do
+                echo "::error title=Row drift::$reason"
+              done
+              grep -E '^Mismatches' verification.txt | while IFS= read -r m; do
+                echo "::error title=Affected tickers::$m"
+              done
             fi
             echo
             echo "Verified by: \`scripts/verify_series.py\` against \`https://external-api.demo.kalshi.co/trade-api/v2\`"
@@ -76,6 +89,9 @@ jobs:
             echo "| \`GET /$q\` | $n series |" >> "$GITHUB_STEP_SUMMARY"
           done
 
+      # Tolerated on purpose: this only proves capture-snapshot.js still runs. It is not
+      # part of the row-verification guarantee, so a failure here must not mask a green
+      # row result and must not turn the board red either.
       - name: Snapshot capture works end-to-end (dry run, nothing written)
         continue-on-error: true
         run: |
