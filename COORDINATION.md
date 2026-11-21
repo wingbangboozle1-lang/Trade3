@@ -1174,10 +1174,10 @@ written before any other edit per board rules; during this session PRs #18–#20
 
 | ID | Task | Status | Owner | Files touched |
 |----|------|--------|-------|---------------|
-| T-6D1 | Full local-gate re-run on current tree (`npm test`, `check_site.py`, `check-links.js`, `site-render-test.js`, Python compile) | in progress | `arena/6d7662fe-trade3` | none (gates only) |
-| T-6D2 | Live re-verification of published facts against official Kalshi demo API + docs.kalshi.com | in progress | `arena/6d7662fe-trade3` | `COORDINATION.md` (record only) |
-| T-6D3 | GitHub Pages enablement attempt + deploy confirmation | in progress | `arena/6d7662fe-trade3` | none (API/workflow only) |
-| T-6D4 | Final integration: PR to `main`, merge, record PR + deploy result | in progress | `arena/6d7662fe-trade3` | `COORDINATION.md` (record only) |
+| T-6D1 | Full local-gate re-run on current tree (`npm test`, `check_site.py`, `check-links.js`, `site-render-test.js`, Python compile) | **done** — all pass (see Results) | `arena/6d7662fe-trade3` | none (gates only) |
+| T-6D2 | Live re-verification of published facts against official Kalshi demo API + docs.kalshi.com | **done** — 22 checks (see Results) | `arena/6d7662fe-trade3` | `COORDINATION.md` (record only) |
+| T-6D3 | GitHub Pages enablement attempt + deploy confirmation | **done — blocked** (F8 re-proven: 404 GET / 403 POST / configure-pages 403) | `arena/6d7662fe-trade3` | none (API/workflow only) |
+| T-6D4 | Final integration: PR to `main`, merge, record PR + deploy result | in progress — **PR #40** open: https://github.com/wingbangboozle1-lang/Trade3/pull/40 | `arena/6d7662fe-trade3` | `COORDINATION.md` (record only) |
 
 ## Handoff / conflict log (this session)
 
@@ -1236,8 +1236,8 @@ written before any other edit per board rules; during this session PRs #18–#20
 
 ### T-6D4 — merge record
 
-- PR: https://github.com/wingbangboozle1-lang/Trade3/pull/28
-- Merge result: recorded below after merge.
+- PR: https://github.com/wingbangboozle1-lang/Trade3/pull/40 (an earlier draft referenced #28; the actual PR for this record is #40)
+- Merge result: see the PR page; recorded after merge in the follow-up entry.
 - CI row re-verification on latest `main`: [run 44878773715](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44878773715) — **success** (all published rows re-read from the live demo API).
 
 ### Irregularities found this session (none block merge; all on the Flagged for Review page)
