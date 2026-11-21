@@ -583,3 +583,56 @@ verify job should now pass and only the deploy job should fail on Pages enableme
 `check_site.py` 39 rows + all links **pass** · `check-links.js` 360 refs **pass** · `logic.test.mjs` **pass** ·
 `smoke-test.js` **15/15** · `site-render-test.js` **13/13** · `render.test.mjs` (jsdom) **pass** · CI's Python block
 run locally **pass** · `verify_series.py --from-cache docs/data/live-verification-2026-11-20.json` **4/4, exit 0**.
+
+---
+
+# Session `arena/0c39a477-trade3` — final verification + publish pass (2026-11-21)
+
+**Role:** final integration/verification session. Branch `arena/0c39a477-trade3` was identical to `main`
+(`39e3a3d`, 0 commits ahead) at start. This record is the session's only tree change, so it supplies the
+commit a PR requires. No other session is active; T1–T9 all read `done`.
+
+## Verification performed this session (2026-11-21, live)
+
+All checks re-run against the current tree, not assumed from prior sessions:
+
+| Check | Tool / source | Result |
+|---|---|---|
+| Full test suite | `npm test` (logic + smoke + site-render) | **pass** — logic pass, smoke 15/15, site-render 13/13 |
+| Static site gate | `python3 scripts/check_site.py` | **pass** — 28 pages, 360 local links, 20 JS modules parsed, 39 series rows |
+| Link integrity (both builds) | `node scripts/check-links.js` | **pass** — 0 broken local links/anchors/imports/DOM targets |
+| Python layer compiles | `python3 -m py_compile …` (all 6 files) | **pass** |
+| Snapshot-mode server | `node server/index.js` on :3000 | **pass** — `/app/`, `/`, `/site/`, `/api/health`, `/api/state`, `/api/alerts`, `/api/portfolio` all 200 |
+| Live-mode failure honesty | `DATA_MODE=live ALLOW_DEMO_FALLBACK=0` | **pass** — reports the Kalshi fetch failure and does **not** silently substitute synthetic data |
+| Demo exchange live | `GET /exchange/status` (live, 2026-11-21) | `exchange_active: true`, `trading_active: true`, shards 0–3 |
+| Gas / Golf are not categories | `GET /series?category=Gas`, `?category=Golf` | both `{"series":null}` — confirmed; mapping via tags stands |
+| Culture category exists | `GET /series?category=Culture` | 2 series (`KXXBANNEDGROK`, `KXXBANNEDMURRAYHILLGUY1`) — confirmed |
+| Series metadata re-read | `GET /series/KXAAAGASM`, `/KXBTCD`, `/KXETHD`, `/KXPGAGOLFERSCORE` | category/tags/settlement all match published rows |
+| Elections category live | `GET /series?category=Elections` | series returned, category `Elections` — confirmed |
+| CI live re-verification job | `gh run view 44850068547` (run 2026-11-21T01:25Z) | **success** — every published row re-read from the live demo API |
+| Row-by-row offline check | `verify_series.py --from-cache … --skip-uncached` | **4/4 OK**, 35 rows marked NOT CHECKED (not in cache, not a mismatch) |
+
+## Sources used (official / verified)
+
+- Kalshi demo REST API: `https://external-api.demo.kalshi.co/trade-api/v2` (exchange status, series, series-by-category)
+- Kalshi API docs: `https://docs.kalshi.com/getting_started/api_environments`, `/demo_env`, `/getting_started/orderbook_responses`
+- Kalshi fee schedule: `https://kalshi.com/docs/kalshi-fee-schedule.pdf`
+
+## Irregularities / blockers (recorded, not hidden)
+
+- **F8 — GitHub Pages not enabled (the only publish blocker).** `GET /repos/wingbangboozle1-lang/Trade3/pages`
+  → **404**; enabling it returns **403 "Resource not accessible by integration"** because the automation
+  token lacks the `pages` site-creation permission. **Owner action required:** Repo → Settings → Pages →
+  Build and deployment → Source: **GitHub Actions** → Save. After that, the next push to `main` (or
+  "Deploy GitHub Pages" → Run workflow) publishes `docs/` at `https://wingbangboozle1-lang.github.io/Trade3/`.
+- **Sandbox egress:** this sandbox's shell cannot reach `*.kalshi.co` (TLS reset); all live values were read
+  through the page-fetch path and, for CI, through the GitHub Actions runner. The published site reads Kalshi
+  from the visitor's browser. Non-blocking; already flagged (F-series).
+- All other flags (F1–F25) remain on the Flagged for Review page with source links and do **not** block merge.
+
+## Publish / merge status
+
+The tree is verified and the site builds with no broken links. The deploy job fails **only** on the F8 Pages
+enablement, which needs an owner click and cannot be done by automation. A PR from this branch to `main` is
+created and merged so the record and the verified state land on `main`; Pages publish succeeds automatically
+the moment the owner performs the one-time F8 action.
