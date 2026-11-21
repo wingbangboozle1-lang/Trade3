@@ -1297,3 +1297,10 @@ Local clone started shallow (depth 1); unshallowed this session (`git fetch --un
 
 - To be filled after PR creation/merge below.
 
+
+### T-A4 Merge record (session `arena/a1c4d012-trade3`, 2026-11-21)
+
+- **PR #37:** https://github.com/wingbangboozle1-lang/Trade3/pull/37 — **MERGED** 2026-11-21T07:17:41Z, merge commit `c7c04d0` (`arena/a1c4d012-trade3` → `main`). Change: `COORDINATION.md` only (claim + T-A1–T-A3 results); no site code changed.
+- **Conflict handling:** PR #37 hit `COORDINATION.md` append conflicts twice as `main` advanced (PR #35 `4615447`, PR #38 `80b662d`, PR #39 `3243d28`). Each time the branch was unshallowed (`git fetch --unshallow origin`), rebased onto latest `origin/main`, and the conflict resolved by keeping both sessions' sections (upstream first, then this session). Nothing from any other session was discarded. Final rebase base: `3243d28`; merged clean.
+- **Deploy outcome:** the merge touched only `COORDINATION.md`, which is outside `pages.yml`'s path filter, so no new workflow run was triggered by PR #37. Latest `main` deploy run at record time: [44879350060](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879350060) (PR #22 merge) — **Verify site ✓** (1m35s, all gates green) · **Deploy ✗ at `actions/configure-pages@v5`** only (upload/deploy skipped). `GET /repos/…/pages` → **404**; `POST` → **403** (reproduced this session). **Site is not live** — F8 owner click still required: Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save. Expected URL: https://wingbangboozle1-lang.github.io/Trade3/
+- **Site status:** verified and not broken (all gates pass locally and in CI Verify). Flagged items F1–F26 remain on the Flagged for Review page and did not block the merge, per instructions.
