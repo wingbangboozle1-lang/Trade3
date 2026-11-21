@@ -827,3 +827,57 @@ No other session is active; no conflicting claims exist on the board.
 
 - F8 Pages enablement still requires one owner click (reproduced 403 this session). Site itself is verified and not broken.
 - All other flags F1–F25 unchanged; no new unverified values introduced. No hallucinations: every value in this record links its official source above.
+# Session `arena/658d547d-trade3` — claim (2026-11-21)
+
+**Branch:** `arena/658d547d-trade3` (fixed for this session; based on `main` @ `4eb92a1`). The task text names
+`session-<id>/<task>` branches; the session rules for this run require the assigned `arena/…` branch, so that name is used.
+
+| Task | Status | Owner | File scope |
+|---|---|---|---|
+| T-R1 Re-run all local gates on `main` (`npm test`, `check_site.py`, `check-links.js`, Python compile + offline checks) | **done** | `arena/658d547d-trade3` | none (read-only) |
+| T-R2 Spot re-verify published values against the official Kalshi demo API and docs (via fetch, not sandbox bash) | **done** (5 fetches + 4 cached rows) | `arena/658d547d-trade3` | `docs/data/series.json` (read only) |
+| T-R3 GitHub Pages enablement retry (`POST /repos/…/pages`, `build_type=workflow`) | **done — blocked** (403) | `arena/658d547d-trade3` | none (API call only) |
+| T-R4 Add flag F26 (golf settlement label), record results, PR to `main`, merge, Pages status | **done** (merge) · **blocked** (Pages) | `arena/658d547d-trade3` | `docs/flagged.html`, `docs/dashboard-site/assets/data.js`, `docs/index.html` (flag count only), `COORDINATION.md` |
+
+No other session has an open claim on the board. Files owned by other sessions are not touched.
+
+## Results — session `arena/658d547d-trade3` (2026-11-21)
+
+### Gates (run in this sandbox on the `main` tree plus the F26 edit)
+
+| Gate | Result |
+|---|---|
+| `npm test` (logic + smoke + site-render) | pass — logic pass, engine 15/15, site render 13/13 |
+| `python3 scripts/check_site.py` | pass — 28 pages, 360 local links, 20 JS modules, 39 series rows |
+| `node scripts/check-links.js` | pass — 360 local references resolve; no broken links, anchors, imports or DOM targets |
+| `python3 -m py_compile` (6 Python files) | pass |
+| Python offline checks (strategies, paper ledger, V2 order body, topic vocabulary) | pass — run in a venv at `/tmp` (system Python blocks pip under PEP 668) |
+| `verify_series.py --from-cache docs/data/live-verification-2026-11-20.json --skip-uncached` | 4/4 rows OK; 35 rows NOT CHECKED (not in cache — not a mismatch) |
+
+### Live spot checks (official Kalshi demo API and docs, fetched 2026-11-21)
+
+| Check | Official source | Result |
+|---|---|---|
+| Exchange status | [GET /exchange/status](https://external-api.demo.kalshi.co/trade-api/v2/exchange/status) | `exchange_active: true`, `trading_active: true`, shards 0–3 |
+| Culture category | [GET /series?category=Culture](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture) | `KXXBANNEDGROK`, `KXXBANNEDMURRAYHILLGUY1`, both `Culture` — matches `series.json` |
+| Crypto row | [GET /series/KXETHD](https://external-api.demo.kalshi.co/trade-api/v2/series/KXETHD) | `Crypto`, hourly, CF Benchmarks RTI URL — matches `series.json` |
+| Golf row | [GET /series/KXPGAT20](https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAT20) | `Sports`, tag `Golf`; settlement is "the Governing League" → pgatour.com — **label differs, see F26** |
+| Settlement rule | [docs.kalshi.com/getting_started/market_settlement](https://docs.kalshi.com/getting_started/market_settlement) | Yes and No holders each receive $1 per contract — matches the dashboard |
+
+### Pages retry (T-R3)
+
+- `POST /repos/wingbangboozle1-lang/Trade3/pages` with `build_type=workflow` → **403 "Resource not accessible by integration"** (token has repo admin, but not the Pages scope). `GET .../pages` → 404.
+- No workaround was attempted (no other token, no branch-based Pages, no change to the workflow's trust model).
+- **Owner action, one time:** Repo → Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save. Then run "Deploy site to GitHub Pages" (or push to `main`). Expected URL: https://wingbangboozle1-lang.github.io/Trade3/
+
+### Irregularities (this session)
+
+1. **F26 (new, on the Flagged page):** golf settlement source label differs between `docs/data/series.json` ("PGA Tour") and `docs/dashboard-site` ("the Governing League (pgatour.com)"). The API gives the URL and the name "the Governing League"; "PGA Tour" is an inference from the URL. Wording flagged, value not changed.
+2. **Two site builds with separate flag stores.** `docs/flagged.html` and `docs/dashboard-site/assets/data.js` each keep their own list (F1–F26 vs. the dashboard-site list). Both now carry F26; unifying them is a larger change and was left for a later integration pass.
+3. **Pages still not live** (F8). The deploy job fails at its readiness step by design; the verified site is not broken.
+4. **Branch name.** The task text asks for `session-<id>/<task>` branches. This session's rules fix the branch to `arena/658d547d-trade3`, so that name is used.
+5. **Sandbox egress.** Bash cannot reach `*.kalshi.co`; live values were read through the fetch tool. Nothing was read from the sandbox shell.
+
+### Merge (T-R4)
+
+- **PR #20:** https://github.com/wingbangboozle1-lang/Trade3/pull/20 (`arena/658d547d-trade3` → `main`). Merge result: see the PR page (`gh pr view 20`). The Pages deploy triggered by this merge is the live test of the `configure-pages enablement: true` step on `main`.
