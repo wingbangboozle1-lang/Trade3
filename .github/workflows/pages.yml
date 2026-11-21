@@ -220,7 +220,13 @@ jobs:
           if [ -n "$commit" ]; then
             # On gh-pages the tree root IS docs/, so the published commit's tree
             # must equal this commit's docs/ tree.
-            published=$(git rev-parse "${commit}:docs" 2>/dev/null || git rev-parse "${commit}^{tree}" 2>/dev/null || echo '')
+            # -q --verify is required: a bare `rev-parse "sha:docs"` on a missing
+            # path echoes the spec on stdout and exits 1, which corrupted this
+            # comparison (found 2026-11-21). Accept either published layout.
+            root=$(git rev-parse -q --verify "${commit}^{tree}" 2>/dev/null || echo '')
+            sub=$(git rev-parse -q --verify "${commit}:docs" 2>/dev/null || echo '')
+            published="$root"
+            if [ "$sub" = "$expected" ]; then published="$sub"; fi
           fi
 
           echo "expected=$expected" >> "$GITHUB_OUTPUT"
@@ -297,11 +303,17 @@ jobs:
           commit=$(printf '%s' "$json" | python3 -c "import json,sys;print(json.load(sys.stdin).get('commit',''))" 2>/dev/null || echo '')
           published=""
           if [ -n "$commit" ]; then
-            published=$(git rev-parse "${commit}:docs" 2>/dev/null || git rev-parse "${commit}^{tree}" 2>/dev/null || echo '')
+            # -q --verify is required: a bare `rev-parse "sha:docs"` on a missing
+            # path echoes the spec on stdout and exits 1, which corrupted this
+            # comparison (found 2026-11-21). Accept either published layout.
+            root=$(git rev-parse -q --verify "${commit}^{tree}" 2>/dev/null || echo '')
+            sub=$(git rev-parse -q --verify "${commit}:docs" 2>/dev/null || echo '')
+            published="$root"
+            if [ "$sub" = "$expected" ]; then published="$sub"; fi
           fi
           if [ "$status" = "built" ] && [ "$published" = "$expected" ]; then
             echo "::notice title=Published site is current::gh-pages serves docs/ from $GITHUB_SHA exactly."
             exit 0
           fi
-          echo "::error title=Published site is stale::Pages is serving commit ${commit:0:12} (${status:-unknown}), which is not docs/ at ${GITHUB_SHA:0:12}. Manual fallback (a non-GITHUB_TOKEN push triggers the legacy build): git fetch origin gh-pages && git commit-tree \$(git rev-parse HEAD:docs) -p FETCH_HEAD -m 'Publish docs/' | xargs git push origin +:refs/heads/gh-pages"
+          echo "::error title=Published site is stale::Pages serves commit ${commit:0:12} (status ${status:-unknown}, tree ${published:-none}) but docs/ at ${GITHUB_SHA:0:12} has tree ${expected}. Manual fallback (a non-GITHUB_TOKEN push triggers the legacy build): git fetch origin gh-pages && git commit-tree \$(git rev-parse HEAD:docs) -p FETCH_HEAD -m 'Publish docs/' | xargs git push origin +:refs/heads/gh-pages"
           exit 1
