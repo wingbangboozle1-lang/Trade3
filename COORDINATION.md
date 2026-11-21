@@ -1847,3 +1847,35 @@ Branch `arena/b1c33964-trade3` (based on `main` @ `a2b6d13`). This session edits
 | T-B2 Live spot re-verification of anchor facts against the official demo API (fetch path) | in progress | `arena/b1c33964-trade3` | `COORDINATION.md` (record only) |
 | T-B3 GitHub Pages enablement retry via REST (`POST /repos/.../pages`, `build_type=workflow`) and deploy-run status | in progress | `arena/b1c33964-trade3` | none (API calls only) |
 | T-B4 Record results, PR to `main` (COORDINATION.md only), merge, record outcome | pending | `arena/b1c33964-trade3` | `COORDINATION.md` (append-only) |
+
+## Session `arena/b1c33964-trade3` — results (2026-11-21, ~07:30Z)
+
+### T-B1 Local gates on `main` @ `a2b6d13` — **done, all pass**
+- `npm test` — PASS: logic tests OK, smoke 13/13 (page checks + data integrity), site-render 13/13.
+- `python3 scripts/check_site.py` — PASS: 29 pages, 387 local links, 20 JS modules parsed, 39 series rows checked.
+- `node scripts/check-links.js` — PASS: 387 local references resolve, 0 broken.
+- `python3 -m py_compile` (kalshi_client, strategies, backtest, run_sim, verify_series, check_site) — PASS.
+- `node --check` (app/app.js, server/index.js, server/collector.js, docs/assets/*.js) — PASS.
+
+### T-B2 Live spot re-verification (official sources, page-fetch path, 2026-11-21)
+| # | Official source | Returned | Matches published data? |
+|---|---|---|---|
+| 1 | [GET /exchange/status](https://external-api.demo.kalshi.co/trade-api/v2/exchange/status) | `exchange_active: true`, `trading_active: true`, shards 0–3 all active | Yes |
+| 2 | [GET /series/KXETHD](https://external-api.demo.kalshi.co/trade-api/v2/series/KXETHD) | category `Crypto`, frequency `hourly`, settlement CF Benchmarks `ETHUSD_RTI` | Yes |
+| 3 | [GET /series/KXAAAGASM](https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASM) | category `Economics`, tags `Oil & Gas`, AAA `gasprices.aaa.com`, monthly | Yes |
+| 4 | [docs: API environments](https://docs.kalshi.com/getting_started/api_environments) | Demo REST `external-api.demo.kalshi.co/trade-api/v2` (fallback `demo-api.kalshi.co`); demo WS `external-api-ws.demo.kalshi.co/trade-api/ws/v2` (fallback `demo-api.kalshi.co/trade-api/ws/v2`) | Yes — matches `docs/methodology.html` and `server/kalshi.js` |
+
+**Irregularities observed this session (for Flagged for Review; no new flag IDs were assigned here):**
+- Official docs now also list dedicated **user** WebSocket hosts for `fill` and `user_orders` (demo: `wss://user-ws.demo.kalshi.co/trade-api/ws/v2`, margin `wss://margin-user-ws.demo.kalshi.co/trade-api/ws/v2/margin`) and an **external-feeds** host (demo: `wss://external-feeds.demo.kalshi.co/trade-api/v2/external-feeds`). The site's WebSocket references do not yet list these. Repo mentions of `user-ws`/`external-feeds` exist only in research/suggestion text. Source: docs link above.
+- The docs also say `warp-ws` / `margin-warp-ws` hosts are deprecated. Not referenced by the site code.
+- The live `contract_url` for KXETHD and KXAAAGASM still points to `kalshi-public-docs-staging.s3.us-east-1.amazonaws.com` — already recorded as F11; re-confirmed today, not changed.
+
+### T-B3 GitHub Pages enablement retry — **blocked (not resolved)**
+- `POST /repos/wingbangboozle1-lang/Trade3/pages` (`build_type=workflow`) and `GET .../pages` both returned **403 "API rate limit exceeded for user ID 347515984"** at 07:25Z and again at 07:27Z (waited ~2 min between). The rate limit is on the shared token, so this is **not** evidence that enablement now works or fails for the owner.
+- Earlier sessions recorded `POST /pages` → 403 "Resource not accessible" with this token class (see F8). Pages is therefore **still not enabled**, and the owner action from F8 remains the only fix: Repo → Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save, then run "Deploy site to GitHub Pages".
+- No deploy run was started by this session (no `docs/**`, `app/**`, `server/**`, `scripts/**`, `tests/**` change).
+
+### Scope of this session
+Only `COORDINATION.md` was edited (claim + this record). No other session's file, PR, or branch was touched. The site content is unchanged.
+
+Marking T-B1, T-B2 **done**; T-B3 **blocked** (rate-limited, F8 unchanged); T-B4 in progress.
