@@ -625,3 +625,22 @@ run locally **pass** · `verify_series.py --from-cache docs/data/live-verificati
 ## Handoff / status
 
 - Status: **done** for T-CA1/T-CA3; **blocked** for T-CA2 (Pages owner click). No other session's files were edited.
+
+---
+
+# Session `arena/6c20e938-trade3` — line-by-line review, live re-verification, feature pass, integration (2026-11-21)
+
+**Claim (this session, branch `arena/6c20e938-trade3`, based on `main` @ `39e3a3d`, merged `origin/main` @ `ccf1688`):**
+Claim committed and pushed before any task work started (rule: claim first, commit immediately).
+
+| Task | Status | Owner | File scope |
+|---|---|---|---|
+| T-6C1 Full line-by-line repo review + live re-verification of published rows/facts against official Kalshi sources (this sandbox has live API + docs access via page fetch) | in progress | `arena/6c20e938-trade3` | `VERIFICATION.md`, `EXECUTIVE_SUMMARY.md`, `docs/data/series.json` (verification fields only) |
+| T-6C2 Requirements audit + defect/feature pass (alerts chat pair, chart time axes, liquidity depth, simulated trades, portfolio analytics, resolution tracking, topic organization) | in progress | `arena/6c20e938-trade3` | `docs/**`, `server/**`, `scripts/**`, `tests/**`, `kalshi_client.py`, `strategies.py`, `backtest.py`, `run_sim.py` |
+| T-6C3 Final integration: local gates, PR to `main`, merge, Pages deploy attempt + record | in progress | `arena/6c20e938-trade3` | `COORDINATION.md`, `.github/workflows/*`, integration only |
+
+No other session is active on this repo (last activity: `arena/ca612a03-trade3`, merged PR #14). Open PR #5 (`arena/b28d6df0-trade3`) noted for the integration step; will be handled there, not edited here.
+
+## Handoff / conflict log
+
+- 2026-11-21: Session `arena/6c20e938-trade3` created this claim. Merged `origin/main` (`ccf1688`, PR #14 record) into this branch; `COORDINATION.md` add/add resolved by taking `main`'s superset version, section preserved verbatim.
