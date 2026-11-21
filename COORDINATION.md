@@ -924,3 +924,12 @@ No other session has an open claim on the board. Files owned by other sessions a
 
 ### Rebase / conflict record
 - Two `git pull --rebase origin main` operations advanced main while PRs #20 and #24 merged. Both conflicts were in the append-only `COORDINATION.md`; resolved by keeping all latest main content and re-appending this session's record. No other session work was discarded.
+## Merge record (session `arena/8373696a-trade3`, T9)
+
+- **PR #19:** https://github.com/wingbangboozle1-lang/Trade3/pull/19 — "Final integration: independent re-verification + Pages workflow fix (8373696a)"
+- **Result:** **MERGED** 2026-11-21T07:03:14Z, merge commit `d7971ea`. Conflict with PR #18 (parallel session `arena/8214edf2-trade3` merged the same Pages fix first) resolved by keeping upstream `pages.yml` and both COORDINATION records; nothing discarded.
+- **Deploy runs triggered by the merges:**
+  - Run [44878359483](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44878359483) (PR #18): **Verify site — success** (all gates green); **Deploy — failure at `configure-pages`** with `HttpError: Resource not accessible by integration` (Create Pages site). `upload`/`deploy-pages` skipped.
+  - Run [44878420679](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44878420679) (PR #19): **Verify site — success**; **Deploy — same 403 at `configure-pages`**.
+- **Conclusion:** The site itself is verified and not broken (every check passes). GitHub Pages cannot be created by any automation token (403 on `POST /pages` from CLI, Actions `configure-pages`, and REST). **Owner action (one click, F8):** Repo → Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save. The next push to `main` (or Actions → "Deploy GitHub Pages" → Run workflow) then publishes `docs/` at `https://wingbangboozle1-lang.github.io/Trade3/` with no further code change. Expected URL: https://wingbangboozle1-lang.github.io/Trade3/
+- **T9 status:** done. All verification sources linked in the table above; no values inferred; flags F1–F25 remain on the Flagged page and do not block merge.
