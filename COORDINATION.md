@@ -1200,3 +1200,11 @@ Only 3 rows were re-read in this session (not all 39). The 39-row full diff is r
 
 - T10: **done** (for the 3-row spot check plus local gates).
 - T11: PR from `arena/71252315-trade3` → `main` opened and merged (record below). The deploy could not be confirmed: Pages is not enabled and the merge does not touch `docs/**`, so `pages.yml` does not run.
+
+### T11 merge record — session `arena/71252315-trade3`
+
+- PR link: https://github.com/wingbangboozle1-lang/Trade3/pull/38
+- Merge result: **MERGED** 2026-11-21T07:16:30Z (merge commit `80b662d3`), `--merge`, no auto-merge.
+- Pages deploy result: **not live**. The latest `pages.yml` run on `main` ([44879350060](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879350060)) shows **Verify site ✓** and **Deploy ✗ at `actions/configure-pages@v5`** (the enablement call). PR #38 does not touch `docs/**`, so it did not trigger a new deploy.
+- Owner action still required: Repo → Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save. Then "Deploy site to GitHub Pages" → Run workflow. Expected URL: `https://wingbangboozle1-lang.github.io/Trade3/`.
+- T10 and T11 are marked done. The site is not published until the owner completes the one-time Pages step.
