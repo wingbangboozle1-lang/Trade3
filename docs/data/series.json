@@ -191,7 +191,7 @@
    "kalshi_category": "Culture",
    "kalshi_tags": [],
    "source": "https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture",
-   "flag": "Kalshi's Culture category has 2 series and no markets at capture (2026-11-20). The dashboards additionally query Entertainment as a clearly-labelled supplement so the topic still has live markets — owner decision pending (flags F15/F20); this table lists only the Culture category's own series. Settlement sources are left blank: the Culture series list Google search pages and a personal account, which are not official publishers (flag F10).",
+    "flag": "Kalshi's Culture category has 2 series and no markets at capture (2026-11-20). The dashboards additionally query Entertainment as a clearly-labelled supplement so the topic still has live markets — owner decision pending (flags F15/F20); this table lists only the Culture category's own series. Settlement sources are left blank on purpose: each Culture series record carries a MIXED settlement_sources list — mostly official publishers, but also non-official entries (Google-search URLs and a personal X account) — and the official-publishers-only policy cites none of it rather than an unverifiable mix (flag F10, re-checked 2026-11-21).",
    "series": [
     {
      "ticker": "KXXBANNEDGROK",
@@ -205,7 +205,7 @@
      "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXXBANNEDGROK",
      "open_markets": 0,
      "settlement_policy": "official-publishers-only",
-     "note": ". Settlement left blank on purpose: the record's settlement_sources list Google-search URLs, a personal X account and an unnamed \"account holder of\" entry — not official publishers (flag F10). The first entry (ABC) was published by an earlier revision and is withdrawn here."
+     "note": ". Settlement left blank on purpose (official-publishers-only policy). Re-checked 2026-11-21: the live record's settlement_sources holds 23 entries — 17 official publishers (ABC, Fox News, MSNBC, WSJ, Semafor, Barchart, NYT, CBS, Washington Post, Axios, CNN, Reuters, Bloomberg, AP, EIA, Politico, TechCrunch) plus non-official entries (Google-search URLs for \"account holder of \", Ars Technica, Engadget, Mashable, Verge, and the personal X account Elon Musk). Because the list is mixed, no single source is cited here (flag F10)."
     },
     {
      "ticker": "KXXBANNEDMURRAYHILLGUY1",
@@ -219,7 +219,7 @@
      "source": "https://external-api.demo.kalshi.co/trade-api/v2/series/KXXBANNEDMURRAYHILLGUY1",
      "open_markets": 0,
      "settlement_policy": "official-publishers-only",
-     "note": ". Settlement left blank on purpose: the record's settlement_sources list Google-search URLs, a personal X account and an unnamed \"account holder of\" entry — not official publishers (flag F10). The first entry (ABC) was published by an earlier revision and is withdrawn here."
+     "note": ". Settlement left blank on purpose (official-publishers-only policy). Re-checked 2026-11-21: the live record's settlement_sources holds 23 entries — 17 official publishers (ABC, Fox News, MSNBC, WSJ, Semafor, Barchart, NYT, CBS, Washington Post, Axios, CNN, Reuters, Bloomberg, AP, EIA, Politico, TechCrunch) plus non-official entries (Google-search URLs for \"account holder of \", Ars Technica, Engadget, Mashable, Verge, and the personal X account Elon Musk). Because the list is mixed, no single source is cited here (flag F10)."
     },
     {
      "ticker": "KXBOOKERPRIZE",
