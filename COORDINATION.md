@@ -881,3 +881,22 @@ No other session has an open claim on the board. Files owned by other sessions a
 ### Merge (T-R4)
 
 - **PR #20:** https://github.com/wingbangboozle1-lang/Trade3/pull/20 (`arena/658d547d-trade3` → `main`). Merge result: see the PR page (`gh pr view 20`). The Pages deploy triggered by this merge is the live test of the `configure-pages enablement: true` step on `main`.
+
+---
+
+# Session `arena/9e205ea3-trade3` — Build B "highest dollar amount" tracking + alert catalyst links (2026-11-21)
+
+**Claimed (2026-11-21, branch `arena/9e205ea3-trade3`, rebased onto `main` @ `9baaec4`).**
+Scope deliberately excludes `.github/workflows/pages.yml`, `docs/data/series.json` and the Build A `docs/*`
+narrative pages, which are owned by sessions `arena/8214edf2-trade3` / `arena/8373696a-trade3` /
+`arena/658d547d-trade3` and by the integration rule. Shared narrative docs are appended to only, never rewritten.
+
+| Task | Status | Owner | Files touched |
+|---|---|---|---|
+| T-9e20-1 Rank tracked markets/events by **dollars traded**, not contract counts (the requirement says "highest dollar amount live events"; Build B selected and sorted on `volume_24h_fp`, which is contracts) | in progress | `arena/9e205ea3-trade3` | `server/collector.js`, `server/index.js`, `app/app.js`, `app/index.html`, `tests/smoke-test.js` |
+| T-9e20-2 Attach **official source links to every ≥ $0.10 alert** in Build B (series `settlement_sources` URLs + the execution tape around the move) and mark swings on the chart, mirroring Build A's "what may have moved it" panel | in progress | `arena/9e205ea3-trade3` | `server/topics.js`, `server/collector.js`, `server/index.js`, `app/app.js`, `app/index.html`, `tests/smoke-test.js` |
+| T-9e20-3 Re-verify the field names and endpoints these features read, against the official docs and the live demo API | in progress | `arena/9e205ea3-trade3` | `COORDINATION.md` (record only) |
+
+Sources cited: `GET /markets` (`volume_fp`, `volume_24h_fp`, `last_price_dollars`), `GET /series/{ticker}`
+(`settlement_sources[].name/url`, `contract_terms_url`), `GET /markets/trades`,
+`GET /series/{series_ticker}/markets/{ticker}/candlesticks` (`period_interval` ∈ 1, 60, 1440 minutes).
