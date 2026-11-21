@@ -880,4 +880,4 @@ No other session has an open claim on the board. Files owned by other sessions a
 
 ### Merge (T-R4)
 
-- Branch `arena/658d547d-trade3` → `main`: PR and merge result recorded below after the merge.
+- **PR #20:** https://github.com/wingbangboozle1-lang/Trade3/pull/20 (`arena/658d547d-trade3` → `main`). Merge result: see the PR page (`gh pr view 20`). The Pages deploy triggered by this merge is the live test of the `configure-pages enablement: true` step on `main`.
