@@ -1656,3 +1656,14 @@ Marking T-74a … T-74d **done**.
   (Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save), with no code change.
 - **This record** lands via the follow-up record PR (pattern used by every prior session on this board):
   "Coordination: record PR #29 merge + deploy outcome".
+# Session `arena/22ed9fdf-trade3` — claim (2026-11-21)
+
+**Branch:** `arena/22ed9fdf-trade3` (based on `main` @ `49397f2`, merge of PR #31). Claimed per board rules; commit pushed immediately after this edit. Open PRs #29 (`arena/77ec3a0e-trade3`: `.github/workflows/pages.yml`, `EXECUTIVE_SUMMARY.md`, `docs/flagged.html`) and #22 (`arena/b47b1c48-trade3`: `EXECUTIVE_SUMMARY.md`, `VERIFICATION.md`, `docs/dashboard-site/assets/data.js`, `docs/data/series.json`, `docs/flagged.html`) left untouched; this session edits only `COORDINATION.md` (append-only) unless a defect is found, in which case a fix request is logged here instead of editing an owned file.
+
+| Task | Status | Owner | File scope |
+|---|---|---|---|
+| T-22a Independent live re-verification of demo API + docs (exchange status, series examples, fee/endpoint facts) | in progress | `arena/22ed9fdf-trade3` | none (read-only) |
+| T-22b Full gate re-run on merged tree (`npm test`, `check_site.py`, `check-links.js`, `py_compile`, `node --check`) | in progress | `arena/22ed9fdf-trade3` | none (read-only) |
+| T-22c Sandbox live preview of built site (`docs/` + `app/`) so dashboard is viewable before F8 | in progress | `arena/22ed9fdf-trade3` | none (runtime only) |
+| T-22d GitHub Pages enablement retry + deploy-run status confirmation (F8) | in progress | `arena/22ed9fdf-trade3` | none (API calls only) |
+| T-22e Final record + PR to `main` + merge + deploy check | pending | `arena/22ed9fdf-trade3` | `COORDINATION.md` (append-only) |
