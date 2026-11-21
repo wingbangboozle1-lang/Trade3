@@ -812,8 +812,8 @@ the moment the owner performs the one-time F8 action.
 | Task | Status | Owner | File scope |
 |---|---|---|---|
 | T-8214-1 Retry Pages enablement via REST (`POST /repos/.../pages`, `build_type=workflow`) | done — **403** again | `arena/8214edf2-trade3` | none (API call only) |
-| T-8214-2 Make `pages.yml` create the Pages site with `actions/configure-pages` `enablement: true` instead of exiting at a 404 pre-check (the pre-check previously stopped the run before that step was ever reached) | in progress | `arena/8214edf2-trade3` | `.github/workflows/pages.yml` |
-| T-8214-3 Merge to `main`, run deploy, record the Pages URL and result | pending | `arena/8214edf2-trade3` | `COORDINATION.md` (record only) |
+| T-8214-2 Make `pages.yml` create the Pages site with `actions/configure-pages` `enablement: true` instead of exiting at a 404 pre-check (the pre-check previously stopped the run before that step was ever reached) | done (merged PR #18, merge commit `a46d67e`) — **enablement still refused: 403** | `arena/8214edf2-trade3` | `.github/workflows/pages.yml` |
+| T-8214-3 Merge to `main`, run deploy, record the Pages URL and result | done — **blocked**: deploy runs `44878359483` and `44878420679` both fail at `Run actions/configure-pages@v5` with `Resource not accessible by integration` (create-site, HTTP 403); `GET /repos/.../pages` → 404; `https://wingbangboozle1-lang.github.io/Trade3/` → no response | `arena/8214edf2-trade3` | `COORDINATION.md` (record only) |
 
 No other session is active; no conflicting claims exist on the board.
 
@@ -930,3 +930,74 @@ No other session has an open claim on the board. Files owned by other sessions a
 - **Pages enablement — definitive evidence (closes the loop on F8):** the enablement path was attempted from three credential classes on 2026-11-21 — owner-authenticated CLI token (`gh api -X POST /repos/wingbangboozle1-lang/Trade3/pages`), the Actions `GITHUB_TOKEN` via `actions/configure-pages@v5 enablement: true`, and the earlier direct `POST` from the workflow — **all return 403 "Resource not accessible by integration"**. GitHub does not allow automation credentials to create a Pages site. The one-time owner click (Settings → Pages → Source: GitHub Actions → Save) is now also emitted as an annotation by the workflow's `if: failure()` step added in the follow-up commit.
 - **Git note (per the conflict-logging rule):** `git pull --rebase` before the second push stalled because this branch carries a history-joining merge commit (rebase tried to flatten `origin/main`'s own commits onto it). The rebase was aborted; nothing was lost (remote already had the correct merge `7f37a24`); the PR then merged cleanly. Follow-up pushes use fetch + fast-forward check instead of rebase.
 - **Live preview for the reviewer:** the local server (`DATA_MODE=demo`, port 3000) is running in the sandbox with the full live stack (SSE `/api/stream`, dual alert feeds, portfolio, resolutions) — synthetic mode is labelled in `/api/health` because the sandbox cannot reach Kalshi from the shell (F19).
+### Record (this session)
+
+- PR #18 `arena/8214edf2-trade3` → `main`: **MERGED** 2026-11-21T07:02Z, merge commit `a46d67e`. Change: `.github/workflows/pages.yml` pre-check removed; `configure-pages` runs with `enablement: true`.
+- Gates on the branch before merge: `scripts/check_site.py` pass (39 series rows); `scripts/check-links.js` pass (360 refs, 0 broken); `tests/logic.test.mjs` pass; `tests/smoke-test.js` 15/15.
+- Verify job on `main` (run `44878359483`): **success**. Deploy job: **failure** at `configure-pages` (see above).
+- Irregularity **F8 (updated)**: the automation token cannot create the Pages site by either route — the REST `POST /pages` call (`build_type=workflow`) and `configure-pages` `enablement: true` both return 403 "Resource not accessible by integration". The token has repo admin per `gh api`, but the Actions/REST token lacks Pages site-creation scope. This is a platform/token limit, not a site defect; no token or credential was requested or stored.
+- **Owner action (one time, ~30 seconds):** GitHub repo → Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save. Then Actions → "Deploy site to GitHub Pages" → Run workflow. Expected URL: `https://wingbangboozle1-lang.github.io/Trade3/`.
+- Sources for this session's claims: GitHub REST Pages API (`https://docs.github.com/rest/pages/pages`), `actions/configure-pages` (`https://github.com/actions/configure-pages`). Run logs linked from the Actions tab.
+- Not done this session (honest scope): live Kalshi demo portfolio tracking and order placement (need user demo API keys; not in repo); WebSocket live feed (requires authenticated handshake); the sandbox has no direct egress to kalshi.co, so the per-row Kalshi re-check runs in CI (`verify-live.yml`) only.
+
+---
+
+# Session `arena/84e59a8b-trade3` — current-branch review and UX/verification follow-up (2026-11-21)
+
+**Claimed on `arena/84e59a8b-trade3` at base `4eb92a1`; rebased onto `main` at `9baaec4` and then `9ed35e9` to preserve concurrently merged work.**
+
+| Task | Status | Owner | File scope |
+|---|---|---|---|
+| T-84 Fresh review of live-market ranking and volume labelling; rerun local gates, verify claims against official sources, and report publish status | **done** | `arena/84e59a8b-trade3` | `COORDINATION.md`, `app/app.js`, `app/index.html` |
+
+### Changes
+- Live app market list now defaults to descending order-book liquidity in dollars, the directly available dollar-denominated measure for ranking largest displayed live books. The table labels this as available book depth, not traded dollar volume, and links the methodology to Kalshi's official order-book docs.
+- Corrected the overview KPI that previously formatted Kalshi's `volume_24h_fp` contract count as USD. It now reads `24h contract volume` and uses a number formatter. The markets table explicitly labels 24h volume and open interest as contracts.
+- No API data rows or market values were edited or inferred.
+
+### Official sources and checks
+- [Kalshi Get Markets](https://docs.kalshi.com/api-reference/market/get-markets): response schema distinguishes `volume_24h_fp` and `open_interest_fp` fixed-point fields from dollar-price fields (`last_price_dollars`, `notional_value_dollars`).
+- [Kalshi Orderbook Responses](https://docs.kalshi.com/getting_started/orderbook_responses): order-book arrays pair price in dollars with contract count and return bids only; the interface describes notional as displayed bid depth.
+- `npm test`: pass (logic, 15/15 engine checks, 13/13 site render checks).
+- `npm run test:all` (with temporary, untracked jsdom install): pass, including Build A headless dashboard, portfolio and deep-link render tests.
+- `python3 scripts/check_site.py`: pass (28 pages, 360 local links, 20 JS modules, 39 series rows).
+- `node scripts/check-links.js`: pass (360 local references, no broken links/anchors/imports/DOM targets).
+- Python `py_compile` for `kalshi_client.py`, `strategies.py`, `backtest.py`, `run_sim.py`, `scripts/verify_series.py`, `scripts/check_site.py`; `node --check` for `app/app.js` and all `server/*.js`: pass.
+- Snapshot-mode preview on port 3000: `/`, `/app/`, `/site/`, `/api/health`, `/api/state`, `/api/alerts`, `/api/portfolio` all returned HTTP 200. It reported snapshot mode and its captured timestamp, not live data.
+- GitHub Pages readiness re-check (`gh api repos/wingbangboozle1-lang/Trade3/pages`): HTTP 404, site still not enabled. No deploy success is claimed; F8 remains an owner-side blocker.
+
+### Parallel coordination / remaining limits
+- PR #21 (`arena/6c20e938-trade3`) and PR #22 (`arena/b47b1c48-trade3`) are open. Their branches/files were left untouched; the T-84 product patch changes only `app/app.js` and `app/index.html` besides this coordination record.
+- Live demo account reads/trading remain unavailable without owner-provided demo API credentials. This patch does not enable or attempt live orders.
+- News-cause attribution is not inferred. Existing F-series flags remain the review surface for external news feeds, authenticated WS and hosting limitations.
+
+### Rebase / conflict record
+- Two `git pull --rebase origin main` operations advanced main while PRs #20 and #24 merged. Both conflicts were in the append-only `COORDINATION.md`; resolved by keeping all latest main content and re-appending this session's record. No other session work was discarded.
+## Merge record (session `arena/8373696a-trade3`, T9)
+
+- **PR #19:** https://github.com/wingbangboozle1-lang/Trade3/pull/19 — "Final integration: independent re-verification + Pages workflow fix (8373696a)"
+- **Result:** **MERGED** 2026-11-21T07:03:14Z, merge commit `d7971ea`. Conflict with PR #18 (parallel session `arena/8214edf2-trade3` merged the same Pages fix first) resolved by keeping upstream `pages.yml` and both COORDINATION records; nothing discarded.
+- **Deploy runs triggered by the merges:**
+  - Run [44878359483](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44878359483) (PR #18): **Verify site — success** (all gates green); **Deploy — failure at `configure-pages`** with `HttpError: Resource not accessible by integration` (Create Pages site). `upload`/`deploy-pages` skipped.
+  - Run [44878420679](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44878420679) (PR #19): **Verify site — success**; **Deploy — same 403 at `configure-pages`**.
+- **Conclusion:** The site itself is verified and not broken (every check passes). GitHub Pages cannot be created by any automation token (403 on `POST /pages` from CLI, Actions `configure-pages`, and REST). **Owner action (one click, F8):** Repo → Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save. The next push to `main` (or Actions → "Deploy GitHub Pages" → Run workflow) then publishes `docs/` at `https://wingbangboozle1-lang.github.io/Trade3/` with no further code change. Expected URL: https://wingbangboozle1-lang.github.io/Trade3/
+- **T9 status:** done. All verification sources linked in the table above; no values inferred; flags F1–F25 remain on the Flagged page and do not block merge.
+
+### Merge and deploy record — session `arena/658d547d-trade3` (2026-11-21, final)
+
+- **PR #20** https://github.com/wingbangboozle1-lang/Trade3/pull/20 — **MERGED** 2026-11-21T07:04:32Z, merge commit `9baaec4`.
+- **Verify site job** on the merge commit (run [44878522179](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44878522179)): **success**, all 12 steps green (static site gate, link check, logic/engine/render tests, Python checks, live row re-verification, snapshot contract).
+- **Deploy job** on the same run: **failure at `actions/configure-pages@v5`** (the step that now runs `enablement: true`). Annotation from the runner: `HttpError: Resource not accessible by integration` — `Create Pages site failed`, pointing at the Pages REST docs. `upload-pages-artifact` and `deploy-pages` were skipped. This is the same owner-only blocker F8: the workflow's `GITHUB_TOKEN` is not allowed to create the Pages site, and the API token used by sessions gets the same 403.
+- **Not done, by design:** no workaround (no second token, no `gh-pages` branch, no change to the trust model). Nothing was merged that was not verified; the failing step is the enablement call only.
+- **Site status:** **not live.** Expected URL once enabled: https://wingbangboozle1-lang.github.io/Trade3/
+
+**One owner action is required (no code change):** Repo → Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save. Then run the "Deploy site to GitHub Pages" workflow (Actions → Run workflow on `main`). The verify job already passes, so the deploy should succeed right after that click.
+
+---
+
+# Session `arena/84e59a8b-trade3` — PR #23 merge/deploy addendum (2026-11-21)
+
+- **PR #23:** https://github.com/wingbangboozle1-lang/Trade3/pull/23 — merged by squash at `2026-11-21T07:07:13Z`; merge commit `622709c1060d3eb33bd92448e5d13c21fa9fb15d`.
+- **Main verification run:** [44878773776](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44878773776). Verify site job **success** (all checks, including live-row re-verification, green). Deploy job **failure** at `actions/configure-pages@v5`; upload/deploy were skipped. GitHub's log receiver returned EOF when requesting the failure text, but `gh run view` lists the exact failing step. This is F8 / Pages enablement, not a build or link-check failure.
+- Re-checked Pages with `gh api repos/wingbangboozle1-lang/Trade3/pages`: 404 (no Pages site). The workflow and site files were not changed by this addendum; PR #26's separate Pages work was left to its owner.
+- No deployment success or public Pages URL is claimed. Owner action remains Settings → Pages → Build and deployment → Source: GitHub Actions, unless the separate PR #26 resolves the site-creation limitation.
