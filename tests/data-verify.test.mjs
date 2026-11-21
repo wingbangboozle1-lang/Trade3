@@ -130,5 +130,28 @@ check('credentialState accepts a real RSA private key from the PEM env var', () 
   return 'accepted, orders still blocked';
 });
 
+
+// --- documented pacing --------------------------------------------------------
+// Numbers from https://docs.kalshi.com/getting_started/rate_limits, read 2026-11-21.
+check('the client paces inside the published Basic read budget', () => {
+  const app = readFileSync(path.join(ROOT, 'docs', 'assets', 'app.js'), 'utf8');
+  const gap = Number((app.match(/minGapMs:\s*(\d+)/) || [])[1]);
+  const conc = Number((app.match(/maxConcurrent:\s*(\d+)/) || [])[1]);
+  if (!gap || !conc) throw new Error('pacing constants not found');
+  // The queue starts a request at most once per minGapMs (net.lastStart gate), so the
+  // sustained ceiling is 1000/gap regardless of how many slots exist.
+  const perSecond = 1000 / gap;
+  const budget = 200 / 10;               // 200 tokens/s at 10 tokens per request
+  if (perSecond > budget) throw new Error(`${perSecond.toFixed(1)} req/s exceeds the ${budget} req/s Basic read budget`);
+  return `${perSecond.toFixed(1)} req/s maximum vs ${budget} req/s published (${conc} concurrent slots)`;
+});
+
+check('the balance endpoint is throttled to the published 1 call/s', () => {
+  const preview = readFileSync(path.join(ROOT, 'server', 'preview.js'), 'utf8');
+  if (!/BALANCE_MIN_GAP_MS\s*=\s*1000/.test(preview)) throw new Error('balance throttle missing or below 1 s');
+  if (!/readAccountThrottled/.test(preview)) throw new Error('portfolio route does not use the throttled read');
+  return 'throttled in server/preview.js';
+});
+
 console.log(`\n${passed}/${passed + failed} data-integrity checks passed`);
 process.exit(failed ? 1 : 0);

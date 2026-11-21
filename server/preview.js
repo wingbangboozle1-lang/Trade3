@@ -92,6 +92,26 @@ export function makeCollector({ env = process.env, logger = console } = {}) {
   return collector;
 }
 
+// GET /portfolio/balance is metered in its own bucket: 1 call/s on Basic and Advanced,
+// 5 call/s above that (https://docs.kalshi.com/getting_started/rate_limits). Balance only
+// changes on fills, settlements and transfers, so polling it faster cannot learn anything
+// faster. The account read below is therefore throttled to one per second per caller.
+const BALANCE_MIN_GAP_MS = 1000;
+const balanceReads = new Map();
+
+async function readAccountThrottled(client, address) {
+  const now = Date.now();
+  const prev = balanceReads.get(address);
+  if (prev && now - prev.at < BALANCE_MIN_GAP_MS) return { ...prev.payload, cached: true };
+  const [balance, positions] = await Promise.all([
+    client.balance(),
+    client.positions({ settlementStatus: 'all', limit: 200 }),
+  ]);
+  const payload = { available: true, readAt: new Date().toISOString(), balance, positions };
+  balanceReads.set(address, { at: now, payload });
+  return payload;
+}
+
 export function createLiveServer({ collector, logger = console } = {}) {
   const roots = [
     { prefix: '/app', dir: path.join(ROOT, 'app') },
@@ -142,11 +162,7 @@ async function handleApi({ req, res, url, collector }) {
       if (!collector.client.authenticated) {
         account = { available: false, reason: 'No API key configured (KALSHI_API_KEY_ID + KALSHI_PRIVATE_KEY_PEM/PATH).' };
       } else {
-        const [balance, positions] = await Promise.all([
-          collector.client.balance(),
-          collector.client.positions({ settlementStatus: 'all', limit: 200 }),
-        ]);
-        account = { available: true, readAt: new Date().toISOString(), balance, positions };
+        account = await readAccountThrottled(collector.client, req.socket?.remoteAddress || 'local');
       }
     } catch (err) {
       account = { available: false, reason: err.message };

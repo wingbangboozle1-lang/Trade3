@@ -238,3 +238,128 @@ inaccurate and is now stated correctly.
   passes all checks. Owner action required; not fixable from inside the sandbox.
 - Sandbox shell egress to `*.kalshi.co` is still blocked (TLS reset); live values were read through the
   page-fetch path. Non-blocking (see F19).
+
+---
+
+# Session `arena/5d2508a7-trade3` — 2026-11-21 full re-verification
+
+**Method.** The shell in this sandbox cannot reach the Kalshi hosts (TLS reset, recorded since
+session `63ad86b3`), so every live read below was made through the agent's page-fetch path and is
+quoted from the response, not from memory. The raw series records are committed under
+`data/verify-cache/` so anyone can re-run the comparison:
+
+```
+python3 scripts/verify_series_bulk.py --from-cache data/verify-cache/batch1.json
+```
+
+## Series rows — all 39, not a sample
+
+| Check | Result |
+|---|---|
+| 39 published rows compared against raw `GET /series/{ticker}` records | **39 checked, 39 pass after corrections** |
+| Rows whose settlement cell was paraphrased rather than copied | **8 — fixed** (see below) |
+| Rows left blank on purpose | 5 (`KXXBANNEDGROK`, `KXXBANNEDMURRAYHILLGUY1`, `KXELECTUKRAINE`, `KXLINKPERP`, `KXSOLPERP`) |
+| Rows missing an official source URL | 0 |
+
+**The eight corrected settlement cells** (flag F28):
+
+| Ticker | Published before | Official `settlement_sources[0]` |
+|---|---|---|
+| `KXPGAGOLFERSCORE` | "the Governing League — … (also NBC Sports, …)" | `NBC Sports — http://www.nbcsports.com/` |
+| `KXPGAEAGLE` | "PGA Tour — … (also Fox Sports, ESPN)" | `Fox Sports — https://www.foxsports.com` |
+| `KXPRESCUPMATCH` | "PGA Tour — … (also ESPN)" | `ESPN — https://www.espn.com/` |
+| `KXPGAT20` | "PGA Tour — … (also Fox Sports, ESPN)" | `Fox Sports — https://www.foxsports.com` |
+| `KXBTC2025100` | "… BRTI?ref=blog.cfbenchmarks.com (URL exactly as the API returns it)" | the URL with no trailing note |
+| `KXELECTUKRAINE` | "See series record for full source list" | `ABC — https://abcnews.go.com/` (16 sources) → left blank under the official-publishers-only rule, with a note naming the record |
+| `KXLINKPERP` | "None listed by Kalshi (… flag F18)" | `settlement_sources: null` → blank + note |
+| `KXSOLPERP` | same as above | `settlement_sources: null` → blank + note |
+
+Sources for every row are the row's own `source` URL; the two re-read in this pass beyond the
+earlier evidence bundle are [KXPGAGOLFERSCORE](https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAGOLFERSCORE)
+and [KXELECTUKRAINE](https://external-api.demo.kalshi.co/trade-api/v2/series/KXELECTUKRAINE).
+`tests/data-verify.test.mjs` (9 checks) now fails the build if a published settlement stops being a
+verbatim `NAME — URL` or grows a parenthetical aside.
+
+**Why the old result said 4/4.** `verify_series.py --from-cache docs/data/live-verification-2026-11-20.json
+--skip-uncached` reports *4/4 rows verified* because that evidence bundle only holds four series
+records; the other 35 rows were skipped, not verified (flag F29). The new bulk verifier reports
+unchecked rows as NOT CHECKED and never counts them as passing.
+
+## Market rows — the ten published by the audit edition
+
+| Ticker | Outcome | What the record says now |
+|---|---|---|
+| `KXAAAGASM-26NOV30-4.80` | **corrected** | last 0.1400 (was 0.0300), previous 0.3000, bid 0.1400, ask 1.0000, volume 14143.93, OI 12768.64 |
+| `KXAAAGASM-26NOV30-4.50` | **corrected** | volume 55597.52 (was null); last/bid/ask/OI unchanged |
+| `KXELONMARS-99` | **corrected** | last 0.1400 (0.3000 is `previous_price_dollars`), bid 0.1400, volume 14143.93, OI 12768.64 |
+| `KXPGATOUR-THRC26-BHAA`, `KXPGATOUR-THRC26-RSTR` | match | 0.0000 / bid 0.0000 / ask 1.0000 / no bid 1.0000 / volume 0.00 |
+| `KXNEXTNATOSECGEN-99-MFRE`, `-PPAV`, `-KIOH` | match | 0.5000 / 0.1500 / 0.0200 with the published volumes and open interest |
+| `KXBTCD-26NOV2101-T70799.99`, `-T70599.99` | **not checked** | strikes expired 2026-11-21T06:00Z; rows stay labelled as the 2026-11-20 capture (flag F27) |
+
+Regression guard: `tests/claims.test.mjs` fails if a row is ever recorded as a blanket "match"
+without a per-row outcome, or if a published volume is `null` where the API returns a number.
+
+## Snapshot (`data/snapshot.json`)
+
+Six gas strikes re-read; one volume figure (`.4.50`) corrected from `0.00` to **55597.52**; the other
+six records are listed under `recheck.pending_recheck` and are **not** restated (flag F27). The
+snapshot note now ends "SNAPSHOT — not live", and a test asserts that wording survives.
+
+## Docs and claims
+
+| Claim in the tree | Verified? | Result |
+|---|---|---|
+| `requirements/REQUIREMENTS.md` R7 "WebSocket `market_ticker` … `dollar_volume`" | **no** | No `dollar_volume` response field is read anywhere and no WebSocket client exists. Corrected in place. |
+| R10 "auto-scroll with pause-on-hover" | **no** | Not implemented in either build. Corrected. |
+| R17 "1s/10s windows, step/line toggle, zoom" | **no** | The shipped windows are 60s/5m/15m/1h/6h/24h/7d. Corrected. |
+| R18 "cost to cross N contracts" | **no** | No crossing-cost code. Corrected. |
+| R20 "sparkline, depth histogram, P&L curve, alert-density strip" | **no** | None of the four exist. Corrected. |
+| R21 "configured news feeds per topic" | **no** | No news feed is configured; only the exchange tape and settlement sources. Corrected. |
+| `docs/verification.html` "Result: matches" on every row | **no** | The page never ran a comparison. It now prints provenance labels ("verbatim · re-checked 2026-11-21", "not re-checked since …", "blank — F10/F18/F26"). |
+| `verify_series.py` "4/4 rows verified" | **misleading** | Coverage, not correctness — 35 rows were skipped. New bulk verifier + F29. |
+| Browser CORS for the public REST hosts | **still unverified** | No official statement found (docs.kalshi.com pages read do not mention CORS), and no CORS probe can be run from this sandbox. F6 stands; the reliable live path is now `server/preview.js` (`npm start`), which calls Kalshi from Node. |
+| `GET /markets?mve_filter=exclude` | **yes** | Accepted by the live API; the response excluded the multivariate tickers returned without it. |
+| Order book shape `{"orderbook_fp":{"yes_dollars":[["0.0100","457.36"]],"no_dollars":[...]}}` | **yes** | Live `GET /markets/KXDEMOFUTHOURLY-26NOV21H08-UP/orderbook?depth=5`. |
+| `GET /events` carries `category` + `series_ticker` | **yes** | Live `GET /events?status=open&limit=1` → `KXELONMARS-99`, category `World`. |
+| `GET /series?category=Gas` → `{"series":null}`; `?category=Culture` → 2 series | **yes** | Both re-read 2026-11-21. |
+| `GET /series/GOVPARTYVA` → "Virginia Governor", Elections, fee_multiplier 1 | **yes**, plus one omission | The record also lists settlement source `US State Governments — https://www.usa.gov/state-governments`, which the empty-state note omitted; the note is now aligned (flag F32). |
+| Culture series still have no open markets | **yes** | `GET /markets?series_ticker=KXXBANNEDGROK&status=open` → `{"cursor":"","markets":[]}`. |
+
+## Gates re-run after every change in this session
+
+```
+npm test                       logic · 12 data-integrity · 12 claim checks · smoke 15/15 · site-render 13/13
+python3 scripts/check_site.py  30 pages, 39 rows, all checks pass
+node scripts/check-links.js    0 broken local links/anchors/imports/DOM targets
+node tests/render.test.mjs     headless jsdom render of both dashboards — pass (needs `npm i --no-save jsdom@25`)
+python3 -m py_compile          all Python modules pass
+```
+
+## Still open after this session
+
+- **F30/F8 — GitHub Pages is not enabled.** `GET /repos/wingbangboozle1-lang/Trade3/pages` → **404**;
+  `POST /pages` and `PUT /pages` → **403 "Resource not accessible by integration"** even though the
+  token reports `admin: true` on the repo. The one-time owner action is unchanged: Settings → Pages →
+  Build and deployment → Source: **GitHub Actions** → Save. The site is complete and green; only the
+  publish is blocked.
+- **F6 — browser CORS** for the public REST hosts remains unverified. Not fixable by evidence here.
+- **F27** — six snapshot records and two expired `KXBTCD` strikes were not re-read today and are
+  labelled as such rather than restated.
+
+### Rate limits — official numbers re-read 2026-11-21 (fills a previously blank row)
+
+The repo previously said numeric rate limits were "not on the page read". They are now published,
+read from [Rate Limits and Tiers](https://docs.kalshi.com/getting_started/rate_limits) on 2026-11-21:
+
+| Fact | Official value |
+|---|---|
+| Cost of a normal request | 10 tokens (429 body `{"error":{"code":"too_many_requests",…}}`) |
+| Read bucket, Basic tier | 200 tokens/s sustained → **20 requests/s** at the default cost |
+| Write bucket, Basic tier | 100 tokens/s → **10 order writes/s** |
+| Burst | Basic/Advanced Read buckets and Write buckets above Basic hold 3 s of budget |
+| `GET /portfolio/balance` | its own bucket; Basic/Advanced **1/s**, higher tiers **5/s** |
+| 429 | no `Retry-After`; exponential backoff recommended |
+| Headers | `X-RateLimit-Limit`, `-Remaining`, `-Reset`, `-Cost` (public cacheable responses carry none) |
+
+The client's pacing (`maxConcurrent: 3`, `minGapMs: 90` ≈ 11 requests/s) stays **inside the Basic
+Read budget**, so nothing in this repo relies on a higher tier.

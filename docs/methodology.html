@@ -194,8 +194,12 @@
       <span id="proxy-status" class="dim"></span>
     </div>
     <p class="dim" style="margin-top:8px">
-      Requests are serialised (3 at a time, ≥ 90 ms apart) and 429 responses back off exponentially, well inside the
-      token-bucket limits described in <a href="https://docs.kalshi.com/getting_started/rate_limits" target="_blank" rel="noopener">Rate Limits</a>.
+            Requests start at most once per 90 ms — a ceiling of 11 requests/s — with three in flight at a time and 429 responses back off exponentially.
+      The Basic-tier Read budget is <b>200 tokens/s</b> at <b>10 tokens</b> per request — <b>20 requests/s</b> — so the
+      ceiling above sits at roughly half the published budget, with headroom for the batched-GET accounting the docs
+      describe. The balance endpoint is metered
+      separately at 1 call/s on Basic and Advanced and is never polled faster than that.
+      <a href="https://docs.kalshi.com/getting_started/rate_limits" target="_blank" rel="noopener">Rate Limits and Tiers</a>.
     </p>
   </section>
 
