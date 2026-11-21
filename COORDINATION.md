@@ -1318,9 +1318,9 @@ and its file scope is non-overlapping with every other claim on this board.
 
 | Task | Status | Owner | File scope |
 |---|---|---|---|
-| T-AW1 Live re-verification of load-bearing published facts (exchange status, anchor series, category queries) against the official demo API on 2026-11-21 | in progress | `arena/77ec3a0e-trade3` | `COORDINATION.md` (record), `EXECUTIVE_SUMMARY.md` (status rows) |
-| T-AW2 Pages blocker evidence + deploy workflow hardening (attempt site creation before the owner-action error) | in progress | `arena/77ec3a0e-trade3` | `.github/workflows/pages.yml`, `docs/flagged.html` |
-| T-AW3 Final integration: full gates, PR to `main`, merge, CI + Pages status | in progress | `arena/77ec3a0e-trade3` | `COORDINATION.md` (record) |
+| T-AW1 Live re-verification of load-bearing published facts (exchange status, anchor series, category queries) against the official demo API on 2026-11-21 | done | `arena/77ec3a0e-trade3` | `COORDINATION.md` (record), `EXECUTIVE_SUMMARY.md` (status rows) |
+| T-AW2 Pages blocker evidence + deploy workflow hardening (attempt site creation before the owner-action error) | done | `arena/77ec3a0e-trade3` | `.github/workflows/pages.yml`, `docs/flagged.html` |
+| T-AW3 Final integration: full gates, PR to `main`, merge, CI + Pages status | done (merge) · Pages publish **blocked** on F8 owner action | `arena/77ec3a0e-trade3` | `COORDINATION.md` (record) |
 
 Claim pushed immediately after this edit, before starting work. No other session is active.
 
@@ -1373,3 +1373,28 @@ app JS chart windows 1m–1w, requirements) auto-merged cleanly and are unchange
 `COORDINATION.md` and `EXECUTIVE_SUMMARY.md` (EOF append collisions) and both were union-resolved the same
 way — their records kept first, this session's records appended after. `docs/flagged.html` auto-merged
 (their F10 correction + our F8 evidence coexist). No work discarded.
+
+### Merge record (session `arena/77ec3a0e-trade3`)
+
+- **PR #29:** https://github.com/wingbangboozle1-lang/Trade3/pull/29
+  "Final integration 2026-11-21: live re-verification, Pages blocker evidence + deploy hardening"
+  (`arena/77ec3a0e-trade3` → `main`, summary + sources + flags in the PR body).
+- **Result:** **MERGED** 2026-11-21T07:19:24Z, merge commit `bf08e73d4f1260c5bc09bb1bd778701e3355aea6`.
+  (Two merge rounds were needed: parallel sessions pushed `main` twice while this branch was in
+  review; both rounds were union-resolved as logged above. The first `gh pr merge` attempt after the
+  final push reported "merge conflicts" from GitHub's stale mergeability cache; re-checking
+  `mergeable: CLEAN` and retrying merged immediately.)
+- **CI on the merge (run [44879704914](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879704914)):**
+  - **Verify site — success** (static gate, links, logic, collector/engine, headless render, Python layer).
+  - **Deploy — failure at Pages creation only**, now with the full evidence chain in the log:
+    `actions/configure-pages` enablement ran first and failed exactly as the official source predicts
+    ("Create Pages site failed. Error: Resource not accessible by integration"), then the readiness gate
+    repeated `POST /pages` (403) and printed the one-time owner action with the official action.yml citation.
+  - "Re-verify published rows against the live API" scheduled job: success on its latest runs (every row
+    re-read from the live demo API by a Kalshi-capable runner).
+- **GitHub Pages status after the merge:** `GET /repos/wingbangboozle1-lang/Trade3/pages` → **404**
+  (re-checked 2026-11-21T07:2xZ). The site is deploy-ready and will publish at
+  `https://wingbangboozle1-lang.github.io/Trade3/` the moment the owner performs the F8 action
+  (Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save), with no code change.
+- **This record** lands via the follow-up record PR (pattern used by every prior session on this board):
+  "Coordination: record PR #29 merge + deploy outcome".
