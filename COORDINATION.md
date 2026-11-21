@@ -1662,11 +1662,11 @@ Marking T-74a … T-74d **done**.
 
 | Task | Status | Owner | File scope |
 |---|---|---|---|
-| T-22a Independent live re-verification of demo API + docs (exchange status, series examples, fee/endpoint facts) | in progress | `arena/22ed9fdf-trade3` | none (read-only) |
-| T-22b Full gate re-run on merged tree (`npm test`, `check_site.py`, `check-links.js`, `py_compile`, `node --check`) | in progress | `arena/22ed9fdf-trade3` | none (read-only) |
-| T-22c Sandbox live preview of built site (`docs/` + `app/`) so dashboard is viewable before F8 | in progress | `arena/22ed9fdf-trade3` | none (runtime only) |
-| T-22d GitHub Pages enablement retry + deploy-run status confirmation (F8) | in progress | `arena/22ed9fdf-trade3` | none (API calls only) |
-| T-22e Final record + PR to `main` + merge + deploy check | pending | `arena/22ed9fdf-trade3` | `COORDINATION.md` (append-only) |
+| T-22a Independent live re-verification of demo API + docs (exchange status, series examples, fee/endpoint facts) | **done** | `arena/22ed9fdf-trade3` | none (read-only) |
+| T-22b Full gate re-run on merged tree (`npm test`, `check_site.py`, `check-links.js`, `py_compile`, `node --check`) | **done** | `arena/22ed9fdf-trade3` | none (read-only) |
+| T-22c Sandbox live preview of built site (`docs/` + `app/`) so dashboard is viewable before F8 | **done** | `arena/22ed9fdf-trade3` | none (runtime only) |
+| T-22d GitHub Pages enablement retry + deploy-run status confirmation (F8) | **done** (F8 requires owner action) | `arena/22ed9fdf-trade3` | none (API calls only) |
+| T-22e Final record + PR to `main` + merge + deploy check | **in progress** | `arena/22ed9fdf-trade3` | `COORDINATION.md` (append-only) |
 
 ## Results — session `arena/22ed9fdf-trade3` (2026-11-21)
 
@@ -1681,14 +1681,16 @@ Marking T-74a … T-74d **done**.
 | Crypto KXETHD | [series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXETHD) | "Ethereum price Above/below", Crypto, CF Benchmarks settlement — matches |
 | Base URLs / WS | [API Environments](https://docs.kalshi.com/getting_started/api_environments) | Demo REST `external-api.demo.kalshi.co`, WS `external-api-ws.demo.kalshi.co` — exactly as specified in the task |
 
-### T-22b Gates on merged tree (`main` @ `49397f2`)
+### T-22b Gates on latest merged tree (`main` @ `262f22a`, after PRs #22 and #32)
 
 | Gate | Result |
 |---|---|
-| `npm test` | **pass** — logic OK, engine 15/15, site render 13/13 |
+| `npm test` | **pass** — logic tests, engine 15/15, site render 13/13 |
+| `npm run test:all` | **pass** — logic, headless render (with `jsdom@25`), engine 15/15, site render 13/13 |
+| Latest GitHub Actions Verify site job | **pass** — [run 44879350060](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879350060) includes the CI-installed `jsdom` render test and Python offline checks |
 | `python3 scripts/check_site.py` | **pass** — 29 pages, 387 local links, 20 JS modules, 39 series rows |
 | `node scripts/check-links.js` | **pass** — 387 references resolve, 0 broken |
-| `py_compile` (6 files) · `node --check` (app, server) | **pass** |
+| `py_compile` (6 files) · `node --check` (`app/app.js`, all `server/*.js`) | **pass** |
 
 ### T-22c Sandbox live preview (before F8)
 
@@ -1698,7 +1700,7 @@ Marking T-74a … T-74d **done**.
 ### T-22d Pages (F8) — reproduced, still owner-only
 
 - `GET .../pages` → **404**; `POST .../pages` (`build_type=workflow`) → **403 "Resource not accessible by integration"** ([Pages REST docs](https://docs.github.com/rest/pages/pages)).
-- Latest `main` deploy run [44879180202](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879180202): **Verify site ✓** · **Deploy ✗ at `actions/configure-pages@v5`** (enablement call only; no site defect).
+- Latest `main` deploy run [44879350060](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879350060) on `262f22a`: **Verify site ✓** · **Deploy ✗ at `actions/configure-pages@v5`** (enablement call only; no site defect).
 - Conclusion unchanged: **one owner click** — Repo → Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save — then "Deploy site to GitHub Pages" → Run workflow. Expected URL: `https://wingbangboozle1-lang.github.io/Trade3/`.
 
 ### T-22e PR + merge record
@@ -1706,3 +1708,10 @@ Marking T-74a … T-74d **done**.
 - PR link and merge result recorded below after PR creation.
 
 - **PR #33:** https://github.com/wingbangboozle1-lang/Trade3/pull/33 — "Final integration 2026-11-21: live re-verification, gates, preview + Pages blocker evidence (22ed9fdf)". Coordination-record only. Merging without waiting for approval per task instructions; deploy outcome to be checked after merge (F8 expected).
+
+### T-22 branch update after concurrent merges
+
+- While PR #33 was open, `main` advanced from `49397f2` to `262f22a` through PRs #32 and #22. The first `gh pr merge 33 --merge` attempt correctly refused the stale head because of a `COORDINATION.md` conflict.
+- Rebased the current branch onto the updated `origin/main`. The only conflict was the append-only `COORDINATION.md`; resolved by retaining the full incoming PR #32/#22 entries and this session's claim/results. No other session's files or edits were discarded; this session still changes only `COORDINATION.md`.
+- Re-ran the full local suite on `262f22a` plus this coordination record: `npm run test:all` (including `jsdom@25` render tests), `check_site.py`, `check-links.js`, Python compile, and JS syntax — all pass. Latest GitHub Actions Verify job also passes on `262f22a`; deploy remains blocked only at F8.
+- PR #29 (workflow/executive-summary/flagged scope) and the independent coordination-only PRs #36/#37 remain untouched by this session. PR #33 head update, merge result, and resulting Pages run will be recorded below.
