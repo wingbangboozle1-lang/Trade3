@@ -1675,3 +1675,59 @@ and this branch were identical at claim time, `git status` clean.
 | T-S5-3 | Final integration: PR to `main`, merge, Pages deploy outcome, PR/merge record | unclaimed | — | `COORDINATION.md` |
 
 Any additional task this session starts is claimed in a follow-up commit **before** the edit is made.
+
+---
+
+## T-S5-1 — **done** (session `arena/5d2508a7-trade3`, 2026-11-21)
+
+**Scope actually touched:** `COORDINATION.md`, `VERIFICATION.md`, `requirements/REQUIREMENTS.md`,
+`docs/data/series.json`, `docs/verification.html`, `docs/flagged.html`, `docs/dashboard-site/assets/data.js`,
+`docs/methodology.html`, `docs/dashboard.html`, `data/snapshot.json`, `server/preview.js`, `package.json`,
+`.env.example`, `README.md`, `tests/*.mjs`, `scripts/verify_series_bulk.py`, `data/verify-cache/*`.
+No other session's claim was edited; the two rebase conflicts (`COORDINATION.md`, `VERIFICATION.md`,
+`requirements/REQUIREMENTS.md`) were resolved by **keeping both sides**, and where a parallel session
+(`arena/ccf26d52-trade3`) had already corrected the same file more thoroughly, its text was kept and only
+the still-false claims were corrected on top.
+
+### What the review found, and what was done about it
+
+| # | Finding | Fixed | Flag |
+|---|---|---|---|
+| 1 | 8 of 39 published settlement cells were paraphrases, not the record (`KXPGAGOLFERSCORE`, `KXPGAEAGLE`, `KXPRESCUPMATCH`, `KXPGAT20`, `KXBTC2025100`, `KXELECTUKRAINE`, `KXLINKPERP`, `KXSOLPERP`) | All 39 rows re-fetched; cells now verbatim `NAME — URL` from `settlement_sources[0]`, blanks carry a stated reason | F28 |
+| 2 | The row verifier reported "4/4 rows verified" while 35 rows were skipped — coverage sold as correctness | New bulk verifier reports `NOT CHECKED` and never counts it as passing; the page says so | F29 |
+| 3 | `docs/verification.html` printed "Result: matches" for every row — a comparison never run | Result column is provenance only: "verbatim · re-checked 2026-11-21" / "not re-checked since …" / "blank — F10/F18/F26" | — |
+| 4 | Ten Build-B market rows were a 2026-11-20 capture presented as current; three were stale | All ten re-read: gas 4.80 `0.0300 → 0.1400`, ElonMars `0.3000 → 0.1400` (0.30 was `previous_price_dollars`), gas 4.50 volume `null → 55597.52`; `REVERIFIED` now records a per-row outcome (5 match / 3 correct / 2 not-checked) | F27, F31 |
+| 5 | Nine requirement rows asserted features the code does not have (WebSocket `dollar_volume`, auto-scroll pause-on-hover, step/line toggle + zoom, cost-to-cross, sparkline/histogram/density strip, news-feed causes, sort control) | Each corrected in place with the false claim quoted; `tests/claims.test.mjs` now fails the build if any of them comes back | — |
+| 6 | Browser CORS for the public REST hosts was assumed, never verified — and cannot be verified from this sandbox | Not guessed: no official statement exists on the pages read, the sandbox cannot probe TLS to Kalshi, so the dashboard ships a **same-origin server** (`npm start` → `server/preview.js`) that never needs CORS, and the limitation is stated on the page | F6 |
+| 7 | Numeric rate limits were recorded as "not on the page read" | Official numbers now published (Basic Read 200 tokens/s at 10 tokens/request = 20 req/s; balance endpoint 1 call/s); `/portfolio/balance` is throttled to 1 call/s in the new server; both asserted by tests | — |
+| 8 | Golf settlement sources were listed in the wrong order and the API's own wording ("the Governing League") was silently reworded in one build | Both builds now state **Fox Sports, ESPN, the Governing League** in record order; the API string is quoted as-is and the double label (title "PGA Tour", source "the Governing League") is noted | F26 closed |
+| 9 | The demo-account read path required a hand-written script with credentials in argv/env, and there was no way to run the dashboard live without a browser-side key | `server/preview.js`: env-only credentials, credential state printed at boot, **orders disabled unless `KALSHI_ALLOW_ORDERS=1`**, sits behind `npm start`; credential handling covered by tests (no key / invalid PEM / valid RSA → orders still off) | — |
+
+### Verification (all from official sources; every row carries its own API link)
+
+- **39/39 series rows** re-read against raw `GET /series/{ticker}` — `data/verify-cache/batch1.json`,
+  report `data/verify-cache/report-2026-11-21.json`, re-runnable with `scripts/verify_series_bulk.py --from-cache`.
+- **10/10 Build-B market rows** re-read — 3 corrected, 5 matched, 2 expired before the re-read and labelled
+  not-checked rather than restated.
+- **Snapshot gas strikes** re-read; the `.4.50` volume corrected `0.00 → 55597.52`; six further records listed
+  as pending instead of restated.
+- **Docs claims re-read live:** rate limits (token buckets, balance bucket, 429 shape, headers), `mve_filter=exclude`,
+  order-book shape, `GET /events` carrying `category`/`series_ticker`, `?category=Gas` → `{"series":null}`,
+  `?category=Culture` → 2 series, `GET /series/GOVPARTYVA` (title + fee_multiplier 1 + settlement source
+  `US State Governments — https://www.usa.gov/state-governments`, which the empty-state note had omitted).
+- **Gates at hand-off:** `npm test` → logic pass · **14/14** data-integrity · **9/9** claim checks · smoke 15/15 ·
+  site-render 13/13 · `node tests/render.test.mjs` (jsdom) all PASS · `check_site.py` all checks pass ·
+  `check-links.js` 0 broken · `py_compile` all modules OK.
+
+### Still open (not fixable from this sandbox)
+
+- **F8 — Pages not enabled.** Re-tested 2026-11-21 with a refreshed token: `GET /repos/…/pages` → **404**,
+  `POST /pages` and `PUT /pages` → **403 "Resource not accessible by integration"** although the token reports
+  `admin: true`. Owner action: Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save.
+- **F27** — 6 snapshot records and 2 expired `KXBTCD` strikes were not re-read today and are labelled, not restated.
+- **F6** — browser CORS remains unverified and unverifiable here; the same-origin server is the shipped answer.
+- **F30** — the automation token cannot manage Pages; recorded so the next session does not spend a rate-limit
+  window rediscovering it.
+
+**T-S5-2** (snapshot refresh) is partly absorbed here — the six gas strikes are done, the remaining eight
+records are listed in `data/snapshot.json.recheck.pending_recheck` and stay **unclaimed**.
