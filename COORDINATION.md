@@ -697,6 +697,46 @@ re-verification checks + the Pages blocker) is fully duplicated by later merged 
 
 ---
 
+# Session `arena/6c20e938-trade3` — line-by-line review, live re-verification, feature pass, integration (2026-11-21)
+
+**Claim (this session, branch `arena/6c20e938-trade3`, based on `main` @ `39e3a3d`, merged `origin/main` @ `ccf1688`):**
+Claim committed and pushed before any task work started (rule: claim first, commit immediately).
+
+| Task | Status | Owner | File scope |
+|---|---|---|---|
+| T-6C1 Full line-by-line repo review + live re-verification of published rows/facts against official Kalshi sources (this sandbox has live API + docs access via page fetch) | in progress | `arena/6c20e938-trade3` | `VERIFICATION.md`, `EXECUTIVE_SUMMARY.md`, `docs/data/series.json` (verification fields only) |
+| T-6C2 Requirements audit + defect/feature pass (alerts chat pair, chart time axes, liquidity depth, simulated trades, portfolio analytics, resolution tracking, topic organization) | in progress | `arena/6c20e938-trade3` | `docs/**`, `server/**`, `scripts/**`, `tests/**`, `kalshi_client.py`, `strategies.py`, `backtest.py`, `run_sim.py` |
+| T-6C3 Final integration: local gates, PR to `main`, merge, Pages deploy attempt + record | in progress | `arena/6c20e938-trade3` | `COORDINATION.md`, `.github/workflows/*`, integration only |
+
+No other session is active on this repo (last activity: `arena/ca612a03-trade3`, merged PR #14). Open PR #5 (`arena/b28d6df0-trade3`) noted for the integration step; will be handled there, not edited here.
+
+## Handoff / conflict log
+
+- 2026-11-21: Session `arena/6c20e938-trade3` created this claim. Merged `origin/main` (`ccf1688`, PR #14 record) into this branch; `COORDINATION.md` add/add resolved by taking `main`'s superset version, section preserved verbatim.
+
+### T-6C1 / T-6C2 completion record (2026-11-21)
+
+**T-6C1 — verification performed (all live fetches on 2026-11-21 by this session):**
+
+| Check | Source (official) | Result |
+|---|---|---|
+| Exchange status | [GET /exchange/status](https://external-api.demo.kalshi.co/trade-api/v2/exchange/status) | `exchange_active: true`, `trading_active: true`, shards 0–3 |
+| Series rows re-read field-by-field (5 of 39, one+ per topic): `KXNGASMAX`, `KXXBANNEDGROK`, `KXLINKPERP`, `POPVOTEKHVA`, `KXPGAT20` | `GET /series/{ticker}` (linked per row in `docs/data/series.json`) | All match their published rows. `verified_on` bumped to 2026-11-21 for those rows. Note: `NGASMAX` and `KXNGASMAX` are two distinct live series sharing a title — checked before changing anything; not a defect |
+| `KXAAAGASM`, `KXETHD`, `KXPGAGOLFERSCORE` | re-read 2026-11-21 by session `arena/ca612a03-trade3` (record above) | Match |
+| Remaining 32 rows | [verify-live.yml](https://github.com/wingbangboozle1-lang/Trade3/actions/workflows/verify-live.yml) sweeps all 39 every 6 h from GitHub runners | Latest scheduled run [44850068547](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44850068547) — `success` |
+| Fee schedule PDF | [kalshi-fee-schedule.pdf](https://kalshi.com/docs/kalshi-fee-schedule.pdf) | Re-read 2026-11-21: formula, maker 0.0175, no settlement fee, effective July 7 2026, KXBTCY/KXETHY zero multipliers |
+| Market-data quick start (F6 claim) | [Quick Start: Market Data](https://docs.kalshi.com/getting_started/quick_start_market_data) | Page ships runnable JS `fetch()` examples — F6's citation is grounded |
+| All cited docs paths | [llms.txt](https://docs.kalshi.com/llms.txt) | Present; canonical slug `get-market-orderbook` matches the repo's citations |
+
+**T-6C2 — defects/fixes (details in VERIFICATION.md "session arena/6c20e938-trade3"):**
+
+1. `docs/assets/portfolio.js` swing-momentum still compared `d >= 0.10` in float (exactly-10¢ moves dropped) despite the record claiming all comparisons were tick-space — fixed with shared `ticks`/`movedTicks`/`isSwing` (`docs/assets/app.js`), used by `dashboard.js` too; regression tests in `tests/logic.test.mjs` (0.42−0.32 case).
+2. `VERIFICATION.md` had two rows with duplicate IDs (V21 and V22 each used twice) — renumbered V30/V31, content preserved.
+3. `requirements/REQUIREMENTS.md` "Where" column cited never-merged paths (`app/config.mjs`, `app/lib/*.mjs`, `site/`, `scripts/lib/render.mjs`, `scripts/verify-sources.mjs`) — re-pointed to the real implementations; requirements unchanged.
+4. R19's `/suggestions.html` page did not exist — built `docs/suggestions.html` (17 ranked suggestions, official sources, live status) and linked it in all 12 Build A navs + the landing section.
+5. `docs/flagged.html` F8 re-tested 2026-11-21 (POST /pages still 403); EXECUTIVE_SUMMARY window list/culture count/flag numbering corrected.
+
+**Gates re-run green after the changes:** `npm test` (logic + 15/15 smoke + 13/13 render), `tests/render.test.mjs` (jsdom) pass, `check-links.js` 387 refs OK, `check_site.py` 39 rows OK, `py_compile` OK. Server boot test (`DATA_MODE=demo`, port 3000): `/api/health`, `/api/state`, `/api/alerts?feed=all|model`, `/api/resolutions`, `/api/portfolio`, `/api/stream` (SSE hello), `/app/`, `/site/`, `/`, `/suggestions.html` all 200; synthetic mode unmistakably labelled in `/api/health` notes.
 # Session `arena/0c39a477-trade3` — final verification + publish pass (2026-11-21)
 
 **Role:** final integration/verification session. Branch `arena/0c39a477-trade3` was identical to `main`
