@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Suggestions — Trade3 · Kalshi</title>
+<meta name="description" content="Ranked suggestions for making the Trade3 Kalshi dashboard more live and more interactive, each with its official Kalshi source and its current implementation status.">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">Trade3 <span>· Suggestions</span></div>
+  <nav class="main">
+    <a href="index.html">Home</a>
+    <a href="executive-summary.html">Summary</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="index.html#topics">Topics</a>
+    <a href="portfolio.html">Portfolio</a>
+    <a href="methodology.html">Method</a>
+    <a href="verification.html">Verification</a>
+    <a href="suggestions.html" class="active">Suggestions</a>
+    <a href="flagged.html">Flagged</a>
+    <a href="dashboard-site/index.html">Audit edition</a>
+  </nav>
+</header>
+
+<main class="stack">
+
+  <section class="card">
+    <h1>Suggestions — make it more live, more interactive</h1>
+    <p class="muted">
+      Ranked improvements, each tied to an official Kalshi page. Items marked
+      <b>(our design)</b> are recommendations, not Kalshi facts. Full detail and
+      evidence IDs live in <code>SUGGESTIONS.md</code> at the repo root; this page is the
+      readable digest. Status is reviewed at every integration pass (last: 2026-11-21).
+    </p>
+  </section>
+
+  <section class="card">
+    <h2>Priority 1 — make the data truly live</h2>
+    <table>
+      <thead><tr><th>#</th><th>Suggestion</th><th>Official source</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td><b>Server-side relay for the WebSocket feed.</b> Public channels (<code>ticker</code>, <code>trade</code>, <code>market_lifecycle_v2</code>) still require a signed handshake, and <code>orderbook_delta</code> is private. A static page cannot hold keys safely — the Node collector (<code>server/</code>) is the intended relay once a demo key exists.</td><td><a href="https://docs.kalshi.com/getting_started/quick_start_websockets" target="_blank" rel="noopener">Quick Start: WebSockets</a> · <a href="https://docs.kalshi.com/getting_started/api_environments" target="_blank" rel="noopener">API Environments</a></td><td><span class="pill warn">Open — needs a demo key (F3)</span></td></tr>
+        <tr><td>2</td><td><b>Resolution alerts from lifecycle events, not polling.</b> <code>market_lifecycle_v2</code> emits <code>determined</code> and <code>settled</code> — the natural triggers for the “resolved YES/NO” feed.</td><td><a href="https://docs.kalshi.com/getting_started/market_lifecycle" target="_blank" rel="noopener">Market Lifecycle</a></td><td><span class="pill warn">Open — same key requirement</span></td></tr>
+        <tr><td>3</td><td><b>Poll only what changed.</b> <code>GET /events</code> accepts <code>min_updated_ts</code> to efficiently poll for changes.</td><td><a href="https://docs.kalshi.com/api-reference/events/get-events" target="_blank" rel="noopener">Get Events</a></td><td><span class="pill live">Partly done</span> — paged polling today; delta polling is a drop-in</td></tr>
+        <tr><td>4</td><td><b>Use orderbook <code>depth</code> for the liquidity ladder.</b> <code>GET /markets/{ticker}/orderbook?depth=N</code> (1–100) keeps “contracts available at each price” payloads small.</td><td><a href="https://docs.kalshi.com/api-reference/market/get-market-orderbook" target="_blank" rel="noopener">Get Market Orderbook</a></td><td><span class="pill live">Done</span> — dashboard quotes <code>depth=15</code></td></tr>
+        <tr><td>5</td><td><b>Show data freshness on every live number.</b> Market reads can be cached for a few seconds — display “as of” timestamps.</td><td><a href="https://docs.kalshi.com/api-reference/market/get-market" target="_blank" rel="noopener">Get Market</a></td><td><span class="pill live">Done</span> — status bar shows the update time</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2>Priority 2 — charts that match what the API can provide</h2>
+    <table>
+      <thead><tr><th>#</th><th>Suggestion</th><th>Official source</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>6</td><td><b>Be explicit about chart resolution.</b> Candlesticks are 1-minute, 1-hour or 1-day only. A “seconds” view can come only from live poll samples or the trade stream, and the chart should label which.</td><td><a href="https://docs.kalshi.com/api-reference/market/get-market-candlesticks" target="_blank" rel="noopener">Get Market Candlesticks</a></td><td><span class="pill live">Done</span> — chart labels “candles + live poll points”</td></tr>
+        <tr><td>7</td><td><b>Use trade prints for price-move evidence.</b> <code>GET /markets/trades</code> with <code>min_ts</code>/<code>max_ts</code> (seconds) can mark the exact print that carried a $0.10 move.</td><td><a href="https://docs.kalshi.com/api-reference/market/get-trades" target="_blank" rel="noopener">Get Trades</a></td><td><span class="pill live">Done</span> — “what may have moved it” tape panel</td></tr>
+        <tr><td>8</td><td><b>Decide whether block trades trigger alerts (our design).</b> Trades carry <code>is_block_trade</code>; make the choice explicit.</td><td><a href="https://docs.kalshi.com/api-reference/market/get-trades" target="_blank" rel="noopener">Get Trades</a></td><td><span class="pill warn">Open — owner decision</span></td></tr>
+        <tr><td>9</td><td><b>Label the $0.10 alert rule as ours (our design).</b> The threshold is the brief’s; the detection method (consecutive observed prices, tick-space) is ours and is documented on the Method page.</td><td><a href="https://docs.kalshi.com/api-reference/market/get-market" target="_blank" rel="noopener">Get Market</a></td><td><span class="pill live">Done</span> — Method page + alert rows</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2>Priority 3 — demo account and trading</h2>
+    <table>
+      <thead><tr><th>#</th><th>Suggestion</th><th>Official source</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>10</td><td><b>Never use legacy order endpoints.</b> Legacy <code>/portfolio/orders</code> writes return <code>410 Gone</code>; V2 is <code>/portfolio/events/orders</code>.</td><td><a href="https://docs.kalshi.com/api-reference/orders/create-order-v2" target="_blank" rel="noopener">Create Order V2</a></td><td><span class="pill live">Done</span> — client + server use V2 only</td></tr>
+        <tr><td>11</td><td><b>React to fills instead of polling balance.</b> <code>GET /portfolio/balance</code> is rate-limited to ~1/s on lower tiers; the docs recommend reacting to the user-fills channel.</td><td><a href="https://docs.kalshi.com/getting_started/rate_limits" target="_blank" rel="noopener">Rate Limits</a></td><td><span class="pill warn">Open — needs a demo key</span></td></tr>
+        <tr><td>12</td><td><b>Use the dedicated user host for fills.</b> <code>wss://user-ws.demo.kalshi.co/trade-api/ws/v2</code> delivers <code>fill</code>/<code>user_orders</code> with lower latency.</td><td><a href="https://docs.kalshi.com/getting_started/api_environments" target="_blank" rel="noopener">API Environments</a></td><td><span class="pill warn">Open — needs a demo key</span></td></tr>
+        <tr><td>13</td><td><b>Sign requests correctly.</b> Sign <code>timestamp + METHOD + path</code> without the query string; keep the clock within 30 seconds.</td><td><a href="https://docs.kalshi.com/getting_started/quick_start_authenticated_requests" target="_blank" rel="noopener">Authenticated Requests</a></td><td><span class="pill live">Done</span> — <code>kalshi_client.py</code> implements this verbatim</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2>Priority 4 — trader UX (our design)</h2>
+    <table>
+      <thead><tr><th>#</th><th>Suggestion</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>14</td><td><b>Two labelled alert chats</b> — “all events” and “high-ROI filter”, with the filter rule shown on the page (the ROI screen is a disclosed placeholder until your model is supplied).</td><td><span class="pill live">Done</span> — dual chats + “why filtered out” reasons</td></tr>
+        <tr><td>15</td><td><b>Topic tabs with event groups</b> — topics separate, markets nested under their event.</td><td><span class="pill live">Done</span> — topic tabs + grouped events table</td></tr>
+        <tr><td>16</td><td><b>Simple sparklines and one main chart</b> with a single time-range selector (seconds, minutes, hours).</td><td><span class="pill live">Done</span> — one canvas chart, 1 min → 1 week windows</td></tr>
+        <tr><td>17</td><td><b>Exchange status / maintenance banner.</b> Show a banner when trading is paused.</td><td><a href="https://docs.kalshi.com/getting_started/maintenance_and_pauses" target="_blank" rel="noopener">Maintenance and Pauses</a> · <a href="https://docs.kalshi.com/api-reference/exchange/get-exchange-status" target="_blank" rel="noopener">Get Exchange Status</a></td><td><span class="pill warn">Partly</span> — status pill exists; pause banner not wired</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2>Open questions (never guessed)</h2>
+    <ul>
+      <li><b>Browser CORS for the REST hosts</b> is not documented — tested in the browser, flagged F6.</li>
+      <li><b>Numeric public rate limits</b> vary by tier; the dashboard paces itself far under them (flag F-sources in <code>SUGGESTIONS.md</code>).</li>
+      <li><b>The high-ROI “model”</b> is a disclosed placeholder heuristic (Method page) until a model is supplied.</li>
+    </ul>
+    <p class="muted">Anything on this page that cannot be confirmed against an official source stays labelled
+    <b>(our design)</b> or <b>Open</b> — never presented as a Kalshi fact.</p>
+  </section>
+
+</main>
+<footer><a href="index.html">← Home</a> · <a href="methodology.html">Methodology</a> · <a href="flagged.html">Flagged for Review</a></footer>
+</body>
+</html>

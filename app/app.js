@@ -13,7 +13,9 @@ const state = {
   detailTicker: null,
   chartWindow: 'minutes',
   alertFilters: { basis: '', topic: '', direction: '' },
-  marketFilter: { topic: '', sort: 'volume' },
+  // Default to confirmed dollar-denominated book depth: users asked to surface the
+  // highest-dollar live opportunities. Contract counts stay separately labeled below.
+  marketFilter: { topic: '', sort: 'liquidity' },
   es: null,
   seenAlertIds: new Set(),
   lastAlertSignature: '',
@@ -164,7 +166,7 @@ function renderKpis() {
     kpi('Tracked markets', fmtNum(tracked), '5 topics only'),
     kpi('Swings ≥ $0.10', fmtNum(d.alertCounts?.total ?? 0), 'since collector start'),
     kpi('Model picks', fmtNum(d.alertCounts?.model ?? 0), `score ≥ ${d.highRoiMinScore ?? 45}`),
-    kpi('24h volume', fmtMoney(vol), 'contracts across tracked'),
+    kpi('24h contract volume', fmtNum(vol), 'contracts · Kalshi API field'),
     kpi('Biggest swing', biggest ? fmtPrice(biggest.moveDollars) : '—', biggest ? esc(truncate(biggest.title, 34)) : 'none yet'),
     kpi('Paper P&L', p ? fmtCents(p.realizedPnlCents) : '—', p ? `${p.tradeCount} closed · ${p.openPositionCount} open` : ''),
   ].join('');
@@ -310,11 +312,12 @@ function renderMarketTable() {
       <td><a href="${esc(m.kalshiUrl || kalshiUrl(m.ticker))}" target="_blank" rel="noopener">source ↗</a></td>
     </tr>`;
   }).join('');
-  $('#marketTable').innerHTML = `<thead><tr><th>Topic</th><th>Market</th><th>Last</th><th>Δ day</th><th>Bid/Ask</th><th>24h vol</th><th>OI</th><th>Book $</th><th>Closes</th><th>Source</th></tr></thead>
+  $('#marketTable').innerHTML = `<thead><tr><th>Topic</th><th>Market</th><th>Last</th><th>Δ day</th><th>Bid/Ask</th><th>24h contracts</th><th>OI contracts</th><th>Book liquidity ($)</th><th>Closes</th><th>Source</th></tr></thead>
     <tbody>${rows || '<tr><td colspan="10" class="empty">No markets tracked yet.</td></tr>'}</tbody>`;
   $('#marketFootnote').innerHTML =
     'Δ day compares the current price with Kalshi\'s <code>previous_price_dollars</code> field ("Price for the last traded YES contract on this market a day ago"). ' +
-    'Book $ is the dollar notional of all resting bids on both sides of the book. Click a row for the chart and depth.';
+    'Sorted by order-book liquidity ($) by default: displayed notional is price × contracts for the resting YES and NO bids returned by Kalshi. This is available bid depth, not traded dollar volume. Kalshi’s 24h volume field is contracts, so it is shown as a count rather than converted to dollars. ' +
+    '<a href="https://docs.kalshi.com/getting_started/orderbook_responses" target="_blank" rel="noopener">Official order-book field definitions ↗</a>. Click a row for the chart and depth.';
   wireRowClicks($('#marketTable'));
 }
 

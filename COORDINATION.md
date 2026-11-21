@@ -23,6 +23,52 @@
 
 ## Handoff / conflict log
 
+- 2026-11-21 (session `arena/25db01aa-trade3`, branch `arena/25db01aa-trade3`, based on `main` @ `4eb92a1`):
+  **Claimed before any other edit** —
+  | ID | Task | Status | Files touched |
+  |----|------|--------|---------------|
+  | T25-1 | Repair the Pages deploy pipeline ordering | **closed as superseded** — sessions `arena/8214edf2-trade3` (PR #18) and `arena/8373696a-trade3` (PR #19) independently made the same fix and it is merged on `main`; this session's duplicate change to `.github/workflows/pages.yml` was **dropped in favour of upstream's version** during rebase (no other session's work discarded) | none |
+  | T25-2 | Re-run every local gate | **done** (pre-rebase and again after rebase onto `main` @ `7eed55c`, covering PRs #21/#23 changes) | record only |
+  | T25-3 | Live spot re-verification via the official demo API | **done** | record only |
+  | T25-4 | Integration: PR to `main`, merge, record deploy outcome | done | `COORDINATION.md` |
+
+  **Conflict note:** while this session worked, `main` gained PRs #18–#24 (merges at 2026-11-21T07:06–07:08Z).
+  PR #26 from this branch hit "merge conflicts" against that; resolution was a rebase onto `main` @ `7eed55c`
+  with this session's duplicate `pages.yml` fix dropped (upstream already contains the equivalent fix).
+  Nothing from any other session was modified or discarded.
+
+## Session `arena/25db01aa-trade3` — verification performed (2026-11-21)
+
+| Check | Tool / official source | Result |
+|---|---|---|
+| Full test suite (pre-rebase) | `npm test`, `check_site.py`, `check-links.js`, `render.test.mjs`, `site-render-test.js`, `py_compile` | **pass** — logic pass, smoke 15/15, site-render 13/13, 28 pages / 360 links / 39 rows, 0 broken links |
+| Full test suite (post-rebase, on `main` @ `7eed55c` incl. PR #21 audit + PR #23 dollar-book-depth) | same commands | **pass** — logic pass, smoke 15/15, site-render 13/13, site gate pass, links pass, render tests pass |
+| Workflow YAML validity | `yaml.safe_load` on `pages.yml` | valid; deploy job order: checkout → informational probe → configure-pages (enablement, caught) → readiness verdict → configure-pages → upload → deploy |
+| Demo exchange status | [GET /exchange/status](https://external-api.demo.kalshi.co/trade-api/v2/exchange/status) | `exchange_active: true`, `trading_active: true`, shards 0–3 (live 2026-11-21T07:1xZ) |
+| Gas row KXAAAGASM | [official series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASM) | title "US gas price", category Economics, tags `["Oil & Gas","Oil and energy"]`, AAA settlement, fee_multiplier 1 — matches published row |
+| Elections row POPVOTEKHVA | [official series record](https://external-api.demo.kalshi.co/trade-api/v2/series/POPVOTEKHVA) | title "Kamala Virginia", category Elections, US Congress settlement — matches |
+| Culture row KXXBANNEDGROK | [official series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXXBANNEDGROK) | title "Will Grok be banned this year", category Culture; raw settlement list contains non-official entries (Google-search URLs, personal X account) — published row correctly blanks it under the official-publishers-only policy (flag F10) |
+| Crypto row KXLINKPERP | [official series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXLINKPERP) | title "1 LINK", category Crypto, `settlement_sources: null`, empty `contract_url` — matches published row and flag F18 |
+| Golf row KXPGAGOLFERSCORE | [official series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAGOLFERSCORE) | title "Golf Round Strokes", category Sports, tags `["Golf"]`, 5 official settlement sources — matches |
+| Sandbox egress | `curl` to Kalshi host | TLS reset (000) — shell cannot reach Kalshi; live reads done via the page-fetch path (recorded since session `63ad86b3`) |
+
+## Session `arena/25db01aa-trade3` — irregularities / new evidence
+
+1. **F8 is now proven on the Actions route too (new, conclusive evidence).** Post-fix runs on `main`
+   (run [44878359483](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44878359483), PR #18 merge push)
+   show `actions/configure-pages@v5` with `enablement: true` failing at `POST /repos/{owner}/{repo}/pages` with
+   **403 "Resource not accessible by integration"** — i.e. even the workflow's own `GITHUB_TOKEN` granted
+   `pages: write` cannot create the site, because this repo's automation runs under a GitHub App installation that
+   does not include the Pages permission. Combined with the 403s from the session token (`POST /pages`, `PATCH
+   has_pages`, `POST /pages` re-tested this session), every automation route is exhausted.
+   **Owner action remains the only path (one time):** Repo → Settings → Pages → Build and deployment →
+   Source: **GitHub Actions** → Save. After that, every push to `main` (or "Deploy GitHub Pages" → Run workflow)
+   publishes `docs/` at https://wingbangboozle1-lang.github.io/Trade3/ with no further code change.
+2. Minor doc note (pre-existing, not edited in this scope): `requirements/REQUIREMENTS.md` still references
+   unmerged `site/` paths from the `d9376510` parallel build; the published data/pages live under `docs/`.
+   Flagged for the next documentation pass.
+
+
 - 2026-11-20: Session `arena/73b9db7f-trade3` created this board and claimed T1–T5 (solo session; no other sessions active on this repo). T6 to be claimed at integration time.
 - No cross-session file requests at this time.
 
@@ -697,6 +743,46 @@ re-verification checks + the Pages blocker) is fully duplicated by later merged 
 
 ---
 
+# Session `arena/6c20e938-trade3` — line-by-line review, live re-verification, feature pass, integration (2026-11-21)
+
+**Claim (this session, branch `arena/6c20e938-trade3`, based on `main` @ `39e3a3d`, merged `origin/main` @ `ccf1688`):**
+Claim committed and pushed before any task work started (rule: claim first, commit immediately).
+
+| Task | Status | Owner | File scope |
+|---|---|---|---|
+| T-6C1 Full line-by-line repo review + live re-verification of published rows/facts against official Kalshi sources (this sandbox has live API + docs access via page fetch) | in progress | `arena/6c20e938-trade3` | `VERIFICATION.md`, `EXECUTIVE_SUMMARY.md`, `docs/data/series.json` (verification fields only) |
+| T-6C2 Requirements audit + defect/feature pass (alerts chat pair, chart time axes, liquidity depth, simulated trades, portfolio analytics, resolution tracking, topic organization) | in progress | `arena/6c20e938-trade3` | `docs/**`, `server/**`, `scripts/**`, `tests/**`, `kalshi_client.py`, `strategies.py`, `backtest.py`, `run_sim.py` |
+| T-6C3 Final integration: local gates, PR to `main`, merge, Pages deploy attempt + record | in progress | `arena/6c20e938-trade3` | `COORDINATION.md`, `.github/workflows/*`, integration only |
+
+No other session is active on this repo (last activity: `arena/ca612a03-trade3`, merged PR #14). Open PR #5 (`arena/b28d6df0-trade3`) noted for the integration step; will be handled there, not edited here.
+
+## Handoff / conflict log
+
+- 2026-11-21: Session `arena/6c20e938-trade3` created this claim. Merged `origin/main` (`ccf1688`, PR #14 record) into this branch; `COORDINATION.md` add/add resolved by taking `main`'s superset version, section preserved verbatim.
+
+### T-6C1 / T-6C2 completion record (2026-11-21)
+
+**T-6C1 — verification performed (all live fetches on 2026-11-21 by this session):**
+
+| Check | Source (official) | Result |
+|---|---|---|
+| Exchange status | [GET /exchange/status](https://external-api.demo.kalshi.co/trade-api/v2/exchange/status) | `exchange_active: true`, `trading_active: true`, shards 0–3 |
+| Series rows re-read field-by-field (5 of 39, one+ per topic): `KXNGASMAX`, `KXXBANNEDGROK`, `KXLINKPERP`, `POPVOTEKHVA`, `KXPGAT20` | `GET /series/{ticker}` (linked per row in `docs/data/series.json`) | All match their published rows. `verified_on` bumped to 2026-11-21 for those rows. Note: `NGASMAX` and `KXNGASMAX` are two distinct live series sharing a title — checked before changing anything; not a defect |
+| `KXAAAGASM`, `KXETHD`, `KXPGAGOLFERSCORE` | re-read 2026-11-21 by session `arena/ca612a03-trade3` (record above) | Match |
+| Remaining 32 rows | [verify-live.yml](https://github.com/wingbangboozle1-lang/Trade3/actions/workflows/verify-live.yml) sweeps all 39 every 6 h from GitHub runners | Latest scheduled run [44850068547](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44850068547) — `success` |
+| Fee schedule PDF | [kalshi-fee-schedule.pdf](https://kalshi.com/docs/kalshi-fee-schedule.pdf) | Re-read 2026-11-21: formula, maker 0.0175, no settlement fee, effective July 7 2026, KXBTCY/KXETHY zero multipliers |
+| Market-data quick start (F6 claim) | [Quick Start: Market Data](https://docs.kalshi.com/getting_started/quick_start_market_data) | Page ships runnable JS `fetch()` examples — F6's citation is grounded |
+| All cited docs paths | [llms.txt](https://docs.kalshi.com/llms.txt) | Present; canonical slug `get-market-orderbook` matches the repo's citations |
+
+**T-6C2 — defects/fixes (details in VERIFICATION.md "session arena/6c20e938-trade3"):**
+
+1. `docs/assets/portfolio.js` swing-momentum still compared `d >= 0.10` in float (exactly-10¢ moves dropped) despite the record claiming all comparisons were tick-space — fixed with shared `ticks`/`movedTicks`/`isSwing` (`docs/assets/app.js`), used by `dashboard.js` too; regression tests in `tests/logic.test.mjs` (0.42−0.32 case).
+2. `VERIFICATION.md` had two rows with duplicate IDs (V21 and V22 each used twice) — renumbered V30/V31, content preserved.
+3. `requirements/REQUIREMENTS.md` "Where" column cited never-merged paths (`app/config.mjs`, `app/lib/*.mjs`, `site/`, `scripts/lib/render.mjs`, `scripts/verify-sources.mjs`) — re-pointed to the real implementations; requirements unchanged.
+4. R19's `/suggestions.html` page did not exist — built `docs/suggestions.html` (17 ranked suggestions, official sources, live status) and linked it in all 12 Build A navs + the landing section.
+5. `docs/flagged.html` F8 re-tested 2026-11-21 (POST /pages still 403); EXECUTIVE_SUMMARY window list/culture count/flag numbering corrected.
+
+**Gates re-run green after the changes:** `npm test` (logic + 15/15 smoke + 13/13 render), `tests/render.test.mjs` (jsdom) pass, `check-links.js` 387 refs OK, `check_site.py` 39 rows OK, `py_compile` OK. Server boot test (`DATA_MODE=demo`, port 3000): `/api/health`, `/api/state`, `/api/alerts?feed=all|model`, `/api/resolutions`, `/api/portfolio`, `/api/stream` (SSE hello), `/app/`, `/site/`, `/`, `/suggestions.html` all 200; synthetic mode unmistakably labelled in `/api/health` notes.
 # Session `arena/0c39a477-trade3` — final verification + publish pass (2026-11-21)
 
 **Role:** final integration/verification session. Branch `arena/0c39a477-trade3` was identical to `main`
@@ -765,6 +851,196 @@ the moment the owner performs the one-time F8 action.
 
 ---
 
+# Session `arena/8214edf2-trade3` — Pages enablement via Actions + publish (2026-11-21)
+
+**Claim (committed before any other change; branch `arena/8214edf2-trade3`, based on `main` @ `4eb92a1`):**
+
+| Task | Status | Owner | File scope |
+|---|---|---|---|
+| T-8214-1 Retry Pages enablement via REST (`POST /repos/.../pages`, `build_type=workflow`) | done — **403** again | `arena/8214edf2-trade3` | none (API call only) |
+| T-8214-2 Make `pages.yml` create the Pages site with `actions/configure-pages` `enablement: true` instead of exiting at a 404 pre-check (the pre-check previously stopped the run before that step was ever reached) | done (merged PR #18, merge commit `a46d67e`) — **enablement still refused: 403** | `arena/8214edf2-trade3` | `.github/workflows/pages.yml` |
+| T-8214-3 Merge to `main`, run deploy, record the Pages URL and result | done — **blocked**: deploy runs `44878359483` and `44878420679` both fail at `Run actions/configure-pages@v5` with `Resource not accessible by integration` (create-site, HTTP 403); `GET /repos/.../pages` → 404; `https://wingbangboozle1-lang.github.io/Trade3/` → no response | `arena/8214edf2-trade3` | `COORDINATION.md` (record only) |
+
+No other session is active; no conflicting claims exist on the board.
+
+> **Handoff note (session `arena/8373696a-trade3`, 2026-11-21):** While this branch was open, PR #18 from `arena/8214edf2-trade3` merged the same Pages workflow fix (remove 404 pre-check, let `configure-pages` enablement create the site). Both sessions independently reached the same conclusion. Resolution: kept upstream's `pages.yml` (pre-check removed) and kept both COORDINATION records. No work discarded.
+# Session `arena/8373696a-trade3` — final integration + independent re-verification (2026-11-21)
+
+**Session ID:** `arena/8373696a-trade3` · **Branch:** `arena/8373696a-trade3` · **Base:** `4eb92a1` (`origin/main`, PR #17 merged).
+
+## Task claimed
+
+| ID | Task | Status | Owner | Files touched |
+|----|------|--------|-------|---------------|
+| T9 | Independent line-by-line re-verification against official Kalshi docs + live demo API; full test suite; Pages workflow fix attempt; PR to `main`, merge, deploy check | in progress | `arena/8373696a-trade3` | `COORDINATION.md`, `.github/workflows/pages.yml` (deploy-job ordering only, if needed) |
+
+## Independent verification performed this session (fetched live 2026-11-21 via docs proxy)
+
+| Check | Source | Result |
+|-------|--------|--------|
+| Demo REST/WS base URLs (recommended + alternate) | [API Environments](https://docs.kalshi.com/getting_started/api_environments) | Match brief exactly: `external-api.demo.kalshi.co/trade-api/v2`, `demo-api.kalshi.co/trade-api/v2`, `wss://external-api-ws.demo.kalshi.co/trade-api/ws/v2`, `wss://demo-api.kalshi.co/trade-api/ws/v2` |
+| Demo caveat "may not be reflective" | [Demo Environment](https://docs.kalshi.com/getting_started/demo_env) | Confirmed verbatim |
+| `GET /exchange/status` | [Live API](https://external-api.demo.kalshi.co/trade-api/v2/exchange/status) | `exchange_active:true`, `trading_active:true`, shards 0–3 |
+| `GET /series?category=Culture` | [Live API](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture) | 2 series (`KXXBANNEDGROK`, `KXXBANNEDMURRAYHILLGUY1`), each `"category":"Culture"` — confirms F1 correction |
+| `GET /series?category=Gas` / `?category=Golf` | [Live API](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Gas) | Both `{"series":null}` — no such categories; Gas=Economics+Oil & Gas, Golf=Sports+Golf |
+| `GET /series/KXAAAGASM` | [Live API](https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASM) | Economics · Oil & Gas/Oil and energy · scope Gasoline · AAA settlement |
+| `GET /series/KXPGATOUR` | [Live API](https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGATOUR) | Sports · Golf · scope Game · Fox/ESPN/PGA Tour |
+| `GET /series/KXBTCD` | [Live API](https://external-api.demo.kalshi.co/trade-api/v2/series/KXBTCD) | Crypto · Crypto/Hourly/Bitcoin · CF Benchmarks BRTI |
+| `GET /markets?series_ticker=KXAAAGASM&status=open` | [Live API](https://external-api.demo.kalshi.co/trade-api/v2/markets?series_ticker=KXAAAGASM&status=open&limit=2) | Fields `yes_bid_dollars`, `last_price_dollars`, `volume_fp`, `open_interest_fp`, `result`, `status:active` present; titles ship markdown (`**gas prices**`) |
+| Settlement $1/contract, zero fee for yes/no | [Market Settlement](https://docs.kalshi.com/getting_started/market_settlement) | Confirmed |
+| Lifecycle statuses + filter map | [Market Lifecycle](https://docs.kalshi.com/getting_started/market_lifecycle) | 8 statuses; `open`→`active`, `settled`→`finalized`, `result` yes/no/scalar |
+| Candlesticks `period_interval` ∈ {1,60,1440} | [Get Market Candlesticks](https://docs.kalshi.com/api-reference/market/get-market-candlesticks) | Confirmed; shortest candle 1 minute (seconds charts must be own sampling) |
+| Create Order V2 `POST /portfolio/events/orders` | [Create Order V2](https://docs.kalshi.com/api-reference/orders/create-order-v2) | Confirmed (`side` bid/ask, `count` "10.00", `price` "0.5600") |
+| Pages enablement | `gh api POST /repos/.../pages` | 403 "Resource not accessible by integration" (reproduced); `GET /pages` → 404. Owner click still required (F8). |
+
+## Tests (this session, to be recorded after run)
+
+- `npm test`, `python3 scripts/check_site.py`, `node scripts/check-links.js` — results below after run.
+
+## Tests run this session (2026-11-21)
+
+- `npm test` — **logic + 15/15 engine + 13/13 site** (all pass).
+- `python3 scripts/check_site.py` — 28 pages, 360 local links, 20 JS modules, 39 series rows — **all site checks passed**.
+- `node scripts/check-links.js` — 28 HTML pages, 20 JS files, 360 references — **all resolve**.
+- `python3 -m py_compile` on Python layer — **OK**.
+- Server boot (`DATA_MODE=demo PORT=3100`): `/api/health` → `ok:true`, `/api/state` → 5 topics tracked, `/app/` → 200, `/` → 200. Demo mode correctly labels synthetic data as NOT Kalshi markets.
+
+## Workflow fix (this session)
+
+- `.github/workflows/pages.yml` deploy job reordered: `configure-pages` (enablement:true) now runs **before** the readiness probe, and the probe is informational (warning, not `exit 1`). Previously the probe exited before `configure-pages` ever ran, so the Actions token never attempted enablement. If the Actions token can create Pages, the next run deploys; if it still gets 403, the owner click (F8) remains the only route. No site code changed.
+
+## Irregularities (non-blocking, on Flagged page)
+
+- F8 Pages enablement still requires one owner click (reproduced 403 this session). Site itself is verified and not broken.
+- All other flags F1–F25 unchanged; no new unverified values introduced. No hallucinations: every value in this record links its official source above.
+# Session `arena/658d547d-trade3` — claim (2026-11-21)
+
+**Branch:** `arena/658d547d-trade3` (fixed for this session; based on `main` @ `4eb92a1`). The task text names
+`session-<id>/<task>` branches; the session rules for this run require the assigned `arena/…` branch, so that name is used.
+
+| Task | Status | Owner | File scope |
+|---|---|---|---|
+| T-R1 Re-run all local gates on `main` (`npm test`, `check_site.py`, `check-links.js`, Python compile + offline checks) | **done** | `arena/658d547d-trade3` | none (read-only) |
+| T-R2 Spot re-verify published values against the official Kalshi demo API and docs (via fetch, not sandbox bash) | **done** (5 fetches + 4 cached rows) | `arena/658d547d-trade3` | `docs/data/series.json` (read only) |
+| T-R3 GitHub Pages enablement retry (`POST /repos/…/pages`, `build_type=workflow`) | **done — blocked** (403) | `arena/658d547d-trade3` | none (API call only) |
+| T-R4 Add flag F26 (golf settlement label), record results, PR to `main`, merge, Pages status | **done** (merge) · **blocked** (Pages) | `arena/658d547d-trade3` | `docs/flagged.html`, `docs/dashboard-site/assets/data.js`, `docs/index.html` (flag count only), `COORDINATION.md` |
+
+No other session has an open claim on the board. Files owned by other sessions are not touched.
+
+## Results — session `arena/658d547d-trade3` (2026-11-21)
+
+### Gates (run in this sandbox on the `main` tree plus the F26 edit)
+
+| Gate | Result |
+|---|---|
+| `npm test` (logic + smoke + site-render) | pass — logic pass, engine 15/15, site render 13/13 |
+| `python3 scripts/check_site.py` | pass — 28 pages, 360 local links, 20 JS modules, 39 series rows |
+| `node scripts/check-links.js` | pass — 360 local references resolve; no broken links, anchors, imports or DOM targets |
+| `python3 -m py_compile` (6 Python files) | pass |
+| Python offline checks (strategies, paper ledger, V2 order body, topic vocabulary) | pass — run in a venv at `/tmp` (system Python blocks pip under PEP 668) |
+| `verify_series.py --from-cache docs/data/live-verification-2026-11-20.json --skip-uncached` | 4/4 rows OK; 35 rows NOT CHECKED (not in cache — not a mismatch) |
+
+### Live spot checks (official Kalshi demo API and docs, fetched 2026-11-21)
+
+| Check | Official source | Result |
+|---|---|---|
+| Exchange status | [GET /exchange/status](https://external-api.demo.kalshi.co/trade-api/v2/exchange/status) | `exchange_active: true`, `trading_active: true`, shards 0–3 |
+| Culture category | [GET /series?category=Culture](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture) | `KXXBANNEDGROK`, `KXXBANNEDMURRAYHILLGUY1`, both `Culture` — matches `series.json` |
+| Crypto row | [GET /series/KXETHD](https://external-api.demo.kalshi.co/trade-api/v2/series/KXETHD) | `Crypto`, hourly, CF Benchmarks RTI URL — matches `series.json` |
+| Golf row | [GET /series/KXPGAT20](https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAT20) | `Sports`, tag `Golf`; settlement is "the Governing League" → pgatour.com — **label differs, see F26** |
+| Settlement rule | [docs.kalshi.com/getting_started/market_settlement](https://docs.kalshi.com/getting_started/market_settlement) | Yes and No holders each receive $1 per contract — matches the dashboard |
+
+### Pages retry (T-R3)
+
+- `POST /repos/wingbangboozle1-lang/Trade3/pages` with `build_type=workflow` → **403 "Resource not accessible by integration"** (token has repo admin, but not the Pages scope). `GET .../pages` → 404.
+- No workaround was attempted (no other token, no branch-based Pages, no change to the workflow's trust model).
+- **Owner action, one time:** Repo → Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save. Then run "Deploy site to GitHub Pages" (or push to `main`). Expected URL: https://wingbangboozle1-lang.github.io/Trade3/
+
+### Irregularities (this session)
+
+1. **F26 (new, on the Flagged page):** golf settlement source label differs between `docs/data/series.json` ("PGA Tour") and `docs/dashboard-site` ("the Governing League (pgatour.com)"). The API gives the URL and the name "the Governing League"; "PGA Tour" is an inference from the URL. Wording flagged, value not changed.
+2. **Two site builds with separate flag stores.** `docs/flagged.html` and `docs/dashboard-site/assets/data.js` each keep their own list (F1–F26 vs. the dashboard-site list). Both now carry F26; unifying them is a larger change and was left for a later integration pass.
+3. **Pages still not live** (F8). The deploy job fails at its readiness step by design; the verified site is not broken.
+4. **Branch name.** The task text asks for `session-<id>/<task>` branches. This session's rules fix the branch to `arena/658d547d-trade3`, so that name is used.
+5. **Sandbox egress.** Bash cannot reach `*.kalshi.co`; live values were read through the fetch tool. Nothing was read from the sandbox shell.
+
+### Merge (T-R4)
+
+- **PR #20:** https://github.com/wingbangboozle1-lang/Trade3/pull/20 (`arena/658d547d-trade3` → `main`). Merge result: see the PR page (`gh pr view 20`). The Pages deploy triggered by this merge is the live test of the `configure-pages enablement: true` step on `main`.
+### Record (this session)
+
+- PR #18 `arena/8214edf2-trade3` → `main`: **MERGED** 2026-11-21T07:02Z, merge commit `a46d67e`. Change: `.github/workflows/pages.yml` pre-check removed; `configure-pages` runs with `enablement: true`.
+- Gates on the branch before merge: `scripts/check_site.py` pass (39 series rows); `scripts/check-links.js` pass (360 refs, 0 broken); `tests/logic.test.mjs` pass; `tests/smoke-test.js` 15/15.
+- Verify job on `main` (run `44878359483`): **success**. Deploy job: **failure** at `configure-pages` (see above).
+- Irregularity **F8 (updated)**: the automation token cannot create the Pages site by either route — the REST `POST /pages` call (`build_type=workflow`) and `configure-pages` `enablement: true` both return 403 "Resource not accessible by integration". The token has repo admin per `gh api`, but the Actions/REST token lacks Pages site-creation scope. This is a platform/token limit, not a site defect; no token or credential was requested or stored.
+- **Owner action (one time, ~30 seconds):** GitHub repo → Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save. Then Actions → "Deploy site to GitHub Pages" → Run workflow. Expected URL: `https://wingbangboozle1-lang.github.io/Trade3/`.
+- Sources for this session's claims: GitHub REST Pages API (`https://docs.github.com/rest/pages/pages`), `actions/configure-pages` (`https://github.com/actions/configure-pages`). Run logs linked from the Actions tab.
+- Not done this session (honest scope): live Kalshi demo portfolio tracking and order placement (need user demo API keys; not in repo); WebSocket live feed (requires authenticated handshake); the sandbox has no direct egress to kalshi.co, so the per-row Kalshi re-check runs in CI (`verify-live.yml`) only.
+
+---
+
+# Session `arena/84e59a8b-trade3` — current-branch review and UX/verification follow-up (2026-11-21)
+
+**Claimed on `arena/84e59a8b-trade3` at base `4eb92a1`; rebased onto `main` at `9baaec4` and then `9ed35e9` to preserve concurrently merged work.**
+
+| Task | Status | Owner | File scope |
+|---|---|---|---|
+| T-84 Fresh review of live-market ranking and volume labelling; rerun local gates, verify claims against official sources, and report publish status | **done** | `arena/84e59a8b-trade3` | `COORDINATION.md`, `app/app.js`, `app/index.html` |
+
+### Changes
+- Live app market list now defaults to descending order-book liquidity in dollars, the directly available dollar-denominated measure for ranking largest displayed live books. The table labels this as available book depth, not traded dollar volume, and links the methodology to Kalshi's official order-book docs.
+- Corrected the overview KPI that previously formatted Kalshi's `volume_24h_fp` contract count as USD. It now reads `24h contract volume` and uses a number formatter. The markets table explicitly labels 24h volume and open interest as contracts.
+- No API data rows or market values were edited or inferred.
+
+### Official sources and checks
+- [Kalshi Get Markets](https://docs.kalshi.com/api-reference/market/get-markets): response schema distinguishes `volume_24h_fp` and `open_interest_fp` fixed-point fields from dollar-price fields (`last_price_dollars`, `notional_value_dollars`).
+- [Kalshi Orderbook Responses](https://docs.kalshi.com/getting_started/orderbook_responses): order-book arrays pair price in dollars with contract count and return bids only; the interface describes notional as displayed bid depth.
+- `npm test`: pass (logic, 15/15 engine checks, 13/13 site render checks).
+- `npm run test:all` (with temporary, untracked jsdom install): pass, including Build A headless dashboard, portfolio and deep-link render tests.
+- `python3 scripts/check_site.py`: pass (28 pages, 360 local links, 20 JS modules, 39 series rows).
+- `node scripts/check-links.js`: pass (360 local references, no broken links/anchors/imports/DOM targets).
+- Python `py_compile` for `kalshi_client.py`, `strategies.py`, `backtest.py`, `run_sim.py`, `scripts/verify_series.py`, `scripts/check_site.py`; `node --check` for `app/app.js` and all `server/*.js`: pass.
+- Snapshot-mode preview on port 3000: `/`, `/app/`, `/site/`, `/api/health`, `/api/state`, `/api/alerts`, `/api/portfolio` all returned HTTP 200. It reported snapshot mode and its captured timestamp, not live data.
+- GitHub Pages readiness re-check (`gh api repos/wingbangboozle1-lang/Trade3/pages`): HTTP 404, site still not enabled. No deploy success is claimed; F8 remains an owner-side blocker.
+
+### Parallel coordination / remaining limits
+- PR #21 (`arena/6c20e938-trade3`) and PR #22 (`arena/b47b1c48-trade3`) are open. Their branches/files were left untouched; the T-84 product patch changes only `app/app.js` and `app/index.html` besides this coordination record.
+- Live demo account reads/trading remain unavailable without owner-provided demo API credentials. This patch does not enable or attempt live orders.
+- News-cause attribution is not inferred. Existing F-series flags remain the review surface for external news feeds, authenticated WS and hosting limitations.
+
+### Rebase / conflict record
+- Two `git pull --rebase origin main` operations advanced main while PRs #20 and #24 merged. Both conflicts were in the append-only `COORDINATION.md`; resolved by keeping all latest main content and re-appending this session's record. No other session work was discarded.
+## Merge record (session `arena/8373696a-trade3`, T9)
+
+- **PR #19:** https://github.com/wingbangboozle1-lang/Trade3/pull/19 — "Final integration: independent re-verification + Pages workflow fix (8373696a)"
+- **Result:** **MERGED** 2026-11-21T07:03:14Z, merge commit `d7971ea`. Conflict with PR #18 (parallel session `arena/8214edf2-trade3` merged the same Pages fix first) resolved by keeping upstream `pages.yml` and both COORDINATION records; nothing discarded.
+- **Deploy runs triggered by the merges:**
+  - Run [44878359483](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44878359483) (PR #18): **Verify site — success** (all gates green); **Deploy — failure at `configure-pages`** with `HttpError: Resource not accessible by integration` (Create Pages site). `upload`/`deploy-pages` skipped.
+  - Run [44878420679](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44878420679) (PR #19): **Verify site — success**; **Deploy — same 403 at `configure-pages`**.
+- **Conclusion:** The site itself is verified and not broken (every check passes). GitHub Pages cannot be created by any automation token (403 on `POST /pages` from CLI, Actions `configure-pages`, and REST). **Owner action (one click, F8):** Repo → Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save. The next push to `main` (or Actions → "Deploy GitHub Pages" → Run workflow) then publishes `docs/` at `https://wingbangboozle1-lang.github.io/Trade3/` with no further code change. Expected URL: https://wingbangboozle1-lang.github.io/Trade3/
+- **T9 status:** done. All verification sources linked in the table above; no values inferred; flags F1–F25 remain on the Flagged page and do not block merge.
+
+### Merge and deploy record — session `arena/658d547d-trade3` (2026-11-21, final)
+
+- **PR #20** https://github.com/wingbangboozle1-lang/Trade3/pull/20 — **MERGED** 2026-11-21T07:04:32Z, merge commit `9baaec4`.
+- **Verify site job** on the merge commit (run [44878522179](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44878522179)): **success**, all 12 steps green (static site gate, link check, logic/engine/render tests, Python checks, live row re-verification, snapshot contract).
+- **Deploy job** on the same run: **failure at `actions/configure-pages@v5`** (the step that now runs `enablement: true`). Annotation from the runner: `HttpError: Resource not accessible by integration` — `Create Pages site failed`, pointing at the Pages REST docs. `upload-pages-artifact` and `deploy-pages` were skipped. This is the same owner-only blocker F8: the workflow's `GITHUB_TOKEN` is not allowed to create the Pages site, and the API token used by sessions gets the same 403.
+- **Not done, by design:** no workaround (no second token, no `gh-pages` branch, no change to the trust model). Nothing was merged that was not verified; the failing step is the enablement call only.
+- **Site status:** **not live.** Expected URL once enabled: https://wingbangboozle1-lang.github.io/Trade3/
+
+**One owner action is required (no code change):** Repo → Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save. Then run the "Deploy site to GitHub Pages" workflow (Actions → Run workflow on `main`). The verify job already passes, so the deploy should succeed right after that click.
+
+---
+
+# Session `arena/84e59a8b-trade3` — PR #23 merge/deploy addendum (2026-11-21)
+
+- **PR #23:** https://github.com/wingbangboozle1-lang/Trade3/pull/23 — merged by squash at `2026-11-21T07:07:13Z`; merge commit `622709c1060d3eb33bd92448e5d13c21fa9fb15d`.
+- **Main verification run:** [44878773776](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44878773776). Verify site job **success** (all checks, including live-row re-verification, green). Deploy job **failure** at `actions/configure-pages@v5`; upload/deploy were skipped. GitHub's log receiver returned EOF when requesting the failure text, but `gh run view` lists the exact failing step. This is F8 / Pages enablement, not a build or link-check failure.
+- Re-checked Pages with `gh api repos/wingbangboozle1-lang/Trade3/pages`: 404 (no Pages site). The workflow and site files were not changed by this addendum; PR #26's separate Pages work was left to its owner.
+- No deployment success or public Pages URL is claimed. Owner action remains Settings → Pages → Build and deployment → Source: GitHub Actions, unless the separate PR #26 resolves the site-creation limitation.
+
+---
+
 # Session `arena/77ec3a0e-trade3` — live re-verification, Pages blocker evidence, deploy hardening, final integration (2026-11-21)
 
 **Claim (this session, branch `arena/77ec3a0e-trade3`, based on `main` @ `4eb92a1`):**
@@ -807,3 +1083,19 @@ Claim pushed immediately after this edit, before starting work. No other session
 `npm test` (smoke 15/15 + site-render 13/13) · `node tests/logic.test.mjs` · `node scripts/check-links.js`
 (28 pages / 360 refs, 0 broken) · `python3 scripts/check_site.py` (39 rows) · `python3 -m py_compile` (all 6) ·
 `pages.yml` YAML parse OK.
+
+### Merge-conflict log (2026-11-21, session `arena/77ec3a0e-trade3`)
+
+`gh pr merge 29` initially refused: `main` had advanced via parallel sessions (`arena/6c20e938-trade3`,
+`arena/658d547d-trade3`, `arena/25db01aa-trade3`, PRs #26–#28) while this branch was in progress.
+`git merge origin/main` produced four conflicts, resolved **without discarding either side**:
+
+| File | Conflict | Resolution |
+|---|---|---|
+| `.github/workflows/pages.yml` | This branch's Pages-readiness gate (tries `POST /pages`, then a cited owner-action error) vs main's fix "let `configure-pages` enablement create the site" (PRs #18/#19, sessions 8214edf2/8373696a) | **Both kept, combined**: `configure-pages@v5` with `enablement: true` runs first (`continue-on-error`, so enablement always gets its chance — addressing the review note on main that the old pre-check exited before enablement could try), then the readiness gate repeats the same `POST /pages` create attempt and, only when creation is proven impossible for the run token, stops with the exact owner action and the official rule. Verified against the official action source (`api-client.js`: `findOrCreatePagesSite` fetches first, calls `createPagesSite` = `POST /pages` `build_type=workflow` on a miss — the identical call, same token). Duplicate trailing `configure-pages` step from the common hunk removed. |
+| `docs/flagged.html` | Both rewrote F8 | **Both kept, combined**: their session list (2100849c, ca612a03, 6c20e938) + this session's GET-404/POST-403 evidence + the official action.yml and api-client.js citations + the self-heal note. Their F26 row, nav link and header edits auto-merged untouched. |
+| `EXECUTIVE_SUMMARY.md` | Both appended a 2026-11-21 section at EOF | **Both kept**: session 6c20e938's audit section first (it landed on main first), then this session's re-verification section, whose workflow paragraph was updated to describe the combined flow actually merged. Their earlier header/table edits auto-merged untouched. |
+| `COORDINATION.md` | Both appended session records at EOF | **Both kept**: main's session records (6c20e938, 658d547d, 25db01aa, …) then this session's claim + T-AW1/T-AW2 records. |
+
+No other session's work was modified or removed; their unmerged-in files (tests, `docs/suggestions.html`,
+app JS chart windows 1m–1w, requirements) auto-merged cleanly and are unchanged by this resolution.

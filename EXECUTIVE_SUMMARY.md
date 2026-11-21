@@ -1,6 +1,6 @@
 # Executive Summary — Trade3 Kalshi Demo Dashboard
 
-**Date:** 2026-11-20 · **Environment:** Kalshi demo (mock funds) · **Site:** GitHub Pages (`docs/`)
+**Date:** 2026-11-20 · **last re-verified 2026-11-21** · **Environment:** Kalshi demo (mock funds) · **Site:** GitHub Pages (`docs/`)
 
 ## What was built
 
@@ -38,7 +38,7 @@ required for market data.
    high-ROI alerts) + Python backtest (`backtest.py`, `run_sim.py`) replaying snapshots.
    Results categorized by topic and strategy (trades, wins, PnL, win rate, ROI).
 5. **Live interactive charts.** Canvas chart: x = time, y = contract price ($0–$1).
-   Windows: 60s / 5m / 1h / 24h (seconds/minutes/hours). Backfill from candlesticks
+   Windows: 1m / 5m / 15m / 1h / 6h / 1d / 1w (seconds/minutes/hours). Backfill from candlesticks
    (`period_interval` 1/60/1440) + live poll points. Amber markers on ≥ $0.10 steps.
 6. **Liquidity.** `GET /markets/{ticker}/orderbook` — YES/NO bids with contract counts per price.
 7. **Jump causes.** Kalshi API has no news feed. Dashboard links each market to its official
@@ -62,7 +62,7 @@ required for market data.
 
 | Item | Result | Evidence |
 |---|---|---|
-| Series rows in the topic tables (gas 10, elections 5, crypto 10, golf 4, culture 2) | Re-read from `GET /series/{ticker}`. Corrections: two crypto series list no settlement source; one golf settlement list was incomplete; one URL shown exactly as returned. | [series.json](docs/data/series.json) (each row links its record) · [VERIFICATION.md](VERIFICATION.md) V21–V24 |
+| Series rows in the topic tables (gas 10, elections 5, crypto 10, golf 4, culture 10 = 2 Culture + 8 labelled Entertainment) | Re-read from `GET /series/{ticker}`. Corrections: two crypto series list no settlement source; one golf settlement list was incomplete; one URL shown exactly as returned. | [series.json](docs/data/series.json) (each row links its record) · [VERIFICATION.md](VERIFICATION.md) V21–V24 |
 | Culture topic | **Corrected.** Kalshi has a Culture category (2 series, no markets). The earlier "no Culture category" claim was wrong. | [Series by category: Culture](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture) |
 | Market rows in the published data file (Build B: 10 rows; 9 re-read) | 6 matched. 2 golf rows had yes-ask and no-bid reversed and were corrected. 1 row (KXELONMARS-99) had drifted volume and open interest and was updated. `KXAAAGASM-26NOV30-4.50` was not re-read in this pass. | [data.js](docs/dashboard-site/assets/data.js) `REVERIFIED` · V25 |
 | Fee schedule | Formula and effective date (July 7, 2026) confirmed. | [Fee schedule PDF](https://kalshi.com/docs/kalshi-fee-schedule.pdf) · V26 |
@@ -80,9 +80,11 @@ Full list with source links: [Flagged for Review](docs/flagged.html).
 - **F4 $ volume definition:** volume × price approximation; confirm intent.
 - **F5 High-ROI thresholds:** unvalidated heuristic; tune via backtest.
 - **F6 CORS:** verify live fetch on GitHub Pages HTTPS (Kalshi docs show browser fetch examples).
-- **F8 Demo-UI URL pattern:** `demo.kalshi.co/markets/{ticker}` could not be verified from an
-  official source; market links now use the verified API-record URL instead (flagged, needs
-  human confirmation in a browser).
+- **F21 Demo-UI URL pattern** (ledger renumbering: this item was F8 in an earlier draft):
+  `demo.kalshi.co/markets/{ticker}` could not be verified from an official source; market links
+  now use the verified API-record URL instead (flagged, needs human confirmation in a browser).
+- **F8 GitHub Pages:** still not enabled (403 for automation tokens, retried 2026-11-21);
+  the one-time owner click is documented on the flag page and in the workflow's failure summary.
 
 ## Second line-by-line review (2026-11-20, session `arena/2100849c-trade3`)
 
@@ -136,6 +138,25 @@ capture) · `site-render-test.js` (build B pages) · `py_compile` + the offline 
 
 ---
 
+## Line-by-line audit — session `arena/6c20e938-trade3` (2026-11-21)
+
+A third full pass re-verified the published record against the live demo API and official docs
+(fresh fetches on 2026-11-21: exchange status, five series records across all five topics, the
+market-data quick start, the llms.txt index, and the fee-schedule PDF). One published claim was
+overstated and is now corrected in [VERIFICATION.md](VERIFICATION.md): the 2026-11-20 "all
+threshold comparisons are tick-space" fix had **not** actually reached
+`docs/assets/portfolio.js`'s swing-momentum strategy (float `>= 0.10` still dropped exactly-10¢
+moves) and the dashboard used a float-epsilon test; both now share `ticks`/`movedTicks`/`isSwing`
+helpers with regression tests. Also fixed: duplicate verification IDs (V21/V22 collided),
+`requirements/REQUIREMENTS.md` pointing at files that do not exist in this tree, and the
+missing `/suggestions.html` page (now built and linked in every nav). Full detail:
+[VERIFICATION.md](VERIFICATION.md) "session arena/6c20e938-trade3" section.
+
+
+---
+
+---
+
 ## Re-verification + deploy-hardening pass — session `arena/77ec3a0e-trade3` (2026-11-21)
 
 Additive record. Everything above remains true except where noted.
@@ -165,7 +186,11 @@ Pages write permission is required. In the context of a GitHub App, the `adminis
 `pages:write` permissions are required."* No token in this environment has those permissions, so the
 site creation needs the one owner click (Settings → Pages → Source: **GitHub Actions** → Save).
 
-The deploy workflow (`pages.yml`) was hardened: when `GET /pages` is 404 it now **attempts
-`POST /pages` itself** before surfacing the owner-action error, so the deploy self-heals if the
-repository token ever gains the required permission. Flag F8 on the [Flagged for Review](docs/flagged.html)
-page carries this evidence and both source links.
+The deploy workflow (`pages.yml`) was hardened in a merge-safe combination with the parallel
+fix from sessions 8214edf2/8373696a (PRs #18/#19): `actions/configure-pages` with `enablement: true`
+gets its chance first (per the official `api-client.js`, it fetches the site and only calls
+`createPagesSite` — `POST /pages`, `build_type: workflow` — on a miss), and when that cannot create
+the site the readiness gate **repeats the `POST /pages` attempt itself** before surfacing the
+owner-action error, so the deploy self-heals if the repository token ever gains the required
+permission. Flag F8 on the [Flagged for Review](docs/flagged.html) page carries this evidence and
+all three source links.

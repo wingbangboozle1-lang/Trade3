@@ -3,12 +3,10 @@
 # The site is plain HTML/CSS/ES modules with no build step, so this workflow verifies it and
 # then uploads /docs. A site that fails a check never deploys.
 #
-# KNOWN ENVIRONMENT BLOCKER (recorded in COORDINATION.md): a repository whose Pages site has
-# never been created returns 403 "Resource not accessible by integration" to every token that
-# GitHub issues for automation, so the "Pages readiness" step below stops with an explicit
-# instruction instead of a confusing mid-deploy failure. One-time owner action, no code change:
+# PAGES ENABLEMENT: actions/configure-pages with `enablement: true` creates the Pages site
+# (build type: workflow) on first run if the repository has none. If the token is not allowed to
+# create it, that step fails and the run log says so; the one-time manual fallback is:
 #   Repo -> Settings -> Pages -> Build and deployment -> Source: GitHub Actions -> Save
-# After that click, every push to main deploys automatically.
 # Manual alternative: Actions -> "Deploy site to GitHub Pages" -> Run workflow.
 
 name: Deploy site to GitHub Pages
@@ -141,6 +139,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Combined resolution of two independent fixes (sessions arena/8214edf2-trade3 PR #18 /
+      # arena/8373696a-trade3, and session arena/77ec3a0e-trade3 — logged in COORDINATION.md):
+      # configure-pages with enablement: true gets its chance first (per findOrCreatePagesSite in
+      # the official action source, it fetches the site and only calls createPagesSite
+      # (POST /pages, build_type=workflow) when the fetch misses:
+      # https://github.com/actions/configure-pages/blob/main/src/api-client.js). Its failure is
+      # not terminal here: the readiness gate below repeats the same create attempt and, when the
+      # run token cannot create the site, stops with the exact owner action and the official rule
+      # (https://github.com/actions/configure-pages/blob/main/action.yml: the enablement option
+      # "requires a token other than GITHUB_TOKEN" - a PAT with the repo scope or Pages write
+      # permission, or a GitHub App with administration:write and pages:write).
+      - uses: actions/configure-pages@v5
+        continue-on-error: true
+        with:
+          enablement: true
+
       - name: Pages readiness
         env:
           GH_TOKEN: ${{ github.token }}
@@ -165,14 +179,10 @@ jobs:
               echo "Pages site created by the workflow token; continuing."
             else
               cat /tmp/pages-create.json || true
-              echo "::error title=GitHub Pages is not enabled on this repository::Pages has never been created for $GITHUB_REPOSITORY and the token for this run could not create it (POST /pages -> $post). Per the official actions/configure-pages action.yml (https://github.com/actions/configure-pages/blob/main/action.yml), enabling Pages needs a token other than GITHUB_TOKEN: a PAT with the repo scope or Pages write permission, or a GitHub App with administration:write and pages:write. Owner action, one time: Settings -> Pages -> Build and deployment -> Source: GitHub Actions -> Save, then re-run this workflow (or push to main). The site itself passed every check in the verify job."
+              echo "::error title=GitHub Pages is not enabled on this repository::Pages has never been created for $GITHUB_REPOSITORY and the token for this run could not create it (POST /pages -> $post; actions/configure-pages enablement failed the same way above). Per the official actions/configure-pages action.yml (https://github.com/actions/configure-pages/blob/main/action.yml), enabling Pages needs a token other than GITHUB_TOKEN: a PAT with the repo scope or Pages write permission, or a GitHub App with administration:write and pages:write. Owner action, one time: Settings -> Pages -> Build and deployment -> Source: GitHub Actions -> Save, then re-run this workflow (or push to main). The site itself passed every check in the verify job."
               exit 1
             fi
           fi
-
-      - uses: actions/configure-pages@v5
-        with:
-          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: docs
