@@ -151,8 +151,23 @@ jobs:
             "https://api.github.com/repos/$GITHUB_REPOSITORY/pages")
           echo "GET /repos/$GITHUB_REPOSITORY/pages -> $code"
           if [ "$code" = "404" ]; then
-            echo "::error title=GitHub Pages is not enabled on this repository::Pages has never been created for $GITHUB_REPOSITORY. Automation tokens are not allowed to create it (403 from POST/PUT /pages). Owner action, one time: Settings -> Pages -> Build and deployment -> Source: GitHub Actions -> Save, then re-run this workflow. The site itself passed every check in the verify job."
-            exit 1
+            # The site has never been created. Try to create it with this run's token first,
+            # so the deploy self-heals if the token ever carries the required permission.
+            echo "GET returned 404; attempting POST /repos/$GITHUB_REPOSITORY/pages (build_type=workflow)"
+            post=$(curl -s -o /tmp/pages-create.json -w '%{http_code}' \
+              -X POST \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/$GITHUB_REPOSITORY/pages" \
+              -d '{"build_type":"workflow"}')
+            echo "POST /repos/$GITHUB_REPOSITORY/pages -> $post"
+            if [ "$post" = "201" ]; then
+              echo "Pages site created by the workflow token; continuing."
+            else
+              cat /tmp/pages-create.json || true
+              echo "::error title=GitHub Pages is not enabled on this repository::Pages has never been created for $GITHUB_REPOSITORY and the token for this run could not create it (POST /pages -> $post). Per the official actions/configure-pages action.yml (https://github.com/actions/configure-pages/blob/main/action.yml), enabling Pages needs a token other than GITHUB_TOKEN: a PAT with the repo scope or Pages write permission, or a GitHub App with administration:write and pages:write. Owner action, one time: Settings -> Pages -> Build and deployment -> Source: GitHub Actions -> Save, then re-run this workflow (or push to main). The site itself passed every check in the verify job."
+              exit 1
+            fi
           fi
 
       - uses: actions/configure-pages@v5
