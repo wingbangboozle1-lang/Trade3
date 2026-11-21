@@ -1304,3 +1304,47 @@ Local clone started shallow (depth 1); unshallowed this session (`git fetch --un
 - **Conflict handling:** PR #37 hit `COORDINATION.md` append conflicts twice as `main` advanced (PR #35 `4615447`, PR #38 `80b662d`, PR #39 `3243d28`). Each time the branch was unshallowed (`git fetch --unshallow origin`), rebased onto latest `origin/main`, and the conflict resolved by keeping both sessions' sections (upstream first, then this session). Nothing from any other session was discarded. Final rebase base: `3243d28`; merged clean.
 - **Deploy outcome:** the merge touched only `COORDINATION.md`, which is outside `pages.yml`'s path filter, so no new workflow run was triggered by PR #37. Latest `main` deploy run at record time: [44879350060](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879350060) (PR #22 merge) — **Verify site ✓** (1m35s, all gates green) · **Deploy ✗ at `actions/configure-pages@v5`** only (upload/deploy skipped). `GET /repos/…/pages` → **404**; `POST` → **403** (reproduced this session). **Site is not live** — F8 owner click still required: Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save. Expected URL: https://wingbangboozle1-lang.github.io/Trade3/
 - **Site status:** verified and not broken (all gates pass locally and in CI Verify). Flagged items F1–F26 remain on the Flagged for Review page and did not block the merge, per instructions.
+---
+
+# Session `arena/2634d5fc-trade3` — final verification + publish blocker report (2026-11-21)
+
+**Branch:** `arena/2634d5fc-trade3` (identical to `origin/main` @ `49397f2`, PR #31 merged — no unintegrated work remains on this branch). **Session status:** active → this record closes it.
+
+## Tasks reviewed against the brief
+
+| Brief item | Where it lives | Verified |
+|---|---|---|
+| Executive summary | `EXECUTIVE_SUMMARY.md`, `docs/executive-summary.md` | read |
+| Live dashboard: highest-dollar events, gas/elections/culture/crypto/golf | `docs/dashboard.html`, `docs/assets/dashboard.js`, `docs/topics/*.html` | read + gates |
+| ≥ $0.10 swing alerts, two scrolling chats (all + high-ROI filter) | `docs/dashboard.html` alert chats; high-ROI screen in `dashboard.js` | read + logic tests |
+| Track events until resolved yes/no | resolution tracker + `fetchSettled` in `dashboard.js` | read |
+| Simulated trades + portfolio + strategy analysis | `kalshi_client.py`, `strategies.py`, `backtest.py`, `run_sim.py`, `docs/portfolio.html` | 15/15 engine tests |
+| Live chart X=time, Y=price; seconds/minutes/hours windows; liquidity depth | canvas chart + candlesticks (1/60/1440 min) + orderbook ladder | read |
+| Suggestions for more live/interactive | `SUGGESTIONS.md`, `docs/suggestions.html` | read |
+| Tables with official source links; blanks flagged, never inferred | `docs/data/series.json` per-row `source_url`; `docs/flagged.html` F1–F26 | check_site.py 39 rows |
+
+## Gates run (all pass)
+
+| Gate | Command | Result |
+|---|---|---|
+| Logic + engine + site render | `npm test` | pass — logic OK, smoke 15/15, site-render 13/13 |
+| Static site gate | `python3 scripts/check_site.py` | pass — 29 pages, 387 local links, 20 JS modules, 39 series rows |
+| Link integrity | `node scripts/check-links.js` | pass — 387 references, 0 broken links/anchors/imports/DOM targets |
+| Python layer | `python3 -m py_compile` (6 files) + offline unit block | pass |
+| JS syntax | `node --check` (dashboard JS modules) | pass |
+
+## GitHub Pages — the one remaining item (owner action only)
+
+- `GET /repos/wingbangboozle1-lang/Trade3/pages` → **404** (no Pages site exists)
+- `POST /repos/wingbangboozle1-lang/Trade3/pages` (`build_type=workflow`) → **403 "Resource not accessible by integration"** (re-tested this session; same as the Actions `configure-pages enablement: true` route tried by prior sessions)
+- Conclusion: every automation credential is refused the Pages site-creation permission. **This is not a site defect** — every check above passes and the `docs/` artifact is ready.
+- **One-time owner action:** GitHub repo → Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save. Then Actions → "Deploy site to GitHub Pages" → Run workflow (or push to `main`). Expected URL: `https://wingbangboozle1-lang.github.io/Trade3/`
+- Until that click, the site builds locally (all pages HTTP 200 when served) but is not published.
+
+## PR / merge
+
+This branch == `main`, so there is nothing to merge: T1–T6 (repo review, dashboard, topic subpages, simulated trading/portfolio, Pages site structure, integration) are all already on `main` and verified. No PR from this branch is needed.
+
+## Flagged irregularities (non-blocking, published on `docs/flagged.html`)
+
+F1–F26, including F8 (Pages enablement needs the owner click), F4 ($ volume = volume × price approximation), F6 (CORS from Pages unverified), F9/F10 (Culture settlement blank under official-publishers-only policy), F18 (two crypto series with no settlement source). None block merge; none are inferred values.
