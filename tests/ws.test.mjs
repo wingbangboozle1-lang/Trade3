@@ -428,6 +428,22 @@ await check('order book: cumulative depth within a price band', () => {
   assert.equal(within.dollars, 9.0);
 });
 
+await check('order book: no-leg NO prices are flipped into yes space when declared', () => {
+  // Official: "a no-side delta at price_dollars=0.30 corresponds to a market offer
+  // of 'no at 30c', which would match against 'yes at 70c'".
+  const base = buildOrderbookState({ yes: [[0.4, 100]], no: [] });
+  const asNoLeg = applyBookMessage(base, {
+    type: 'orderbook_delta',
+    msg: { market_ticker: 'X', price_dollars: '0.3000', delta: 10, side: 'no' },
+  }, { scale: 'no-leg' });
+  assert.equal(asNoLeg.no.get(0.7), 10, 'no-leg 0.30 must be stored as yes-leg 0.70');
+  const asYesLeg = applyBookMessage(base, {
+    type: 'orderbook_delta',
+    msg: { market_ticker: 'X', price_dollars: '0.7000', delta: 10, side: 'no' },
+  }, { scale: 'yes-leg' });
+  assert.equal(asYesLeg.no.get(0.7), 10, 'yes-leg input is stored unchanged');
+});
+
 await check('applyBookMessage accepts a delta and a snapshot without inventing levels', () => {
   let state = buildOrderbookState({ yes: [[0.4, 100]], no: [] });
   state = applyBookMessage(state, { type: 'orderbook_snapshot', msg: { market_ticker: 'X', yes: [[0.5, 5]], no: [] } });

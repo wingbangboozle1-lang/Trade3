@@ -206,6 +206,12 @@ export class KalshiWsFeed extends EventEmitter {
       // examples. Omitting it subscribes to all markets, which is far too broad
       // for a five-topic dashboard, so we always send the explicit list.
       if (tickers.length) params.market_tickers = tickers;
+      // Ask for one price scale on both sides. Kalshi's "Order direction" page
+      // says NO-side orderbook levels default to *no-leg* pricing (a no-side
+      // 0.30 means a yes price of 0.70) and that new integrations are encouraged
+      // to set use_yes_price: true. Without it, mirroring a book would mix scales
+      // and silently misprice one side.
+      if (channel.startsWith('orderbook_')) params.use_yes_price = true;
       this.#send({ cmd: 'subscribe', params });
     }
     this.stats.tickersSubscribed = tickers.length;

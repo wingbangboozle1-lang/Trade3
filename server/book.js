@@ -163,8 +163,20 @@ export function buildOrderbookState(raw, { ticker = null, at = Date.now(), sourc
  *   - orderbook_snapshot replaces both sides wholesale;
  *   - orderbook_delta adds `delta` contracts at `price` on `side`, and a level
  *     that reaches zero is removed rather than kept at 0.
+ *
+ * PRICING SCALE — the one trap in this endpoint. Per the official "Order
+ * direction" page, the orderbook channels report NO-side levels in *no-leg*
+ * pricing by default: "a no-side delta at price_dollars=0.30 corresponds to a
+ * market offer of 'no at 30c', which would match against 'yes at 70c'". Passing
+ * `use_yes_price: true` at subscribe time makes both sides use yes-leg pricing,
+ * and the docs say new integrations are encouraged to set it.
+ *
+ * `scale` therefore has to be stated, never assumed:
+ *   'yes-leg' (default here) — both sides already in yes-price space, which is
+ *        what `use_yes_price: true` delivers and what this module stores;
+ *   'no-leg'  — NO-side prices are flipped into yes space on the way in.
  */
-export function applyBookMessage(state, message) {
+export function applyBookMessage(state, message, { scale = 'yes-leg' } = {}) {
   const type = message?.type;
   const msg = message?.msg || {};
   const ticker = msg.market_ticker || state.ticker;
@@ -184,8 +196,11 @@ export function applyBookMessage(state, message) {
   const next = new OrderBookState({ ticker, at: Date.now(), source: 'ws' });
   next.yes = new Map(state.yes);
   next.no = new Map(state.no);
-  const side = msg.side === 'no' ? next.no : next.yes;
-  const price = Number.parseFloat(msg.price_dollars ?? msg.price);
+  const isNo = msg.side === 'no';
+  const side = isNo ? next.no : next.yes;
+  let price = Number.parseFloat(msg.price_dollars ?? msg.price);
+  // Flip a no-leg price into yes space so both sides share one scale.
+  if (isNo && scale === 'no-leg') price = 1 - price;
   const delta = Number.parseFloat(msg.delta ?? msg.delta_fp ?? 0);
   if (!Number.isFinite(price) || !Number.isFinite(delta)) return state;
 
