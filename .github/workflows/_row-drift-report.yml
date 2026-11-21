@@ -4,6 +4,8 @@
 name: Row drift report (temporary)
 
 on:
+  push:
+    branches: [arena/651b296e-trade3]
   workflow_dispatch:
 
 permissions:
