@@ -1892,3 +1892,24 @@ pushed before any other task work, per board rules. Open PRs at claim time: **#2
 | T-3A1 Requirements-gap audit of the published site/app against the original brief (line by line; fix any gap found in files not claimed by PRs #29/#33/#34) | in progress | `arena/3a5fe603-trade3` | to be scoped in an update to this claim before any edit |
 | T-3A2 Re-run all local gates on the current merged tree + live spot re-verification via the official demo API/docs | in progress | `arena/3a5fe603-trade3` | none (read-only) |
 | T-3A3 Final integration: coordinate open PRs, PR to `main`, merge, Pages deploy attempt + record | pending | `arena/3a5fe603-trade3` | `COORDINATION.md` (append-only), integration only |
+
+### T-3A1 scope update (before any edit, per claim rule)
+
+**File scope for T-3A1 fixes:** `requirements/REQUIREMENTS.md` only. Not touched (owned by open PR #29):
+`.github/workflows/pages.yml`, `EXECUTIVE_SUMMARY.md`, `docs/flagged.html`. `COORDINATION.md` stays append-only
+for this session.
+
+**Audit findings (line-by-line of `requirements/REQUIREMENTS.md` against the code, 2026-11-21):** the *requirements*
+themselves are implemented, but 16 traceability cells overstate or misname what the code does — R4/R5 (WS URLs are
+configured and test-asserted but no socket is ever opened; live path is REST polling), R7 (ranking is
+Σ(volume_fp × last price), no ticker-channel `dollar_volume` is consumed), R10 (chats are newest-first at top with a
+Pause button + freeze-feed checkbox, not "bottom + auto-scroll/pause-on-hover"), R12 (resolutions come from REST
+`status=settled`/`result` fields, not `market_lifecycle_v2` WS events), R13 (no queue-position model; "tournament" is
+the portfolio page running all strategies on one snapshot), R15 (no price-bucket, EV or max-drawdown metric; strategy
+cards are static rule definitions), R17 (windows are 60s/5m/15m/1h/6h/24h/7d, Y always $0.00–$1.00, no step/line
+toggle — the `chart-mode-pill` is a static label), R18 (no "cost to cross N contracts"), R19 (malformed 5-cell row),
+R21 (news feeds in `research/topics.json` are research data only — never consumed by the dashboard), R22 (no sort
+control — fixed dollar-volume ranking + filter box), R6/R25/R26 (stale `site/` paths — the published site is
+`docs/`), R27/R28 (fields are `source`/`source_url`/`verified_on`, not `source_id`/`as_of`, and there is no
+`unverified: true` escape hatch — `scripts/check_site.py` requires six keys plus an official
+`https://external-api.` source URL). Fix = correct the doc to match the code; no product code changes.
