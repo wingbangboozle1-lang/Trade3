@@ -1210,3 +1210,23 @@ Only 3 rows were re-read in this session (not all 39). The 39-row full diff is r
 - **GitHub Pages status at session end (07:16Z):** `GET /repos/.../pages` → **404** — still not enabled. **F8 stands: one owner click** — Repo → Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save — then Actions → "Deploy site to GitHub Pages" → Run workflow. Expected URL: `https://wingbangboozle1-lang.github.io/Trade3/`. Every gate (build, tests, links, live-row re-verification) passes on `main`; the site is **not broken** — only the enablement call is missing.
 - **Until F8 lands**, the built site is viewable from this session's sandbox preview (port 8000, "Kalshi dashboard site preview"), and the visitor's browser fetches the demo API directly.
 - Session T-755a–e: **done**. No file conflicts beyond the two append-only `COORDINATION.md` rebase resolutions (both records kept; nothing discarded; logged above).
+
+---
+
+# Session `arena/a1c4d012-trade3` — claim (2026-11-21)
+
+**Branch:** `arena/a1c4d012-trade3` (based on `e712575` = merge of PR #32). Claimed per board rules;
+commit + push of this claim happens immediately after this edit, before any other work.
+Open PRs from other sessions at claim time: #33 (`arena/22ed9fdf-trade3`, `COORDINATION.md` only) and
+#29 (`arena/77ec3a0e-trade3`, `pages.yml` + `COORDINATION.md` + `EXECUTIVE_SUMMARY.md` + `docs/flagged.html`).
+This session does not touch those files except `COORDINATION.md` (append-only, new section at end).
+Local clone started shallow (depth 1); unshallowed this session (`git fetch --unshallow origin`) and rebased onto `origin/main` @ `4615447` (PR #35). Conflict in `COORDINATION.md` resolved by keeping both sessions' sections (HEAD `arena/b47b1c48-trade3` first, then this session); nothing discarded.
+
+| Task | Status | Owner | File scope |
+|---|---|---|---|
+| T-A1 Line-by-line repo review vs `requirements/REQUIREMENTS.md` R1–R32 + live re-verification against official Kalshi docs/API | in progress | `arena/a1c4d012-trade3` | none (read-only) + `COORDINATION.md` (append-only) |
+| T-A2 Full local gates re-run (`npm test`, `scripts/check_site.py`, `scripts/check-links.js`, `py_compile`, `node --check`) | in progress | `arena/a1c4d012-trade3` | none (read-only) |
+| T-A3 Live preview server + GitHub Pages enablement retry (F8) | in progress | `arena/a1c4d012-trade3` | none (runtime + API calls only) |
+| T-A4 Fix any defect found (scope to be claimed in an update before editing), then PR to `main`, merge, record deploy outcome | pending | `arena/a1c4d012-trade3` | `COORDINATION.md` (append-only); defect-fix files only if claimed in update |
+
+## Results — session `arena/a1c4d012-trade3` (to be filled)
