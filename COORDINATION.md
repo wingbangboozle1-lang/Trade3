@@ -1725,3 +1725,11 @@ in the visitor's browser (browser-side fetch); sandbox shell egress to `*.kalshi
 - Verification: gates table above; 8/8 live row re-reads; 32/32 requirement rows well-formed post-fix.
 - Irregularities: F8 (Pages enablement, owner-only) re-reproduced; F19 (sandbox→Kalshi egress) unchanged;
   no new flags raised, no data changed.
+
+### Conflict log — session `arena/ccf26d52-trade3`
+
+- 2026-11-21: `git pull --rebase origin main` before the integration push collided on `COORDINATION.md`
+  (append collision — `main` had advanced to `a2b6d13` with PRs #44–#46 records from sessions
+  `arena/d9cfd60b-trade3`/`arena/7457e87c-trade3`/`arena/77ec3a0e-trade3`). Resolved as a **union**:
+  upstream `COORDINATION.md` kept byte-for-byte, this session's claim block re-appended after it.
+  No other session's work modified or discarded. Remaining commits replayed cleanly.
