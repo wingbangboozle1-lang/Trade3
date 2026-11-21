@@ -136,7 +136,6 @@ DOM targets) · `logic.test.mjs` · `render.test.mjs` (headless, jsdom) · `smok
 capture) · `site-render-test.js` (build B pages) · `py_compile` + the offline unit block for the Python layer ·
 `verify_series.py --from-cache docs/data/live-verification-2026-11-20.json` → **4/4, exit 0**.
 
-
 ---
 
 ## Line-by-line audit — session `arena/6c20e938-trade3` (2026-11-21)
@@ -152,3 +151,24 @@ helpers with regression tests. Also fixed: duplicate verification IDs (V21/V22 c
 `requirements/REQUIREMENTS.md` pointing at files that do not exist in this tree, and the
 missing `/suggestions.html` page (now built and linked in every nav). Full detail:
 [VERIFICATION.md](VERIFICATION.md) "session arena/6c20e938-trade3" section.
+
+---
+
+## Re-verification pass — session `arena/b47b1c48-trade3` (2026-11-21)
+
+Re-read the key published rows against the live demo API again and re-ran every gate. One documentation
+irregularity was found and corrected: the `series.json` Culture settlement notes (and flag F10) described
+the `KXXBANNEDGROK` / `KXXBANNEDMURRAYHILLGUY1` settlement list as only non-official entries and claimed
+ABC had been "withdrawn" — both false. The live records carry **23 mixed settlement sources** (17 official
+publishers incl. Barchart + a few Google-search/personal entries), and ABC is present. The notes now state this accurately;
+the decision to leave settlement blank under the official-publishers-only policy is unchanged.
+
+| Item | Result | Evidence |
+|---|---|---|
+| Exchange status | `exchange_active: true`, `trading_active: true`, shards 0–3 | [GET /exchange/status](https://external-api.demo.kalshi.co/trade-api/v2/exchange/status) |
+| Gas / Golf / Crypto rows | `KXAAAGASM`, `KXPGAGOLFERSCORE`, `KXETHD` all match `series.json` | [KXAAAGASM](https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASM) · [KXPGAGOLFERSCORE](https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAGOLFERSCORE) · [KXETHD](https://external-api.demo.kalshi.co/trade-api/v2/series/KXETHD) |
+| Culture category | 2 series, `category: Culture` — confirms the earlier correction | [Series by category: Culture](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture) |
+| Culture markets | empty — confirms F9 | [Markets for KXXBANNEDGROK](https://external-api.demo.kalshi.co/trade-api/v2/markets?series_ticker=KXXBANNEDGROK&status=open) |
+| Local gates | `npm test`, `check_site.py`, `check-links.js`, `py_compile`, JSON parse — all pass | See [VERIFICATION.md](VERIFICATION.md) |
+| GitHub Pages | **Still not enabled** (404; enablement returns 403 to automation). Owner action required — see F8 | [docs/flagged.html](docs/flagged.html) |
+

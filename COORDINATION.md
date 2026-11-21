@@ -861,6 +861,11 @@ the moment the owner performs the one-time F8 action.
 
 ---
 
+
+| Check | Official source | Result |
+|---|---|---|
+| Exchange status | [GET /exchange/status](https://external-api.demo.kalshi.co/trade-api/v2/exchange/status) | `exchange_active: true`, `trading_active: true`, shards 0–3 |
+
 # Session `arena/8214edf2-trade3` — Pages enablement via Actions + publish (2026-11-21)
 
 **Claim (committed before any other change; branch `arena/8214edf2-trade3`, based on `main` @ `4eb92a1`):**
@@ -952,9 +957,6 @@ No other session has an open claim on the board. Files owned by other sessions a
 
 ### Live spot checks (official Kalshi demo API and docs, fetched 2026-11-21)
 
-| Check | Official source | Result |
-|---|---|---|
-| Exchange status | [GET /exchange/status](https://external-api.demo.kalshi.co/trade-api/v2/exchange/status) | `exchange_active: true`, `trading_active: true`, shards 0–3 |
 | Culture category | [GET /series?category=Culture](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture) | `KXXBANNEDGROK`, `KXXBANNEDMURRAYHILLGUY1`, both `Culture` — matches `series.json` |
 | Crypto row | [GET /series/KXETHD](https://external-api.demo.kalshi.co/trade-api/v2/series/KXETHD) | `Crypto`, hourly, CF Benchmarks RTI URL — matches `series.json` |
 | Golf row | [GET /series/KXPGAT20](https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAT20) | `Sports`, tag `Golf`; settlement is "the Governing League" → pgatour.com — **label differs, see F26** |
@@ -995,7 +997,6 @@ No other session has an open claim on the board. Files owned by other sessions a
 - **Owner action (one time, ~30 seconds):** GitHub repo → Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save. Then Actions → "Deploy site to GitHub Pages" → Run workflow. Expected URL: `https://wingbangboozle1-lang.github.io/Trade3/`.
 - Sources for this session's claims: GitHub REST Pages API (`https://docs.github.com/rest/pages/pages`), `actions/configure-pages` (`https://github.com/actions/configure-pages`). Run logs linked from the Actions tab.
 - Not done this session (honest scope): live Kalshi demo portfolio tracking and order placement (need user demo API keys; not in repo); WebSocket live feed (requires authenticated handshake); the sandbox has no direct egress to kalshi.co, so the per-row Kalshi re-check runs in CI (`verify-live.yml`) only.
-
 ---
 
 # Session `arena/84e59a8b-trade3` — current-branch review and UX/verification follow-up (2026-11-21)
@@ -1104,3 +1105,50 @@ claim touched). Claimed per board rules; commit pushed immediately after this ed
 ### T-755e Final PR + merge record (session `arena/755fb608-trade3`)
 
 - See the merge record appended below after PR creation (number, result, deploy-run outcome recorded there).
+
+
+# Session `arena/b47b1c48-trade3` — line-by-line re-verification + final integration (2026-11-21)
+
+**Branch:** `arena/b47b1c48-trade3` (current session branch, based on `main` @ `4eb92a1`). No other
+session is active; all earlier tasks read `done`. This session is the final integration/verification pass.
+
+| Task | Status | Owner | File scope |
+|---|---|---|---|
+| T8 | Line-by-line repo review + live re-verification of published rows + fix any discrepancy | **done** | `docs/data/series.json`, `docs/flagged.html`, `VERIFICATION.md`, `EXECUTIVE_SUMMARY.md`, `COORDINATION.md` |
+| T9 | Final integration: gates, PR to `main`, merge, confirm Pages deploy | **done** (Pages blocked by owner action, F8) | integration only |
+
+### Live re-verification performed this session (fetched 2026-11-21 from the official demo REST API)
+| Gas `KXAAAGASM` | [GET /series/KXAAAGASM](https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASM) | Matches `series.json` (Economics, Oil & Gas, scope Gasoline, monthly, AAA) |
+| Golf `KXPGAGOLFERSCORE` | [GET /series/KXPGAGOLFERSCORE](https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAGOLFERSCORE) | Matches (Sports, Golf tag, PGA Tour + NBC/Fox/AP/Golf Channel) |
+| Crypto `KXETHD` | [GET /series/KXETHD](https://external-api.demo.kalshi.co/trade-api/v2/series/KXETHD) | Matches (Crypto, hourly, CF Benchmarks ETHUSD_RTI) |
+| Culture category | [GET /series?category=Culture](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture) | 2 series, both `category: Culture` — confirms V18 |
+| Culture markets | [GET /markets?series_ticker=KXXBANNEDGROK&status=open](https://external-api.demo.kalshi.co/trade-api/v2/markets?series_ticker=KXXBANNEDGROK&status=open) | `{"markets":[]}` — confirms F9 |
+
+### Discrepancy found and corrected this session
+
+**Stale Culture settlement documentation (F10).** The `series.json` notes for `KXXBANNEDGROK` and
+`KXXBANNEDMURRAYHILLGUY1` described the `settlement_sources` list as only non-official entries
+(Google-search URLs, a personal X account, an unnamed "account holder of") and claimed "the first entry
+(ABC) was published by an earlier revision and is withdrawn here." The live records carry **23 mixed
+settlement sources — 17 official publishers** (ABC, Fox News, MSNBC, WSJ, Semafor, Barchart, NYT, CBS,
+Washington Post, Axios, CNN, Reuters, Bloomberg, AP, EIA, Politico, TechCrunch) plus a few non-official entries,
+and **ABC is present** (so the "withdrawn" claim was false). Corrected in `docs/data/series.json` (both
+rows + topic `flag`) and flag **F10** on `docs/flagged.html`; the official-publishers-only blank-settlement
+decision is unchanged. Detail: [VERIFICATION.md § Re-verification pass](VERIFICATION.md).
+
+### Gates re-run this session
+
+`npm test` (logic + smoke 15/15 + site-render 13/13) · `python3 scripts/check_site.py` (28 pages, 360
+links, 39 rows) · `node scripts/check-links.js` (0 broken) · `py_compile` (6 files) · JSON parse — **all pass**.
+
+### Pages status (blocker, not a code defect)
+
+Re-tested 2026-11-21: `GET /repos/wingbangboozle1-lang/Trade3/pages` → **404**; `POST /repos/…/pages` →
+**403 "Resource not accessible by integration"**. The automation token cannot create the Pages site. The
+deploy job fails **only** at "Pages readiness"; every verify step is green. **Owner action required**
+(Settings → Pages → Source: GitHub Actions → Save). Recorded as F8; see PR/merge record below.
+
+### Handoff / status
+
+No other session is active; no cross-session file requests. Status: **done** for the review/fix and the
+integration; **blocked** only on the environment-level F8 Pages enablement, which requires the owner.
