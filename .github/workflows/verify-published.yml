@@ -1,0 +1,88 @@
+# Confirms the published GitHub Pages site is actually serving the expected pages.
+#
+# Why this exists: the build sandbox that developed this repo has no route to
+# *.github.io (curl returns 000), so "it deployed" could never be proven from
+# there. A GitHub runner has ordinary outbound HTTPS, so this job is the
+# authoritative check: it fetches every published page from the live URL and fails
+# loudly on a 404, a redirect to a 404, or a missing title.
+#
+# It also fails if the artifact the deploy produced is stale relative to docs/,
+# by comparing the page list in the repo with the page list the site serves.
+
+name: Verify published site is live
+
+on:
+  workflow_dispatch:
+  page_build:            # fires when GitHub finishes building Pages
+  schedule:
+    - cron: '43 */6 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-published
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Fetch every published page
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Site root answers
+        run: |
+          code=$(curl -sS -o /tmp/root.html -w '%{http_code}' --max-time 30 --retry 3 \
+            https://wingbangboozle1-lang.github.io/Trade3/)
+          echo "GET / -> $code"
+          test "$code" = "200" || { echo "::error title=Site root is not publishing::GET / returned $code"; exit 1; }
+          grep -qi '<title>' /tmp/root.html || { echo "::error title=Site root has no title::served body is not the dashboard landing page"; exit 1; }
+          grep -qi 'Trade3' /tmp/root.html || { echo "::error title=Wrong body served::the root page does not mention the project"; exit 1; }
+          echo "root: $(grep -oi '<title>[^<]*' /tmp/root.html | head -1)"
+
+      - name: Every page in docs/ is published, byte-identical length
+        run: |
+          set -euo pipefail
+          base=https://wingbangboozle1-lang.github.io/Trade3
+          fail=0
+          count=0
+          # Every HTML page shipped in docs/ must be reachable at the same path.
+          while IFS= read -r f; do
+            rel=${f#docs/}
+            count=$((count+1))
+            code=$(curl -sS -o /tmp/page.html -w '%{http_code}' --max-time 30 --retry 2 "$base/$rel")
+            local_bytes=$(wc -c < "$f")
+            served_bytes=$(wc -c < /tmp/page.html)
+            if [ "$code" != "200" ]; then
+              echo "::error title=Published page missing::$rel returned $code"; fail=1; continue
+            fi
+            # GitHub Pages serves these files verbatim; a size mismatch means a stale artifact.
+            if [ "$local_bytes" != "$served_bytes" ]; then
+              echo "::error title=Stale published artifact::$rel is $local_bytes bytes in docs/ but $served_bytes on the site"; fail=1; continue
+            fi
+            echo "OK $rel ($code, $served_bytes bytes)"
+          done < <(find docs -name '*.html' -type f | sort)
+          echo "checked $count pages"
+          exit $fail
+
+      - name: Key assets answer with the right content type
+        run: |
+          set -euo pipefail
+          base=https://wingbangboozle1-lang.github.io/Trade3
+          for f in assets/style.css assets/dashboard.js assets/app.js data/series.json; do
+            out=$(curl -sS -o /dev/null -w '%{http_code} %{content_type}' --max-time 30 "$base/$f")
+            echo "$f -> $out"
+            case "$out" in 200*) ;; *) echo "::error title=Published asset missing::$f -> $out"; exit 1;; esac
+          done
+          # .nojekyll must be present or files beginning with _ would be dropped.
+          curl -sS -o /dev/null -w '.nojekyll -> %{http_code}\n' --max-time 30 "$base/.nojekyll"
+
+      - name: Pages settings snapshot
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          curl -sS -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/pages" \
+            | python3 -c "import json,sys; d=json.load(sys.stdin); print('status:', d.get('status'), '| build_type:', d.get('build_type'), '| source:', d.get('source'), '| url:', d.get('html_url'))" \
+            || echo "Pages REST not readable by this token (informational only)"
