@@ -12,6 +12,9 @@
 // Nothing is estimated. Missing values render as "—".
 // ============================================================================
 import {
+  LiveRelay, relayUrl, applyTickerFrame, transportSummary, RELAY_STATE,
+} from "./live.js";
+import {
   ALERT_THRESHOLD, TOPICS, TOPIC_BY_ID, apiGet, baseUrls, candlePlan, classify, cleanTitle, fetchTrades, sourceLinks,
   clockStr, depthWithin, discoverTopicSeries, esc, fetchCandles, fetchOpenEvents,
   fetchOpenMarkets, fetchOrderbook, fetchSettled, fmt$, fmtDelta, fmtNum, fmtPx,
@@ -49,6 +52,13 @@ const state = {
   loading: false,
   lastRefresh: null,
   error: null,
+  relay: null,            // LiveRelay instance (see assets/live.js)
+  relayState: "idle",
+  relayDetail: "",
+  relayRttMs: null,
+  feedStatus: null,       // Kalshi socket status relayed by the server, if any
+  wsTicks: 0,             // socket ticker frames applied to the table
+  liveSound: 0,           // counter used to keep the alert beep responsive
 };
 
 // ---------------------------------------------------------------------------
@@ -89,6 +99,7 @@ document.addEventListener("DOMContentLoaded", () => {
   renderTopicTabs();
   buildChats();
   renderPaper();
+  startRelay();
   window.addEventListener("hashchange", () => {
     if (selectFromHash()) { renderEvents(); renderDetail(); drawChart(true); }
   });
@@ -101,6 +112,162 @@ function startTimer() {
   if (state.timer) clearInterval(state.timer);
   if (state.paused) return;
   state.timer = setInterval(() => refresh(), state.pollMs);
+}
+
+// ---------------------------------------------------------------------------
+// live transport
+//
+// Two things can carry data into this page, and the header says which is active:
+//   1. the same-origin /live socket, served by server/index.js — push alerts and,
+//      when that server holds a Kalshi key, signed socket ticker frames;
+//   2. REST polling of Kalshi's public endpoints from this browser.
+// On GitHub Pages only (2) exists, because a static host cannot run the relay.
+// The page never labels itself live when neither is delivering.
+// ---------------------------------------------------------------------------
+function startRelay() {
+  const url = relayUrl(location);
+  const relay = new LiveRelay({ url });
+  state.relay = relay;
+
+  relay.on("state", ({ state: st, detail }) => {
+    state.relayState = st;
+    state.relayDetail = detail || "";
+    renderTransport();
+  });
+  relay.on("rtt", (ms) => { state.relayRttMs = ms; renderTransport(); });
+  relay.on("hello", (hello) => {
+    state.feedStatus = hello?.feed || null;
+    renderTransport();
+  });
+  relay.on("message", (frame) => {
+    if (!frame || !frame.type) return;
+    if (frame.type === "feed") {
+      if (frame.data?.status !== undefined) state.feedStatus = frame.data.status;
+      renderTransport();
+      return;
+    }
+    if (frame.type === "alert") { applyPushedAlert(frame.data); return; }
+    if (frame.type === "ticker") { applyPushedTicker(frame.data); return; }
+    if (frame.type === "trade" || frame.type === "update") renderTransport();
+  });
+
+  relay.start();
+  renderTransport();
+}
+
+/** A swing the collector detected server-side: show it without waiting for a poll. */
+function applyPushedAlert(a) {
+  if (!a || !a.ticker) return;
+  const existing = state.alerts.some((x) => x.ts === a.ts && x.ticker === a.ticker);
+  if (existing) return;
+  const alert = {
+    ts: a.ts || Date.now(),
+    ticker: a.ticker,
+    title: cleanTitle(a.title || a.ticker),
+    topic: a.topic || (state.markets.find((m) => m.ticker === a.ticker)?._topic) || "—",
+    from: a.from ?? a.previousPrice ?? null,
+    to: a.to ?? a.price ?? null,
+    delta: a.delta ?? null,
+    spread: a.spread ?? null,
+    depth: a.depth ?? null,
+    roi: Boolean(a.roi ?? a.highRoi),
+    why: a.why || a.reasons || [],
+    event: a.event || null,
+    series: a.series || null,
+    pushed: true,
+  };
+  state.alerts.unshift(alert);
+  if (alert.roi) state.roiAlerts.unshift(alert);
+  state.alerts = state.alerts.slice(0, 400);
+  state.roiAlerts = state.roiAlerts.slice(0, 200);
+  renderChats();
+  renderTransport();
+  if (state.sound) beep(0.08);
+}
+
+/** A Kalshi socket ticker frame relayed by the server, applied to the live table. */
+function applyPushedTicker(t) {
+  if (!t || !t.ticker) return;
+  const { markets, changed } = applyTickerFrame(state.markets, {
+    market_ticker: t.ticker,
+    price_dollars: t.lastPriceDollars,
+    yes_bid_dollars: t.yesBidDollars,
+    yes_ask_dollars: t.yesAskDollars,
+    yes_bid_size_fp: t.yesBidSizeFp,
+    yes_ask_size_fp: t.yesAskSizeFp,
+    volume_fp: t.volumeFp,
+    open_interest_fp: t.openInterestFp,
+  });
+  state.wsTicks++;
+  state.markets = markets;
+  if (changed.length) {
+    for (const sw of changed) {
+      state.alerts.unshift({
+        ts: sw.at, ticker: sw.ticker, title: cleanTitle(sw.ticker), topic: "—",
+        from: sw.from, to: sw.to, delta: sw.delta, spread: null, depth: null,
+        roi: false, why: ["raised by the Kalshi socket between polls"],
+        pushed: true, source: "socket",
+      });
+    }
+    state.alerts = state.alerts.slice(0, 400);
+    renderChats();
+    if (state.sound) beep(0.08);
+  }
+  // Redraw the table at most a few times a second; a socket burst must not thrash the DOM.
+  if (!state._wsRenderPending) {
+    state._wsRenderPending = true;
+    setTimeout(() => { state._wsRenderPending = false; renderEvents(); renderTransport(); }, 400);
+  }
+}
+
+/** Header pill: exactly what is carrying data, with the age of the last poll. */
+function renderTransport() {
+  const el = $("transport");
+  if (el) {
+    el.textContent = transportSummary({ relay: { state: state.relayState }, lastPollAt: state.lastRefresh, feed: state.feedStatus });
+    el.className = `pill ${RELAY_STATE[state.relayState]?.tone || "info"}`;
+    const why = [
+      state.relayDetail ? `relay: ${state.relayDetail}` : null,
+      state.relayRttMs != null ? `rtt ${state.relayRttMs}ms` : null,
+      state.feedStatus?.configured ? `kalshi socket: ${state.feedStatus.state}` : null,
+      state.wsTicks ? `${state.wsTicks} socket ticks applied` : null,
+    ].filter(Boolean).join(" · ");
+    el.title = why || "No detail yet.";
+  }
+  const note = $("relay-note");
+  if (note) {
+    const feed = state.feedStatus;
+    note.innerHTML = relayNoteHtml(feed);
+  }
+}
+
+function relayNoteHtml(feed) {
+  // NB: never name this `state` — it would shadow the module-level object and the
+  // note would silently read the string "open" instead of the live transport state.
+  const relayState = state.relayState;
+  if (relayState === "open") {
+    if (feed && feed.configured && feed.connected) {
+      return `The <code>/live</code> socket is connected and this server is relaying Kalshi's signed
+        <code>ticker</code> stream (${esc(String(feed.tickersSubscribed || 0))} markets). Alert pushes are immediate.`;
+    }
+    if (feed && feed.configured && !feed.connected) {
+      return `The <code>/live</code> socket is connected; Kalshi's own socket is <b>${esc(feed.state)}</b>
+        (${esc(feed.lastError || "no error recorded")}). Market data stays on REST polling until it reconnects.`;
+    }
+    return `The <code>/live</code> socket is connected, so alerts the collector detects arrive as pushes.
+      Kalshi's own socket needs a demo key on this server; without one, prices are REST-polled and every
+      swing is still detected in this browser.`;
+  }
+  if (relayState === "unavailable") {
+    return `No relay on this origin — this page is being served as static files. Market data and swing
+      detection run from your browser over Kalshi's public REST API, and this is stated rather than hidden.
+      Run <code>npm start</code> in the repo to get the push relay.`;
+  }
+  if (relayState === "error" || relayState === "reconnecting") {
+    return `The relay socket is ${esc(relayState)}; REST polling continues in the meantime.
+      Nothing is being invented to fill the gap.`;
+  }
+  return `Checking the relay…`;
 }
 
 function hardRefresh() {

@@ -540,8 +540,11 @@ export function connectWebSocket(url, { headers = {}, timeoutMs = 15000, maxPayl
 }
 
 function hdrUpgradeHint(status, hdrs) {
+  // This helper is generic: it cannot know which server answered. Both readings
+  // are named so the message is never wrong about the cause.
   if (status === 401 || status === 403) {
-    return `(Kalshi rejects a handshake whose signed headers are missing or wrong; sent headers were accepted only if the key, timestamp and signature all match)`;
+    return '(refused by the server: either a reverse proxy/relay refused the Origin, or Kalshi rejected the '
+      + 'signed handshake headers — check KALSHI-ACCESS-KEY, the timestamp window and the signature)';
   }
   if (status === 429) {
     return '(Kalshi returns 429 both for the concurrent-connection limit and for opening connections too quickly — '

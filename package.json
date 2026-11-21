@@ -17,12 +17,14 @@
     "snapshot": "node scripts/capture-snapshot.js",
     "test:logic": "node tests/logic.test.mjs",
     "test:render": "node tests/render.test.mjs",
-    "test:all": "node tests/logic.test.mjs && node tests/ws.test.mjs && node tests/relay.test.mjs && node tests/render.test.mjs && node tests/smoke-test.js && node tests/site-render-test.js",
+    "test:all": "node tests/logic.test.mjs && node tests/ws.test.mjs && node tests/relay.test.mjs && node tests/live.test.mjs && node tests/render.test.mjs && node tests/dashboard-dom.test.mjs && node tests/smoke-test.js && node tests/site-render-test.js",
     "check:site": "python3 scripts/check_site.py",
     "verify:rows": "python3 scripts/verify_series.py",
     "snapshot:dry": "node scripts/capture-snapshot.js --dry-run",
     "test:ws": "node tests/ws.test.mjs",
-    "test:relay": "node tests/relay.test.mjs"
+    "test:relay": "node tests/relay.test.mjs",
+    "test:dom": "node tests/dashboard-dom.test.mjs",
+    "test:live": "node tests/live.test.mjs"
   },
   "license": "MIT"
 }

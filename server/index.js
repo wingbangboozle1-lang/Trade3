@@ -106,7 +106,15 @@ export function createServer({
       socket.destroy();
       return;
     }
-    const conn = upgradeRequest(req, socket, { checkOrigin: sameOrigin(req.headers.host) });
+    const conn = upgradeRequest(req, socket, {
+      checkOrigin: (origin) => {
+        const ok = sameOrigin(req.headers.host)(origin);
+        if (!ok) {
+          logger.warn?.(`/live refused an upgrade: Origin ${origin} does not match Host ${req.headers.host}`);
+        }
+        return ok;
+      },
+    });
     if (!conn) return;
 
     wsClients.add(conn);
