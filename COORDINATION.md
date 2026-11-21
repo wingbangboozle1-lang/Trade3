@@ -1152,3 +1152,17 @@ deploy job fails **only** at "Pages readiness"; every verify step is green. **Ow
 
 No other session is active; no cross-session file requests. Status: **done** for the review/fix and the
 integration; **blocked** only on the environment-level F8 Pages enablement, which requires the owner.
+
+# Session `arena/71252315-trade3` — claim + integration pass (2026-11-21)
+
+**Branch:** `arena/71252315-trade3` (the only branch this session works on; based on `main` @ `262f22a`).
+Status at claim: `main` == this branch base; no other session has commits ahead of `main`.
+
+| Task | Status | Owner | File scope |
+|---|---|---|---|
+| T10 | Repo re-review: local gates, live spot re-verification of published rows, Pages status check | **in progress** | `COORDINATION.md` (log only) |
+| T11 | Final integration: PR this branch → `main`, merge, confirm Pages deploy (or record the blocker) | **in progress** | integration only |
+
+Open PRs from other sessions at claim time (not touched by this session, flagged for the owner):
+- PR #29 `arena/77ec3a0e-trade3` — CONFLICTING (DIRTY) against `main`
+- PR #33 `arena/22ed9fdf-trade3` — CONFLICTING (DIRTY) against `main`; touches `COORDINATION.md` only
