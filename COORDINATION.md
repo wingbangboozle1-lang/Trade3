@@ -30,7 +30,7 @@
   | T25-1 | Repair the Pages deploy pipeline ordering | **closed as superseded** — sessions `arena/8214edf2-trade3` (PR #18) and `arena/8373696a-trade3` (PR #19) independently made the same fix and it is merged on `main`; this session's duplicate change to `.github/workflows/pages.yml` was **dropped in favour of upstream's version** during rebase (no other session's work discarded) | none |
   | T25-2 | Re-run every local gate | **done** (pre-rebase and again after rebase onto `main` @ `7eed55c`, covering PRs #21/#23 changes) | record only |
   | T25-3 | Live spot re-verification via the official demo API | **done** | record only |
-  | T25-4 | Integration: PR to `main`, merge, record deploy outcome | done | `COORDINATION.md` |
+  | T25-4 | Integration: PR to `main`, merge, record deploy outcome | **done** — PR #26 merged 2026-11-21T07:11:46Z (commit `1b989cc8e`); latest full deploy run [44878773776](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44878773776) on `main`: **Verify site success (all checks green), Deploy fails only at `actions/configure-pages` 403 (F8 owner action)**; site publishes automatically on the owner's one-time Pages click | `COORDINATION.md` |
 
   **Conflict note:** while this session worked, `main` gained PRs #18–#24 (merges at 2026-11-21T07:06–07:08Z).
   PR #26 from this branch hit "merge conflicts" against that; resolution was a rebase onto `main` @ `7eed55c`
@@ -67,6 +67,16 @@
 2. Minor doc note (pre-existing, not edited in this scope): `requirements/REQUIREMENTS.md` still references
    unmerged `site/` paths from the `d9376510` parallel build; the published data/pages live under `docs/`.
    Flagged for the next documentation pass.
+3. **Live preview of the dashboard in this session (no repo change).** Because Pages publish is pending the F8
+   owner click, this session started the collector (`DATA_MODE=snapshot npm start`, port 3000) so the user can
+   open the full dashboard immediately: `/app/` (Build B dashboard, dual alert feeds, charts, liquidity ladder,
+   resolutions, paper trading), `/` (Build A site incl. `dashboard.html`, which polls Kalshi **from the visitor's
+   browser** and is genuinely live when CORS allows — unverified flag F6), `/site/` (Build B published site).
+   Snapshot mode replays the committed capture of **real** demo values captured 2026-11-20T13:24Z and is clearly
+   labelled; 12 markets across 5 topics tracked, 8 day-base swing alerts ≥ $0.10 in the feed, model feed empty
+   because the ROI screen correctly rejects all of them (spread cost makes net edge negative) — verified honest,
+   not a defect. Preview routes all 200: `/`, `/app/`, `/site/`, `/dashboard.html`, `/api/health`, `/api/state`,
+   `/api/alerts`, `/api/portfolio`.
 
 
 - 2026-11-20: Session `arena/73b9db7f-trade3` created this board and claimed T1–T5 (solo session; no other sessions active on this repo). T6 to be claimed at integration time.
