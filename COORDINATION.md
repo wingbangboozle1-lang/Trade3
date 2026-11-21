@@ -1152,3 +1152,37 @@ deploy job fails **only** at "Pages readiness"; every verify step is green. **Ow
 
 No other session is active; no cross-session file requests. Status: **done** for the review/fix and the
 integration; **blocked** only on the environment-level F8 Pages enablement, which requires the owner.
+
+---
+
+
+---
+
+---
+
+# Session `arena/6d7662fe-trade3` — final verification + publish pass (2026-11-21)
+
+**Role:** final integration/verification session. Branch `arena/6d7662fe-trade3` was identical to
+`main` (`4eb92a1`, 0 commits ahead) at start, when every board task read `done`. The claim was
+written before any other edit per board rules; during this session PRs #18–#20 from sessions
+`arena/8214edf2-trade3`, `arena/8373696a-trade3` and `arena/658d547d-trade3` landed on `main`
+(kept verbatim above; no work discarded).
+
+## Claim
+
+| ID | Task | Status | Owner | Files touched |
+|----|------|--------|-------|---------------|
+| T-6D1 | Full local-gate re-run on current tree (`npm test`, `check_site.py`, `check-links.js`, `site-render-test.js`, Python compile) | in progress | `arena/6d7662fe-trade3` | none (gates only) |
+| T-6D2 | Live re-verification of published facts against official Kalshi demo API + docs.kalshi.com | in progress | `arena/6d7662fe-trade3` | `COORDINATION.md` (record only) |
+| T-6D3 | GitHub Pages enablement attempt + deploy confirmation | in progress | `arena/6d7662fe-trade3` | none (API/workflow only) |
+| T-6D4 | Final integration: PR to `main`, merge, record PR + deploy result | in progress | `arena/6d7662fe-trade3` | `COORDINATION.md` (record only) |
+
+## Handoff / conflict log (this session)
+
+- 2026-11-21: session `arena/6d7662fe-trade3` created this claim on top of `main` @ `4eb92a1`.
+- **Merge conflict (logged, resolved without discarding other work):** during the claim rebase,
+  `origin/main` gained PR #18 from session `arena/8214edf2-trade3` (Pages enablement via
+  `actions/configure-pages` `enablement: true`, task T-8214-2 in `.github/workflows/pages.yml`).
+  Resolution: kept their section verbatim above and appended this session's claim after it.
+  This session will **not** edit `.github/workflows/pages.yml` (their claimed scope); T-6D3 here is
+  limited to observing deploy status and recording results, and any Pages workflow change is theirs.
