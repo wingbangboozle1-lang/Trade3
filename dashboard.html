@@ -31,6 +31,7 @@
     <div class="card-head" style="margin-bottom:10px">
       <h1 style="font-size:20px;margin:0">Live contract dashboard</h1>
       <span id="status" class="pill">Connecting…</span>
+      <span id="transport" class="pill info" title="Which channel is carrying data right now">socket: idle</span>
       <span id="netinfo" class="dim mono"></span>
       <span class="right"></span>
       <label class="switch" title="Play a short tone on each ≥ $0.10 swing">
@@ -63,6 +64,7 @@
       <a href="https://docs.kalshi.com/getting_started/rate_limits" target="_blank" rel="noopener">rate limits</a>.
       If your network blocks the API, set a CORS proxy on the <a href="methodology.html#network">Method</a> page.
     </p>
+    <p class="dim" style="margin:6px 0 0" id="relay-note">Checking the relay…</p>
   </section>
 
   <!-- ============ KPIs ============ -->
