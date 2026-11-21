@@ -760,9 +760,9 @@ Claim committed and pushed before any task work started (rule: claim first, comm
 
 | Task | Status | Owner | File scope |
 |---|---|---|---|
-| T-6C1 Full line-by-line repo review + live re-verification of published rows/facts against official Kalshi sources (this sandbox has live API + docs access via page fetch) | in progress | `arena/6c20e938-trade3` | `VERIFICATION.md`, `EXECUTIVE_SUMMARY.md`, `docs/data/series.json` (verification fields only) |
-| T-6C2 Requirements audit + defect/feature pass (alerts chat pair, chart time axes, liquidity depth, simulated trades, portfolio analytics, resolution tracking, topic organization) | in progress | `arena/6c20e938-trade3` | `docs/**`, `server/**`, `scripts/**`, `tests/**`, `kalshi_client.py`, `strategies.py`, `backtest.py`, `run_sim.py` |
-| T-6C3 Final integration: local gates, PR to `main`, merge, Pages deploy attempt + record | in progress | `arena/6c20e938-trade3` | `COORDINATION.md`, `.github/workflows/*`, integration only |
+| T-6C1 Full line-by-line repo review + live re-verification of published rows/facts against official Kalshi sources (this sandbox has live API + docs access via page fetch) | **done** (see completion record below) | `arena/6c20e938-trade3` | `VERIFICATION.md`, `EXECUTIVE_SUMMARY.md`, `docs/data/series.json` (verification fields only) |
+| T-6C2 Requirements audit + defect/feature pass (alerts chat pair, chart time axes, liquidity depth, simulated trades, portfolio analytics, resolution tracking, topic organization) | **done** (5 defects fixed, see below) | `arena/6c20e938-trade3` | `docs/**`, `server/**`, `scripts/**`, `tests/**`, `kalshi_client.py`, `strategies.py`, `backtest.py`, `run_sim.py` |
+| T-6C3 Final integration: local gates, PR to `main`, merge, Pages deploy attempt + record | **done** (PR #21 + PR #30 merged; Pages enablement proven 403 for all automation creds — owner click remains) | `arena/6c20e938-trade3` | `COORDINATION.md`, `.github/workflows/*`, integration only |
 
 No other session is active on this repo (last activity: `arena/ca612a03-trade3`, merged PR #14). Open PR #5 (`arena/b28d6df0-trade3`) noted for the integration step; will be handled there, not edited here.
 
