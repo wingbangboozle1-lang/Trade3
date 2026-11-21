@@ -1699,7 +1699,7 @@ Marking T-74a … T-74d **done**.
 | T-22b Full gate re-run on merged tree (`npm test`, `check_site.py`, `check-links.js`, `py_compile`, `node --check`) | **done** | `arena/22ed9fdf-trade3` | none (read-only) |
 | T-22c Sandbox live preview of built site (`docs/` + `app/`) so dashboard is viewable before F8 | **done** | `arena/22ed9fdf-trade3` | none (runtime only) |
 | T-22d GitHub Pages enablement retry + deploy-run status confirmation (F8) | **done** (F8 requires owner action) | `arena/22ed9fdf-trade3` | none (API calls only) |
-| T-22e Final record + PR to `main` + merge + deploy check | **in progress** | `arena/22ed9fdf-trade3` | `COORDINATION.md` (append-only) |
+| T-22e Final record + PR to `main` + merge + deploy check | **done** (PR #33 merged; Pages blocked by F8; dispatch retry rate-limited) | `arena/22ed9fdf-trade3` | `COORDINATION.md` (append-only) |
 
 ## Results — session `arena/22ed9fdf-trade3` (2026-11-21)
 
@@ -1709,6 +1709,7 @@ Marking T-74a … T-74d **done**.
 |---|---|---|
 | Exchange status | [GET /exchange/status](https://external-api.demo.kalshi.co/trade-api/v2/exchange/status) | `exchange_active: true`, `trading_active: true`, shards 0–3 (live 2026-11-21) |
 | Gas KXAAAGASM | [series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASM) | "US gas price", Economics, tags `Oil & Gas`, AAA settlement — matches published row |
+| Elections KXELECTUKRAINE | [series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXELECTUKRAINE) | "Ukraine elections", category Elections, tag International elections, custom frequency — matches published topic/category row |
 | Golf KXPGAGOLFERSCORE | [series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAGOLFERSCORE) | "Golf Round Strokes", Sports + Golf tag, 5 official settlement sources — matches |
 | Culture KXXBANNEDGROK | [series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXXBANNEDGROK) | Category Culture confirmed; settlement list contains non-official entries (Google-search URLs, personal X account) — published row correctly blanks it (flag F10) |
 | Crypto KXETHD | [series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXETHD) | "Ethereum price Above/below", Crypto, CF Benchmarks settlement — matches |
@@ -1738,7 +1739,7 @@ Marking T-74a … T-74d **done**.
 
 ### T-22e PR + merge record
 
-- **PR #33:** https://github.com/wingbangboozle1-lang/Trade3/pull/33 — "Final integration 2026-11-21: live re-verification, gates, preview + Pages blocker evidence (22ed9fdf)". Coordination-record only. The local branch is rebased through latest `main` @ `a2b6d13`; the updated head will be pushed, then the merge and post-merge deploy results will be recorded in a follow-up coordination entry.
+- **PR #33:** https://github.com/wingbangboozle1-lang/Trade3/pull/33 — "Final integration 2026-11-21: live re-verification, gates, preview + Pages blocker evidence (22ed9fdf)". Coordination-record only; **merged** at `2026-11-21T07:25:19Z` as `0607b1adc8bd7a36d17d412367cc8f53208b6218`. Post-merge Pages status is recorded below.
 
 ### T-22 branch update after concurrent merges
 
@@ -1995,3 +1996,9 @@ earlier sessions), so every read below was fetched through the docs proxy agains
   one-click action recorded above. Expected URL once enabled: `https://wingbangboozle1-lang.github.io/Trade3/`.
 
 Marking T-63a … T-63e **done**.
+### T-22e PR #33 merge + Pages check (2026-11-21)
+
+- **PR #33:** https://github.com/wingbangboozle1-lang/Trade3/pull/33 — **MERGED** at `2026-11-21T07:25:19Z`, merge commit [`0607b1a`](https://github.com/wingbangboozle1-lang/Trade3/commit/0607b1adc8bd7a36d17d412367cc8f53208b6218). The PR changes only `COORDINATION.md`; the branch diff was checked as coordination-only before merge.
+- Because this merge changed no `docs/**`, `app/**`, `server/**`, tests, or Pages workflow files, the Pages push workflow's path filter did not create a new run. The latest site-bearing run remains [44879704914](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879704914): Verify site **passed**; Deploy **failed at `Pages readiness`** (F8). The later commits through the PR #33 merge are coordination-only, so the verified site tree is unchanged.
+- Attempted a post-merge manual retry with `gh workflow run pages.yml --ref main`; GitHub returned **HTTP 403 API rate limit exceeded** at 2026-11-21 07:25:31Z, so no additional run was created. `GET /repos/wingbangboozle1-lang/Trade3/pages` still returned **404** on the latest check; previous POST create attempts returned **403 `Resource not accessible by integration`**.
+- **F8 remains owner-only:** Repository Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save, then run the Pages workflow. The code/site verification passes; Pages is not yet live. All tasks T-22a through T-22e are complete, with the F8 environment blocker documented and published on Flagged for Review.
