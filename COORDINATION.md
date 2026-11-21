@@ -810,3 +810,20 @@ No other session is active; no conflicting claims exist on the board.
 ## Tests (this session, to be recorded after run)
 
 - `npm test`, `python3 scripts/check_site.py`, `node scripts/check-links.js` — results below after run.
+
+## Tests run this session (2026-11-21)
+
+- `npm test` — **logic + 15/15 engine + 13/13 site** (all pass).
+- `python3 scripts/check_site.py` — 28 pages, 360 local links, 20 JS modules, 39 series rows — **all site checks passed**.
+- `node scripts/check-links.js` — 28 HTML pages, 20 JS files, 360 references — **all resolve**.
+- `python3 -m py_compile` on Python layer — **OK**.
+- Server boot (`DATA_MODE=demo PORT=3100`): `/api/health` → `ok:true`, `/api/state` → 5 topics tracked, `/app/` → 200, `/` → 200. Demo mode correctly labels synthetic data as NOT Kalshi markets.
+
+## Workflow fix (this session)
+
+- `.github/workflows/pages.yml` deploy job reordered: `configure-pages` (enablement:true) now runs **before** the readiness probe, and the probe is informational (warning, not `exit 1`). Previously the probe exited before `configure-pages` ever ran, so the Actions token never attempted enablement. If the Actions token can create Pages, the next run deploys; if it still gets 403, the owner click (F8) remains the only route. No site code changed.
+
+## Irregularities (non-blocking, on Flagged page)
+
+- F8 Pages enablement still requires one owner click (reproduced 403 this session). Site itself is verified and not broken.
+- All other flags F1–F25 unchanged; no new unverified values introduced. No hallucinations: every value in this record links its official source above.

@@ -142,6 +142,8 @@ jobs:
       # configure-pages with enablement: true creates the Pages site (build type: workflow) if it
       # does not exist yet. The earlier pre-check that exited on 404 is removed: it stopped the run
       # before this step could ever try the enablement.
+      # (Sessions arena/8214edf2-trade3 PR #18 and arena/8373696a-trade3 independently made
+      # this same fix; upstream version kept, both COORDINATION records kept.)
       - uses: actions/configure-pages@v5
         with:
           enablement: true
