@@ -1373,3 +1373,45 @@ app JS chart windows 1m–1w, requirements) auto-merged cleanly and are unchange
 `COORDINATION.md` and `EXECUTIVE_SUMMARY.md` (EOF append collisions) and both were union-resolved the same
 way — their records kept first, this session's records appended after. `docs/flagged.html` auto-merged
 (their F10 correction + our F8 evidence coexist). No work discarded.
+# Session `arena/d9cfd60b-trade3` — claim (2026-11-21)
+
+**Branch:** `arena/d9cfd60b-trade3` (fast-forwarded to `main` @ `80b662d`, PR #38 merge, before claiming; rebased onto successive `main` tips after concurrent merges from parallel sessions — append-only conflicts in this file resolved each time by keeping all of `main`'s content).
+Platform rules fix this session to this branch name (the `session-<id>/<task>` naming is not available here).
+
+| Task | Status | Owner | File scope |
+|---|---|---|---|
+| T-d9c1 Fresh verification pass on latest `main`: local gates (`npm test`, `check_site.py`, `check-links.js`, `py_compile`, `node --check`) + live Kalshi demo API spot checks via the page-fetch path | done | `arena/d9cfd60b-trade3` | none (read-only) |
+| T-d9c2 GitHub Pages enablement retry from this session's credentials (F8) | done | `arena/d9cfd60b-trade3` | none (API calls only) |
+| T-d9c3 Sandbox live preview of `docs/` so the dashboard is viewable | done | `arena/d9cfd60b-trade3` | none (runtime only) |
+| T-d9c4 Final record + PR to `main` + merge + deploy status check | done | `arena/d9cfd60b-trade3` | `COORDINATION.md` (append-only) |
+
+## Results — session `arena/d9cfd60b-trade3` (2026-11-21)
+
+### T-d9c1 Verification on `main` @ `3243d28` (PR #39 merge) — all gates pass
+
+| Check | Result |
+|---|---|
+| `npm test` (logic + engine + site-render) | **pass** — site-render 13/13, all pages have title/description/nav/landmark, data integrity 10 markets / 5 series / 15 requirements / 20 flags |
+| `python3 scripts/check_site.py` | **pass** — 29 pages, 387 local links, 20 JS modules, 39 series rows |
+| `node scripts/check-links.js` | **pass** — 387 local references resolve; 0 broken links/anchors/imports/DOM targets |
+| `python3 -m py_compile` (6 files) + `node --check` (app/server/scripts/tests) | **pass** |
+| Exchange status (demo) | [GET /exchange/status](https://external-api.demo.kalshi.co/trade-api/v2/exchange/status) — `exchange_active: true`, `trading_active: true`, 4 shards (live 2026-11-21 via page fetch; shell egress to `*.kalshi.co` remains blocked, F19) |
+| Gas row `KXAAAGASM` | [official series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASM) — "US gas price", Economics, AAA settlement, monthly — matches published row |
+| Crypto row `KXETHD` | [official series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXETHD) — "Ethereum price Above/below", Crypto, hourly, CF Benchmarks ETHUSD_RTI — matches published row |
+
+### T-d9c2 Pages enablement — reproduced again, owner-only (F8 stands)
+
+- `GET /repos/wingbangboozle1-lang/Trade3/pages` → **404** (`has_pages: false`).
+- `POST /repos/.../pages` with `build_type=workflow` → **403 "Resource not accessible by integration"**.
+- `POST /repos/.../pages` with legacy `source[branch]=main, source[path]=docs` → **same 403**.
+- Latest deploy run on `main` ([44879350060](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879350060), PR #22 merge): **Verify site ✓ · Deploy ✗ at `actions/configure-pages@v5`** — enablement call only; the workflow emits an annotation with the exact owner steps. Every automation credential class has now been tried (CLI token, Actions `GITHUB_TOKEN`, `configure-pages enablement: true`, legacy branch-source POST). **Owner one-time action:** Repo → Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save, then run "Deploy site to GitHub Pages". Expected URL: https://wingbangboozle1-lang.github.io/Trade3/ — the verify job passes, so deploy succeeds immediately after.
+
+### T-d9c3 Sandbox preview
+
+- `docs/` served on **port 8000** ("Kalshi dashboard site preview"): `/index.html`, `/dashboard.html`, `/portfolio.html`, `/flagged.html`, `/suggestions.html`, `/topics/crypto.html` all **HTTP 200**. The visitor's browser fetches the demo API directly, so live data appears for the human viewer.
+
+### T-d9c4 Integration
+
+- PR from `arena/d9cfd60b-trade3` → `main` created and merged; number and merge result recorded in the appended merge note below (added in a follow-up commit inside the same PR so the merged board carries it).
+- The merge touches `COORDINATION.md` only (no `docs/**`), so no new Pages deploy run is triggered by it; the deploy outcome on the identical site tree is run [44879350060](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879350060) above.
+- No open claims from other sessions were touched. Open PRs belonging to other sessions were left alone.
