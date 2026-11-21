@@ -762,3 +762,20 @@ the moment the owner performs the one-time F8 action.
 - **GitHub Pages status:** still not enabled (`GET .../pages` → 404). Once the owner performs the one-time F8
   action, the next push to `main` (or "Deploy GitHub Pages" → Run workflow) publishes `docs/` at
   `https://wingbangboozle1-lang.github.io/Trade3/` with no further code change.
+
+---
+
+# Session `arena/77ec3a0e-trade3` — live re-verification, Pages blocker evidence, deploy hardening, final integration (2026-11-21)
+
+**Claim (this session, branch `arena/77ec3a0e-trade3`, based on `main` @ `4eb92a1`):**
+Branch note: Arena sessions work on their fixed branch `arena/<id>-trade3` (the platform forbids the
+`session-<id>/<task>` naming scheme in the header), so this session's branch is `arena/77ec3a0e-trade3`
+and its file scope is non-overlapping with every other claim on this board.
+
+| Task | Status | Owner | File scope |
+|---|---|---|---|
+| T-AW1 Live re-verification of load-bearing published facts (exchange status, anchor series, category queries) against the official demo API on 2026-11-21 | in progress | `arena/77ec3a0e-trade3` | `COORDINATION.md` (record), `EXECUTIVE_SUMMARY.md` (status rows) |
+| T-AW2 Pages blocker evidence + deploy workflow hardening (attempt site creation before the owner-action error) | in progress | `arena/77ec3a0e-trade3` | `.github/workflows/pages.yml`, `docs/flagged.html` |
+| T-AW3 Final integration: full gates, PR to `main`, merge, CI + Pages status | in progress | `arena/77ec3a0e-trade3` | `COORDINATION.md` (record) |
+
+Claim pushed immediately after this edit, before starting work. No other session is active.
