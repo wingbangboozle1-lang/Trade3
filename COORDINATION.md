@@ -983,3 +983,12 @@ No other session has an open claim on the board. Files owned by other sessions a
 - **Site status:** **not live.** Expected URL once enabled: https://wingbangboozle1-lang.github.io/Trade3/
 
 **One owner action is required (no code change):** Repo → Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save. Then run the "Deploy site to GitHub Pages" workflow (Actions → Run workflow on `main`). The verify job already passes, so the deploy should succeed right after that click.
+
+---
+
+# Session `arena/84e59a8b-trade3` — PR #23 merge/deploy addendum (2026-11-21)
+
+- **PR #23:** https://github.com/wingbangboozle1-lang/Trade3/pull/23 — merged by squash at `2026-11-21T07:07:13Z`; merge commit `622709c1060d3eb33bd92448e5d13c21fa9fb15d`.
+- **Main verification run:** [44878773776](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44878773776). Verify site job **success** (all checks, including live-row re-verification, green). Deploy job **failure** at `actions/configure-pages@v5`; upload/deploy were skipped. GitHub's log receiver returned EOF when requesting the failure text, but `gh run view` lists the exact failing step. This is F8 / Pages enablement, not a build or link-check failure.
+- Re-checked Pages with `gh api repos/wingbangboozle1-lang/Trade3/pages`: 404 (no Pages site). The workflow and site files were not changed by this addendum; PR #26's separate Pages work was left to its owner.
+- No deployment success or public Pages URL is claimed. Owner action remains Settings → Pages → Build and deployment → Source: GitHub Actions, unless the separate PR #26 resolves the site-creation limitation.
