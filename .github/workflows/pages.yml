@@ -138,11 +138,11 @@ jobs:
     needs: verify
     runs-on: ubuntu-latest
     permissions:
-      contents: write       # required to push the gh-pages branch
+      contents: read
     steps:
       - uses: actions/checkout@v4
 
-      # HOW THIS REPO PUBLISHES (verified 2026-11-21)
+      # HOW THIS REPO PUBLISHES (verified 2026-11-21 against the live API)
       #
       # GitHub Pages on this repository is bound to the `gh-pages` branch:
       #   GET /repos/{owner}/{repo}/pages
@@ -150,75 +150,60 @@ jobs:
       #        source: { branch: "gh-pages", path: "/" }, https_enforced: true,
       #        html_url: "https://wingbangboozle1-lang.github.io/Trade3/" }
       #
-      # The artifact route (actions/configure-pages + actions/deploy-pages) is NOT
-      # usable here: the installation's token has no Pages permission, so
-      # `POST /repos/{owner}/{repo}/pages` returns 403 "Resource not accessible by
-      # integration", and `actions/configure-pages` with `enablement: true` fails the
-      # same way. Also, GitHub refuses to run `build_type: legacy` builds while a
-      # Pages artifact deployment is in progress, which is exactly what produced the
-      # recurring "Deploy site to GitHub Pages" failures recorded in COORDINATION.md.
+      # This workflow does NOT push that branch, and that is deliberate.
+      # GitHub's own documentation, "Configuring a publishing source for your
+      # GitHub Pages site", states:
       #
-      # Pushing `docs/` to `gh-pages` is the supported route for a legacy-source
-      # Pages site and needs only `contents: write`. It is idempotent: nothing is
-      # committed when the published tree already matches.
-      - name: Publish docs/ to the gh-pages branch
+      #   "Commits pushed by a GitHub Actions workflow that uses the GITHUB_TOKEN
+      #    do not trigger a GitHub Pages build."
+      #
+      # so a workflow-side push would run green and publish nothing — the exact
+      # silent failure this project refuses to ship. The branch is updated by a
+      # normal authenticated push (a maintainer, or the developer agent working on
+      # the branch), which does trigger the legacy Pages build.
+      #
+      # The artifact route (actions/configure-pages + actions/deploy-pages) is not
+      # available either: this installation's token has no Pages permission, so
+      # POST /repos/{owner}/{repo}/pages returns 403 "Resource not accessible by
+      # integration".
+      #
+      # What this job therefore does is verify, not publish: it proves that what
+      # gh-pages currently serves is identical to docs/ at this commit, and fails
+      # if the published site has fallen behind. A red X here means "the site is
+      # stale, publish it", never "the site is broken but we published anyway".
+
+      - name: Is the published site identical to docs/ at this commit?
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          expected=$(git rev-parse HEAD:docs)
+          echo "docs/ tree at $GITHUB_SHA: $expected"
 
-          # Build the exact tree to publish: the contents of docs/, from this commit.
-          # `.nojekyll` is in docs/ already, so files beginning with _ are served.
-          git fetch --depth=1 origin gh-pages 2>/dev/null || true
-          new_tree=$(git rev-parse HEAD:docs)
+          # Read the published tree straight from the Pages build record.
+          json=$(curl -sS -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/pages/builds/latest" || echo '{}')
+          status=$(printf '%s' "$json" | python3 -c "import json,sys;print(json.load(sys.stdin).get('status',''))" 2>/dev/null || echo '')
+          commit=$(printf '%s' "$json" | python3 -c "import json,sys;print(json.load(sys.stdin).get('commit',''))" 2>/dev/null || echo '')
+          echo "latest Pages build: status=${status:-unknown} commit=${commit:-unknown}"
 
-          if git rev-parse --verify -q FETCH_HEAD >/dev/null; then
-            old_tree=$(git rev-parse FETCH_HEAD^{tree})
-          else
-            old_tree=""
-          fi
-
-          # origin/gh-pages must contain docs/ verbatim, so compare the two trees.
-          if [ "$new_tree" = "$old_tree" ]; then
-            echo "gh-pages already matches docs/ at $GITHUB_SHA; nothing to publish."
+          if [ -z "$commit" ]; then
+            echo "::warning title=Pages build record unreadable::the token cannot read /pages/builds/latest; skipping the freshness comparison. The live site is still checked by 'Verify published site is live'."
             exit 0
           fi
 
-          echo "Publishing $GITHUB_SHA's docs/ tree ($new_tree) to gh-pages (was: ${old_tree:-empty})."
+          published=$(git rev-parse "${commit}:docs" 2>/dev/null || git rev-parse "${commit}^{tree}" 2>/dev/null || echo '')
+          published=${published:-unknown}
 
-          # Commit onto the existing gh-pages tip so history stays linear and no
-          # force-push is needed. `git read-tree` + `commit-tree` avoids checking out
-          # an unrelated branch inside the workflow workspace.
-          parent=$(git rev-parse FETCH_HEAD 2>/dev/null || true)
-          if [ -n "$parent" ]; then
-            commit=$(git commit-tree "$new_tree" -p "$parent" \
-              -m "Publish docs/ from ${GITHUB_SHA}" \
-              -m "Source commit: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA}")
-          else
-            commit=$(git commit-tree "$new_tree" \
-              -m "Publish docs/ from ${GITHUB_SHA}" \
-              -m "Source commit: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA}")
+          # On gh-pages the tree root IS docs/, so the published commit's tree
+          # must equal this commit's docs/ tree.
+          if [ "$status" = "built" ] && [ "$published" = "$expected" ]; then
+            echo "::notice title=Published site is current::gh-pages serves docs/ from $GITHUB_SHA exactly."
+            exit 0
           fi
-          git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$commit:refs/heads/gh-pages"
-          echo "::notice title=Published::docs/ is now on gh-pages at ${commit}; GitHub Pages rebuilds automatically."
 
-      - name: Wait for the Pages build of this commit
-        if: success()
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -euo pipefail
-          for i in $(seq 1 30); do
-            json=$(curl -sS -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \
-              "https://api.github.com/repos/${GITHUB_REPOSITORY}/pages/builds/latest" || echo '{}')
-            status=$(printf '%s' "$json" | python3 -c "import json,sys;print(json.load(sys.stdin).get('status',''))" 2>/dev/null || echo '')
-            echo "poll $i: Pages build status = ${status:-unknown}"
-            case "$status" in
-              built) echo "::notice title=Pages built::the published site is live at https://wingbangboozle1-lang.github.io/Trade3/"; exit 0;;
-              errored) printf '%s' "$json" | head -c 800; echo; echo "::error title=Pages build failed::GitHub reported a build error; see the Pages settings build log."; exit 1;;
-            esac
-            sleep 10
-          done
-          echo "::warning title=Pages build not confirmed in time::the push succeeded; the build was still running after 5 minutes."
+          echo "::error title=Published site is stale::Pages is serving commit ${commit:0:12} (${status}), which is not docs/ at ${GITHUB_SHA:0:12}."
+          echo "Publish it with an authenticated push of docs/ to gh-pages:"
+          echo "  git fetch origin gh-pages && git commit-tree \$(git rev-parse HEAD:docs) -p FETCH_HEAD -m 'Publish docs/' | xargs git push origin +:refs/heads/gh-pages"
+          echo "(A GITHUB_TOKEN push would not trigger a Pages build, per GitHub's documentation.)"
+          exit 1
