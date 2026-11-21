@@ -416,6 +416,29 @@ export function num(v) {
 }
 
 /**
+ * Threshold comparisons run in integer 1/10,000-dollar space ("ticks").
+ * Kalshi prices are fixed-point dollar strings, and float subtraction drifts
+ * (0.42 − 0.32 = 0.09999999999999998), which would silently drop an
+ * exactly-$0.10 move. Mirrors the `_ticks()` helper in strategies.py.
+ */
+export function ticks(x) {
+  const f = num(x);
+  return f == null ? null : Math.round(f * 10000);
+}
+
+/** Tick delta from `from` to `to` (positive = price rose), or null. */
+export function movedTicks(from, to) {
+  const a = ticks(from), b = ticks(to);
+  return a == null || b == null ? null : b - a;
+}
+
+/** True when the move from `from` to `to` is ≥ the alert threshold, either direction. */
+export function isSwing(from, to) {
+  const d = movedTicks(from, to);
+  return d != null && Math.abs(d) >= ticks(ALERT_THRESHOLD);
+}
+
+/**
  * Traded dollars = contracts × price, per contract side.
  * Kalshi exposes volume as a contract count and prices separately, and has no
  * dollar-volume field, so this is a *disclosed approximation* (flagged F4).

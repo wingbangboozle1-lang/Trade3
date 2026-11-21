@@ -10,7 +10,7 @@
 // ============================================================================
 import {
   TOPIC_BY_ID, classify, apiGet, discoverTopicSeries, esc, fetchOpenEvents, fetchOpenMarkets,
-  fetchSettled, fmt$, fmtNum, fmtPx, lastPrice, store, yesAsk, yesBid,
+  fetchSettled, fmt$, fmtNum, fmtPx, lastPrice, movedTicks, store, ticks, yesAsk, yesBid,
 } from "./app.js";
 
 const $ = (id) => document.getElementById(id);
@@ -22,10 +22,12 @@ const STRATEGIES = [
     label: "Swing momentum",
     rule: "Follow a ≥ $0.10 move: buy YES after a rise, buy NO after a fall.",
     side: (m) => {
-      const d = drift(m);
+      // Compared in integer 1/10,000-dollar ticks (movedTicks): float
+      // subtraction 0.42 − 0.32 = 0.0999… would drop an exactly-$0.10 move.
+      const d = driftTicks(m);
       if (d == null) return null;
-      if (d >= 0.10) return "yes";
-      if (d <= -0.10) return "no";
+      if (d >= ticks(0.10)) return "yes";
+      if (d <= -ticks(0.10)) return "no";
       return null;
     },
   },
@@ -57,13 +59,14 @@ const STRATEGIES = [
 
 /**
  * Where did the price come from? Kalshi publishes previous_price_dollars, so a
- * move since the prior print is a documented field, not a guess.
+ * move since the prior print is a documented field, not a guess. Returns the
+ * move in integer 1/10,000-dollar ticks (null when unknown).
  */
-function drift(m) {
+function driftTicks(m) {
   const now = lastPrice(m);
   const prev = Number(m?.previous_price_dollars);
   if (now == null || !Number.isFinite(prev) || prev <= 0) return null;
-  return now - prev;
+  return movedTicks(prev, now);
 }
 
 // --- data -------------------------------------------------------------------

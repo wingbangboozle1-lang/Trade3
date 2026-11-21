@@ -3,7 +3,7 @@
 import assert from "node:assert/strict";
 import {
   TOPICS, ALERT_THRESHOLD, ROI, bookSummary, bookDepth, candlePlan, classify,
-  depthWithin, dollarVolume, fmt$, lastPrice, roiCheck, normTag, until, kalshiSeriesUrl,
+  depthWithin, dollarVolume, fmt$, isSwing, lastPrice, movedTicks, roiCheck, normTag, ticks, until, kalshiSeriesUrl,
   cleanTitle, sourceLinks,
 } from "../docs/assets/app.js";
 
@@ -119,5 +119,22 @@ assert.equal(links.length, 1, "one real source: deduped, blanks and kalshi.com p
 assert.equal(links[0].name, "AAA");
 assert.deepEqual(sourceLinks({}), [], "no record, no links — never a guess");
 assert.deepEqual(sourceLinks(null), [], "null record tolerated");
+
+// --- threshold comparisons in tick space (regression: exactly $0.10) --------
+// Float subtraction drifts: 0.42 - 0.32 = 0.09999999999999998, which a bare
+// `>= 0.10` test silently loses. Every >= $0.10 decision runs on integer
+// 1/10,000-dollar ticks (same rule as strategies.py `_ticks`).
+assert.equal((0.42 - 0.32) !== 0.10, true, "sanity: floats really drift here");
+assert.equal(ticks(0.42) - ticks(0.32), 1000, "exactly 10 cents is 1000 ticks");
+assert.equal(movedTicks(0.32, 0.42), 1000);
+assert.equal(movedTicks(0.42, 0.32), -1000, "direction preserved");
+assert.equal(movedTicks(0.33, 0.42), 900, "9 cents stays 9 cents");
+assert.equal(isSwing(0.32, 0.42), true, "an exactly-$0.10 rise must alert (portfolio.js momentum, dashboard)");
+assert.equal(isSwing(0.42, 0.32), true, "an exactly-$0.10 fall must alert");
+assert.equal(isSwing(0.33, 0.42), false, "a 9-cent move must not alert");
+assert.equal(isSwing(0.32, 0.425), true, "moves above $0.10 alert too");
+assert.equal(isSwing(null, 0.42), false, "missing price never alerts");
+assert.equal(ticks("0.4200"), 4200, "fixed-point strings accepted");
+assert.equal(ticks(null), null);
 
 console.log("logic tests passed");

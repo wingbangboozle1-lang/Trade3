@@ -15,7 +15,7 @@ import {
   ALERT_THRESHOLD, TOPICS, TOPIC_BY_ID, apiGet, baseUrls, candlePlan, classify, cleanTitle, fetchTrades, sourceLinks,
   clockStr, depthWithin, discoverTopicSeries, esc, fetchCandles, fetchOpenEvents,
   fetchOpenMarkets, fetchOrderbook, fetchSettled, fmt$, fmtDelta, fmtNum, fmtPx,
-  getEnv, getPollMs, kalshiSeriesUrl, apiMarketUrl, lastPrice, netStats, num, roiCheck,
+  getEnv, getPollMs, isSwing, kalshiSeriesUrl, apiMarketUrl, lastPrice, netStats, num, roiCheck,
   setEnv, setPollMs, store, timeStr, until, yesAsk, yesBid, bookSummary, bookDepth,
 } from "./app.js";
 
@@ -231,7 +231,9 @@ async function detectSwings(markets, now) {
     const old = state.prev.get(m.ticker);
     if (p == null || old == null || !inScope(m)) continue;
     const delta = p - old;
-    if (Math.abs(delta) >= ALERT_THRESHOLD - 1e-9) hits.push({ m, delta, from: old, to: p });
+    // Tick-space threshold: float subtraction (0.42 − 0.32 = 0.0999…) must not
+    // drop an exactly-$0.10 move (same rule as strategies.py `_ticks`).
+    if (isSwing(old, p)) hits.push({ m, delta, from: old, to: p });
   }
   // Quote the book only for fresh swings (keeps request count low).
   for (const h of hits.slice(0, 12)) {
@@ -699,10 +701,10 @@ async function drawChart(reset = false) {
   }
   ctx.globalAlpha = 1;
 
-  // ≥ $0.10 step markers
+  // ≥ $0.10 step markers (tick-space comparison, see isSwing in app.js)
   ctx.fillStyle = "#ffb347";
   for (let i = 1; i < pts.length; i++) {
-    if (Math.abs(pts[i].price - pts[i - 1].price) >= ALERT_THRESHOLD - 1e-9) {
+    if (isSwing(pts[i - 1].price, pts[i].price)) {
       ctx.beginPath(); ctx.arc(x(pts[i].ts), y(pts[i].price), 3.4 * dpr, 0, Math.PI * 2); ctx.fill();
     }
   }

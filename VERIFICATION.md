@@ -37,8 +37,8 @@ Verified 2026-11-20. Live API responses were fetched on 2026-11-20 (demo base).
 | V29 | **Second review, session `arena/2100849c-trade3` — live API re-checks:** exchange status (4 shards, trading active); `GET /markets/KXAAAGASM-26NOV30-4.80` matches the Build B captured row field-for-field; `GET /series/KXAAAGASM` matches (Economics, Oil & Gas + Oil and energy, scope Gasoline, AAA, fee_multiplier 1); `GET /series?category=Gas` → `{"series":null}`; `GET /series?category=Sports&tags=Golf` → golf series (KXLIVCOMPETE, KXPGATOURCHAMP, KXPGAROUNDSCORE, KXPGA, …) | [status](https://external-api.demo.kalshi.co/trade-api/v2/exchange/status) · [market](https://external-api.demo.kalshi.co/trade-api/v2/markets/KXAAAGASM-26NOV30-4.80) · [series](https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASM) · [Gas probe](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Gas) · [Golf query](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Sports&tags=Golf&limit=20) | Fetched live 2026-11-20 by session `arena/2100849c-trade3` |
 | V19 | Exchange active on demo 2026-11-20 (`exchange_active: true`, `trading_active: true`) | [Live status](https://external-api.demo.kalshi.co/trade-api/v2/exchange/status) | Live API JSON |
 | V20 | OpenAPI spec download | [Predictions REST spec](https://docs.kalshi.com/openapi.yaml) | Linked from docs welcome page |
-| V21 | **Second review (2026-11-20, session `arena/2100849c-trade3`) — docs pages re-opened and confirmed live:** demo/prod REST+WS endpoints; signing (`timestamp+METHOD+path` w/o query, RSA-PSS/SHA-256 + Ed25519, headers, ms timestamps, 30s window); API keys under Account & security → API Keys; WS handshake sign `timestamp+"GET"+"/trade-api/ws/v2"` and WS auth required; market lifecycle statuses (initialized/active/inactive/closed/determined/disputed/amended/finalized; filter map `open`→`active`, `settled`→`finalized`); `GET /markets?status=` ∈ {unopened, open, closed, settled}; candlestick `period_interval` ∈ {1, 60, 1440}; orderbook bids-only with YES ask = 1 − NO bid; settlement pays $1/contract to the winning side; fee formula `round up(M×0.07×C×P×(1−P))` + all 21 rows of the published table + maker 0.0175 + KXBTCY/KXETHY zero multiplier + effective 2026-07-07; Create Order V2 body (`ticker, side bid/ask, count "10.00", price "0.5600", time_in_force, self_trade_prevention_type`) and legacy 410 Gone; `GET /series` params (`category` exact/case-sensitive, `tags`, `include_product_metadata`); balance returned in cents | [API Environments](https://docs.kalshi.com/getting_started/api_environments) · [Authenticated Requests](https://docs.kalshi.com/getting_started/quick_start_authenticated_requests) · [WebSockets](https://docs.kalshi.com/getting_started/quick_start_websockets) · [Market Lifecycle](https://docs.kalshi.com/getting_started/market_lifecycle) · [Market Settlement](https://docs.kalshi.com/getting_started/market_settlement) · [Fee schedule PDF](https://kalshi.com/docs/kalshi-fee-schedule.pdf) · [Create Order V2](https://docs.kalshi.com/api-reference/orders/create-order-v2) · [Get Series List](https://docs.kalshi.com/api-reference/market/get-series-list) · [llms.txt index](https://docs.kalshi.com/llms.txt) | Fetched live 2026-11-20; every cited docs path in the repo was found in the official llms.txt index or fetched directly |
-| V22 | **Second review — live demo API re-checks:** `GET /exchange/status` → `exchange_active:true, trading_active:true`, shards 0–3; `GET /markets/KXAAAGASM-26NOV30-4.80` matches the Build B captured row field-for-field (last 0.0300, prev 0.0300, yes bid 0.0000/ask 1.0000, vol 55571.52, OI 55567.52, close 2026-11-30T04:59:00Z, status `active`, result `""`); `GET /series/KXAAAGASM` matches (Economics, Oil & Gas + Oil and energy, scope Gasoline, AAA, fee_multiplier 1, monthly); `GET /series?category=Gas` → `{"series":null}`; `GET /series?category=Sports&tags=Golf` → golf series (KXLIVCOMPETE, KXPGATOURCHAMP, KXPGAROUNDSCORE, KXPGA, …) | [exchange status](https://external-api.demo.kalshi.co/trade-api/v2/exchange/status) · [market record](https://external-api.demo.kalshi.co/trade-api/v2/markets/KXAAAGASM-26NOV30-4.80) · [gas series](https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASM) · [gas category probe](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Gas) · [golf query](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Sports&tags=Golf&limit=20) | Fetched live 2026-11-20 by session `arena/2100849c-trade3` |
+| V30 | **(Renumbered 2026-11-21 — this row originally reused ID V21.) Second review (2026-11-20, session `arena/2100849c-trade3`) — docs pages re-opened and confirmed live:** demo/prod REST+WS endpoints; signing (`timestamp+METHOD+path` w/o query, RSA-PSS/SHA-256 + Ed25519, headers, ms timestamps, 30s window); API keys under Account & security → API Keys; WS handshake sign `timestamp+"GET"+"/trade-api/ws/v2"` and WS auth required; market lifecycle statuses (initialized/active/inactive/closed/determined/disputed/amended/finalized; filter map `open`→`active`, `settled`→`finalized`); `GET /markets?status=` ∈ {unopened, open, closed, settled}; candlestick `period_interval` ∈ {1, 60, 1440}; orderbook bids-only with YES ask = 1 − NO bid; settlement pays $1/contract to the winning side; fee formula `round up(M×0.07×C×P×(1−P))` + all 21 rows of the published table + maker 0.0175 + KXBTCY/KXETHY zero multiplier + effective 2026-07-07; Create Order V2 body (`ticker, side bid/ask, count "10.00", price "0.5600", time_in_force, self_trade_prevention_type`) and legacy 410 Gone; `GET /series` params (`category` exact/case-sensitive, `tags`, `include_product_metadata`); balance returned in cents | [API Environments](https://docs.kalshi.com/getting_started/api_environments) · [Authenticated Requests](https://docs.kalshi.com/getting_started/quick_start_authenticated_requests) · [WebSockets](https://docs.kalshi.com/getting_started/quick_start_websockets) · [Market Lifecycle](https://docs.kalshi.com/getting_started/market_lifecycle) · [Market Settlement](https://docs.kalshi.com/getting_started/market_settlement) · [Fee schedule PDF](https://kalshi.com/docs/kalshi-fee-schedule.pdf) · [Create Order V2](https://docs.kalshi.com/api-reference/orders/create-order-v2) · [Get Series List](https://docs.kalshi.com/api-reference/market/get-series-list) · [llms.txt index](https://docs.kalshi.com/llms.txt) | Fetched live 2026-11-20; every cited docs path in the repo was found in the official llms.txt index or fetched directly |
+| V31 | **(Renumbered 2026-11-21 — this row originally reused ID V22.) Second review — live demo API re-checks:** `GET /exchange/status` → `exchange_active:true, trading_active:true`, shards 0–3; `GET /markets/KXAAAGASM-26NOV30-4.80` matches the Build B captured row field-for-field (last 0.0300, prev 0.0300, yes bid 0.0000/ask 1.0000, vol 55571.52, OI 55567.52, close 2026-11-30T04:59:00Z, status `active`, result `""`); `GET /series/KXAAAGASM` matches (Economics, Oil & Gas + Oil and energy, scope Gasoline, AAA, fee_multiplier 1, monthly); `GET /series?category=Gas` → `{"series":null}`; `GET /series?category=Sports&tags=Golf` → golf series (KXLIVCOMPETE, KXPGATOURCHAMP, KXPGAROUNDSCORE, KXPGA, …) | [exchange status](https://external-api.demo.kalshi.co/trade-api/v2/exchange/status) · [market record](https://external-api.demo.kalshi.co/trade-api/v2/markets/KXAAAGASM-26NOV30-4.80) · [gas series](https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASM) · [gas category probe](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Gas) · [golf query](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Sports&tags=Golf&limit=20) | Fetched live 2026-11-20 by session `arena/2100849c-trade3` |
 
 > **Scope of the 2026-11-20 re-check (session b4e5648a).** Every series row in `docs/data/series.json` (31 rows) and every market row in Build B's `data.js` (10 rows, 9 re-read) was re-read from the official demo endpoint in its row's `sourceUrl`. Rows are marked `verified_on` in the data file. Values that cannot be re-read are blank or flagged; nothing is inferred.
 
@@ -74,6 +74,14 @@ See [Flagged for Review](docs/flagged.html) for the full list with source links 
      misses exactly-$0.10 moves (e.g. `0.42 − 0.32 = 0.09999…`). All comparisons now run in
      integer 1/10,000-dollar space, matching Build B. Fixed in `docs/assets/dashboard.js`,
      `docs/assets/portfolio.js`, `strategies.py`, `run_sim.py`.
+     **Correction (2026-11-21, session `arena/6c20e938-trade3`):** this line overstated the fix.
+     A line-by-line audit found `docs/assets/portfolio.js` still comparing `d >= 0.10` /
+     `d <= -0.10` in float for its swing-momentum strategy (exactly-10¢ moves were still
+     dropped there), and `docs/assets/dashboard.js` using a float-epsilon test
+     (`>= ALERT_THRESHOLD - 1e-9`) rather than tick space. Both now use the shared
+     `ticks`/`movedTicks`/`isSwing` helpers in `docs/assets/app.js`, with regression
+     assertions in `tests/logic.test.mjs` (including the 0.42 − 0.32 case). `strategies.py`
+     and `run_sim.py` were genuinely fixed as claimed (`_ticks`).
   2. The Build A portfolio simulator and `backtest.py` priced a NO buy at `yes_bid_dollars`;
      per the official Orderbook Responses page a NO ask is `1 − best YES bid`. Both fixed.
   3. `kalshi_client.py place_order` used a legacy-shaped body (`yes_price`, `action`) against
@@ -84,7 +92,7 @@ See [Flagged for Review](docs/flagged.html) for the full list with source links 
   5. `package.json` referenced `scripts/capture-snapshot.js`, which did not exist in the
      repo — implemented (captures real demo values into `data/snapshot.json`).
   6. `demo.kalshi.co/markets/{ticker}` (demo web-UI link pattern) could not be verified —
-     flagged F8 (Build A) / F9 (Build B); market links now use the verified API-record URL.
+     flagged F8 in the then-current ledger — **now F21 on the published ledger** (Build B F9 → also renumbered); market links now use the verified API-record URL.
   7. `server/kalshi.js createOrder` defaulted `exchange_index: -1`; `-1` is documented as
      auto-route for CANCEL, not create, so the field is now omitted unless provided.
   8. `scripts/capture-snapshot.js`, `docs/assets/*` and the Python files were re-checked
@@ -118,3 +126,63 @@ produced it, is unchanged and still true except where a line below says otherwis
 DOM targets) · `logic.test.mjs` · `render.test.mjs` (headless, jsdom) · `smoke-test.js` (collector, engines, routes,
 capture) · `site-render-test.js` (build B pages) · `py_compile` + the offline unit block for the Python layer ·
 `verify_series.py --from-cache docs/data/live-verification-2026-11-20.json` → **4/4, exit 0**.
+
+
+---
+
+## Line-by-line review + live re-verification — session `arena/6c20e938-trade3` (2026-11-21)
+
+All checks below were fetched **live on 2026-11-21** by this session (the page-fetch route;
+shell egress to Kalshi hosts remains blocked, flag F19). Where a prior session's claim was
+re-tested today, the result is recorded — including one claim that was overstated and is now
+corrected above (the portfolio.js tick-space fix).
+
+### Live re-verification sample (rows re-read field-by-field against `GET /series/{ticker}`)
+
+| Check | Source (official) | Result vs. published row |
+|---|---|---|
+| Exchange status | [GET /exchange/status](https://external-api.demo.kalshi.co/trade-api/v2/exchange/status) | `exchange_active: true`, `trading_active: true`, shards 0–3 — matches V19/V27 |
+| `KXNGASMAX` | [series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXNGASMAX) | Matches row (title, annual, Economics, EIA settlement). Note: a **separate** series `NGASMAX` ([record](https://external-api.demo.kalshi.co/trade-api/v2/series/NGASMAX)) exists with the same title; both resolve. Not a defect — verified before changing. |
+| `KXXBANNEDGROK` | [series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXXBANNEDGROK) | Matches row (Culture, one_off). Its 23-entry `settlement_sources` list is mixed: ~17 official publisher homepages + 5 Google-search placeholder URLs + `Elon Musk` (x.com) + a malformed `account holder of ` entry — confirming flag F10's blank+flag policy |
+| `KXLINKPERP` | [series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXLINKPERP) | Matches row: `settlement_sources: null` → published as "None listed by Kalshi" (F18) |
+| `POPVOTEKHVA` | [series record](https://external-api.demo.kalshi.co/trade-api/v2/series/POPVOTEKHVA) | Matches row (Kamala Virginia, Elections, congress.gov settlement) |
+| `KXPGAT20` | [series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAT20) | Matches row (T 20, Sports/Golf, Fox Sports + ESPN + Governing League) |
+| `KXAAAGASM`, `KXETHD`, `KXPGAGOLFERSCORE` | re-read by session `arena/ca612a03-trade3` 2026-11-21 (recorded in COORDINATION.md) | Match |
+| Remaining 32 rows | [verify-live.yml](https://github.com/wingbangboozle1-lang/Trade3/actions/workflows/verify-live.yml) — `verify_series.py` re-reads **all 39 rows** every 6 h on GitHub runners that can reach the API | Latest scheduled run [44850068547](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44850068547) (2026-11-21) — conclusion `success` |
+
+### Docs claims re-opened live 2026-11-21
+
+| Check | Source | Result |
+|---|---|---|
+| F6's claim: public REST is presented as browser-fetchable | [Quick Start: Market Data](https://docs.kalshi.com/getting_started/quick_start_market_data) | Confirmed — the page ships JavaScript `fetch('https://external-api.kalshi.com/trade-api/v2/series/KXHIGHNY')` examples as runnable code. (Whether the API sends CORS headers is still "verify in browser", F6 status unchanged) |
+| Every docs path cited in this repo exists | [llms.txt](https://docs.kalshi.com/llms.txt) | Confirmed for the paths listed in V28. Canonical slug is `get-market-orderbook` (as this repo cites); note the quick-start page internally links a hyphenated `get-market-order-book` variant — a Kalshi docs inconsistency, not ours |
+| Fee schedule | [kalshi-fee-schedule.pdf](https://kalshi.com/docs/kalshi-fee-schedule.pdf) | Re-read 2026-11-21: formula `roundup(M × 0.07 × C × P × (1 − P))`, maker `M × 0.0175`, "There is no settlement fee", "Last updated and effective: July 7, 2026", KXBTCY/KXETHY zero multipliers — matches V26 |
+
+### Defects found and fixed by this pass
+
+1. **`docs/assets/portfolio.js` swing-momentum used bare float comparisons** (`d >= 0.10`) —
+   the one place the earlier "all tick-space" claim did not actually hold (see correction
+   above). Fixed with `movedTicks`/`ticks` from `docs/assets/app.js`; `tests/logic.test.mjs`
+   now asserts the exact-10¢ case in both directions plus a 9¢ negative case.
+2. **`VERIFICATION.md` shipped two pairs of rows with duplicate IDs** (two rows were V21 and
+   two were V22 — the second pair near-duplicating V28/V29). The duplicates are renumbered
+   V30/V31 with their unique content preserved (V31's field list for
+   `KXAAAGASM-26NOV30-4.80`).
+3. **`requirements/REQUIREMENTS.md`'s "Where" column cited files that do not exist in this
+   tree** (`app/config.mjs`, `app/lib/*.mjs`, `app/public/`, `site/`, `scripts/lib/render.mjs`,
+   `scripts/verify-sources.mjs`). Re-pointed to the real implementations
+   (`server/kalshi.js`, `docs/assets/app.js`, `server/collector.js`, `docs/assets/dashboard.js`,
+   `scripts/check_site.py`, `scripts/verify_series.py`, …). The requirements themselves
+   (R1–R32) are unchanged.
+4. **R19 claimed a `/suggestions.html` site page that did not exist** (only root
+   `SUGGESTIONS.md` + an index section existed). `docs/suggestions.html` added and linked in
+   the Build A navigation.
+
+### Items this session could NOT complete (honest scope)
+
+- **GitHub Pages enablement**: `GET /repos/wingbangboozle1-lang/Trade3/pages` → 404 (never
+  created); `POST /pages` → 403 "Resource not accessible by integration" (retried 2026-11-21).
+  Automation tokens cannot create the Pages site; the one-time owner click is documented in
+  F8 and the workflow's failure summary. Everything else deploys automatically afterwards.
+- **Live demo-account trading / portfolio pulls**: still require user-owned demo API keys
+  (F3). Not requested, not stored.
