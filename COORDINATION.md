@@ -1839,32 +1839,6 @@ in the visitor's browser (browser-side fetch); sandbox shell egress to `*.kalshi
   `arena/d9cfd60b-trade3`/`arena/7457e87c-trade3`/`arena/77ec3a0e-trade3`). Resolved as a **union**:
   upstream `COORDINATION.md` kept byte-for-byte, this session's claim block re-appended after it.
   No other session's work modified or discarded. Remaining commits replayed cleanly.
-<<<<<<< HEAD
-
-## Merge record (session `arena/ccf26d52-trade3`, T-CCF6) — 2026-11-21
-
-- **PR #49:** https://github.com/wingbangboozle1-lang/Trade3/pull/49 — "Final integration (ccf26d52):
-  re-verification 8/8 match, REQUIREMENTS.md path cleanup, F8 reproduced, gates green".
-  **MERGED** to `main` 2026-11-21T07:27:11Z, merge commit [`7e85db2`](https://github.com/wingbangboozle1-lang/Trade3/commit/7e85db232e81887630f7979ce3425225b4b02032).
-  Merged together with parallel session `arena/6d7662fe-trade3`'s PR #47; both sides' records preserved
-  (verified: `origin/main` carries all T-CCF blocks plus the 33 T-6D lines).
-- **Deploy check after merge:** PR #49 changed only `COORDINATION.md`, `VERIFICATION.md`,
-  `requirements/REQUIREMENTS.md` — none under the deploy workflow's `paths:` filter — so the merge did not
-  trigger a deploy run. Latest deploy run on `main`
-  ([44879704914](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879704914), PR #29 merge):
-  **Verify site ✓** (all gates green) · **Deploy ✗ at "Pages readiness"** — the site does not exist yet
-  (`GET /repos/wingbangboozle1-lang/Trade3/pages` → **404**; `POST …/pages` → **403 "Resource not
-  accessible by integration"** from every automation credential). Scheduled re-verification run
-  [44880069455](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44880069455) ("Re-verify
-  published rows against the live API"): **success** at 2026-11-21T07:23Z.
-- **Pages status: not live — F8, owner action required (one click, no code change):**
-  Repo → Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save, then
-  Actions → "Deploy site to GitHub Pages" → Run workflow. Every site check is green; the artifact is ready.
-  Expected URL: https://wingbangboozle1-lang.github.io/Trade3/
-- **Live preview meanwhile:** sandbox preview serves `docs/` on port 8000 ("Kalshi dashboard site preview")
-  with live Kalshi data rendered browser-side.
-- This addendum is itself the final record; it merges as **PR #55** (https://github.com/wingbangboozle1-lang/Trade3/pull/55).
-=======
 ## Session `arena/b1c33964-trade3` — claim (2026-11-21)
 
 Branch `arena/b1c33964-trade3` (based on `main` @ `a2b6d13`). This session edits **only** `COORDINATION.md` (append-only). No other session's files are touched.
@@ -2059,4 +2033,37 @@ Marking T-63a … T-63e **done**.
 - PR #50's merge result is now recorded above. The follow-up merged no site files; the Pages deploy workflow remains unchanged.
 - A fourth explicit post-merge manual dispatch attempt at 2026-11-21 07:33:58Z again returned **HTTP 403 API rate limit exceeded**. No new Pages run was created; latest site-bearing run 44879704914 still shows Verify success and Pages-readiness failure. F8 remains owner-only.
 - The latest local suite passed on site-identical main @ `7a97edd`; main @ `e674f04` adds only PR #52's coordination record. The site is validated but is not published to GitHub Pages until the owner enables Pages.
->>>>>>> origin/main
+
+
+## Merge record (session `arena/ccf26d52-trade3`, T-CCF6) — 2026-11-21
+
+- **PR #49:** https://github.com/wingbangboozle1-lang/Trade3/pull/49 — "Final integration (ccf26d52):
+  re-verification 8/8 match, REQUIREMENTS.md path cleanup, F8 reproduced, gates green".
+  **MERGED** to `main` 2026-11-21T07:27:11Z, merge commit [`7e85db2`](https://github.com/wingbangboozle1-lang/Trade3/commit/7e85db232e81887630f7979ce3425225b4b02032).
+  Merged together with parallel session `arena/6d7662fe-trade3`'s PR #47; both sides' records preserved
+  (verified: `origin/main` carries all T-CCF blocks plus the 33 T-6D lines).
+- **Deploy check after merge:** PR #49 changed only `COORDINATION.md`, `VERIFICATION.md`,
+  `requirements/REQUIREMENTS.md` — none under the deploy workflow's `paths:` filter — so the merge did not
+  trigger a deploy run. Latest deploy run on `main`
+  ([44879704914](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879704914), PR #29 merge):
+  **Verify site ✓** (all gates green) · **Deploy ✗ at "Pages readiness"** — the site does not exist yet
+  (`GET /repos/wingbangboozle1-lang/Trade3/pages` → **404**; `POST …/pages` → **403 "Resource not
+  accessible by integration"** from every automation credential). Scheduled re-verification run
+  [44880069455](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44880069455) ("Re-verify
+  published rows against the live API"): **success** at 2026-11-21T07:23Z.
+- **Pages status: not live — F8, owner action required (one click, no code change):**
+  Repo → Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save, then
+  Actions → "Deploy site to GitHub Pages" → Run workflow. Every site check is green; the artifact is ready.
+  Expected URL: https://wingbangboozle1-lang.github.io/Trade3/
+- **Live preview meanwhile:** sandbox preview serves `docs/` on port 8000 ("Kalshi dashboard site preview")
+  with live Kalshi data rendered browser-side.
+- This addendum is itself the final record; it merges as **PR #55** (https://github.com/wingbangboozle1-lang/Trade3/pull/55).
+
+### Mishap log (honest record)
+
+- While resolving a repeat append collision during the PR #55 update, a failed sanity assertion was
+  followed by the chained `git add/commit/push` still executing (shell lines do not stop on error),
+  which briefly pushed merge commit `b8f8c48` containing unresolved `COORDINATION.md` conflict markers.
+  Repaired in the next commit on this branch (this one): the file is now a clean union — all parallel
+  records kept in full, this session's blocks re-applied. No other session's content was lost at any
+  point (the markers were confined to this one file and fixed before any merge to `main`).
