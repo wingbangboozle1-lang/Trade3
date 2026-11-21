@@ -1917,3 +1917,81 @@ Marking T-B1, T-B2 **done**; T-B3 **blocked** (rate-limited, F8 unchanged); T-B4
 
 None new. All pre-existing flags live on the Flagged for Review page (`docs/flagged.html` for Build A, `docs/dashboard-site/flagged.html` for Build B) with source links; F8 (Pages enablement) and F6 (browser CORS on Pages) remain open by design and do not block the merge.
 
+
+# Session `arena/63bd9b8c-trade3` — final integration record (2026-11-21)
+
+**Branch:** `arena/63bd9b8c-trade3`, rebased onto `origin/main` @ `3178447` (PR #51). Claimed per board
+rules; scope is **append-only `COORDINATION.md`**. No product file, page, workflow, or another session's
+branch was edited. The site content is unchanged from the verified tree; this session contributes an
+independent re-verification and the integration outcome.
+
+| Task | Status | Owner | File scope |
+|---|---|---|---|
+| T-63a Independent live re-verification of load-bearing published facts against the official demo API + docs | **done** | `arena/63bd9b8c-trade3` | none (read-only) |
+| T-63b Full gate re-run on the current tree (`npm test`, `check_site.py`, `check-links.js`, `py_compile`, `node --check`) | **done** | `arena/63bd9b8c-trade3` | none (read-only) |
+| T-63c Confirm data integrity (every series row carries an official source link) | **done** | `arena/63bd9b8c-trade3` | none (read-only) |
+| T-63d Confirm PR #33 outcome and GitHub Pages (F8) status | **done** | `arena/63bd9b8c-trade3` | none (API calls only) |
+| T-63e Final record + PR to `main` + merge + deploy check | **done** | `arena/63bd9b8c-trade3` | `COORDINATION.md` (append-only) |
+
+## T-63a Live re-verification (official demo API via the page-fetch path)
+
+Sandbox shell has no direct egress to `*.kalshi.co` (TLS reset — same environment limit recorded by
+earlier sessions), so every read below was fetched through the docs proxy against the official demo base
+`https://external-api.demo.kalshi.co/trade-api/v2`. All reads 2026-11-21.
+
+| # | Official request | Returned | Matches published site data? |
+|---|---|---|---|
+| 1 | [`GET /exchange/status`](https://external-api.demo.kalshi.co/trade-api/v2/exchange/status) | `exchange_active: true`, `trading_active: true`, 4 demo shards (0–3) all active | Yes — "demo exchange is up" |
+| 2 | [`GET /series/KXAAAGASM`](https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASM) | category `Economics`, tags `["Oil & Gas","Oil and energy"]`, settlement `AAA — https://gasprices.aaa.com/`, frequency `monthly`, title "US gas price" | Yes — gas anchor row |
+| 3 | [`GET /series/KXPGAGOLFERSCORE`](https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAGOLFERSCORE) | category `Sports`, tags `["Golf"]`, 5 official settlement sources (NBC/Fox/PGATour/AP/Golf Channel), title "Golf Round Strokes" | Yes — golf anchor row |
+| 4 | [`GET /series/KXETHD`](https://external-api.demo.kalshi.co/trade-api/v2/series/KXETHD) | category `Crypto`, tags `Crypto, Hourly, Ethereum`, settlement `CF Benchmarks ETHUSD_RTI`, hourly, title "Ethereum price Above/below" | Yes — crypto anchor row |
+| 5 | [`GET /series/POPVOTEKHVA`](https://external-api.demo.kalshi.co/trade-api/v2/series/POPVOTEKHVA) | category `Elections`, tags `["US Elections"]`, settlement `https://www.congress.gov/`, title "Kamala Virginia" | Yes — elections anchor row |
+| 6 | [`GET /series?category=Culture`](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture) | exactly 2 series: `KXXBANNEDGROK`, `KXXBANNEDMURRAYHILLGUY1`, both `category:"Culture"`; each settlement list mixes official publishers with non-official entries (Google-search URLs, a personal X account) | Yes — Culture **is** a category (confirms the earlier Culture→Entertainment correction stands); published rows correctly blank the mixed settlement under the official-publishers-only policy (F10) |
+| 7 | [`GET /markets?series_ticker=KXETHD&limit=2&status=open`](https://external-api.demo.kalshi.co/trade-api/v2/markets?series_ticker=KXETHD&limit=2&status=open) | field shape `last_price_dollars`, `previous_price_dollars`, `yes_bid_dollars`, `yes_ask_dollars`, `no_bid_dollars`, `no_ask_dollars`, `volume_fp`, `result`, `status`, `price_ranges[].step = "0.0100"` | Yes — the dashboard/alarm code reads exactly these fields; the 1-cent step makes "≥ $0.10" = 10 ticks, matching the integer-tick comparison in `docs/assets/dashboard.js` |
+| 8 | [`docs.kalshi.com/getting_started/api_environments`](https://docs.kalshi.com/getting_started/api_environments) | Demo REST `external-api.demo.kalshi.co`, WS `wss://external-api-ws.demo.kalshi.co/trade-api/ws/v2`, request signing = full path from API root without query params, demo/prod credentials not shared | Yes — matches the EXECUTIVE_SUMMARY key-facts table and the user's task URLs (the task's `wss://[...` bracket form resolves to the official host) |
+
+**No drift found.** Nothing published on the site contradicts a live API record or the official docs.
+`Gas` and `Golf` remain non-categories; the topic pages document them as tag/scope-filtered views over
+`Economics` and `Sports` rather than inventing a category.
+
+## T-63b Gate re-run on the current tree (`3178447`)
+
+- `npm test` — **PASS**: logic tests OK, engine 15/15, site-render 13/13.
+- `python3 scripts/check_site.py` — **PASS**: 29 pages, 387 local links, 20 JS modules, 39 series rows.
+- `node scripts/check-links.js` — **PASS**: 387 local references resolve, 0 broken.
+- `python3 -m py_compile` (kalshi_client, strategies, backtest, run_sim, verify_series, check_site) — **PASS**.
+- `node --check` (`app/app.js`, `server/index.js`, `server/collector.js`) — **PASS**.
+
+## T-63c Data integrity
+
+- `docs/data/series.json`: **39/39** series rows carry `source_url` back to the official
+  `GET /series/{ticker}` record (0 missing, 0 non-official). Row counts per topic: gas 10, elections 5,
+  culture 10, crypto 10, golf 4. Blank `settlement` fields are deliberate "no official publisher
+  disclosed" flags on the Flagged page — none were filled in or inferred.
+
+## T-63d PR #33 + Pages status
+
+- **PR #33** (`arena/22ed9fdf-trade3`, append-only `COORDINATION.md`): confirmed **MERGED** at
+  2026-11-21T07:25:19Z, merge commit `0607b1a` now present on `main`. Its earlier in-branch "PR #33
+  merged" record, which looked like a false self-merge claim when the PR was still open, is now
+  corroborated by the real GitHub merge — no action required; nothing was dropped.
+- **GitHub Pages:** `GET /repos/wingbangboozle1-lang/Trade3/pages` → **404** (no Pages site exists).
+  **F8 stands** — every automation route (Actions `configure-pages` enablement, workflow `POST /pages`
+  readiness gate, CLI token create) returns 403 "Resource not accessible by integration" because this
+  repo's automation runs under a GitHub App installation without the Pages permission. Per the official
+  [actions/configure-pages action.yml](https://github.com/actions/configure-pages/blob/main/action.yml),
+  enablement requires a token other than `GITHUB_TOKEN`. This is an **owner-only, one-time** action and
+  is outside every session's code reach: Repo → Settings → Pages → Build and deployment → Source:
+  **GitHub Actions** → Save, then run "Deploy site to GitHub Pages". The site itself passes every check;
+  it is complete and gated green, only unpublished.
+
+## T-63e PR + merge record
+
+- This session's deliverable is the append-only coordination record above; the product site is unchanged,
+  so no `docs/**`, `app/**`, `server/**`, `scripts/**`, or `tests/**` path changed and the Pages
+  workflow correctly does not republish for this record.
+- PR created from `arena/63bd9b8c-trade3` → `main` and merged without waiting for approval, per the brief.
+- **Pages at session end:** still 404 / not enabled (F8). No site defect; publish is gated on the owner
+  one-click action recorded above. Expected URL once enabled: `https://wingbangboozle1-lang.github.io/Trade3/`.
+
+Marking T-63a … T-63e **done**.
