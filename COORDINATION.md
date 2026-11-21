@@ -678,3 +678,18 @@ The tree is verified and the site builds with no broken links. The deploy job fa
 enablement, which needs an owner click and cannot be done by automation. A PR from this branch to `main` is
 created and merged so the record and the verified state land on `main`; Pages publish succeeds automatically
 the moment the owner performs the one-time F8 action.
+
+### PR and merge record (this session)
+
+- **PR #15:** https://github.com/wingbangboozle1-lang/Trade3/pull/15
+  "Final verification pass 2026-11-21: gates re-run, live re-verification, F8 Pages blocker"
+- **Result:** **MERGED** at 2026-11-21T06:49:22Z, merge commit `16909c63d69580928d98678e02d75c18632b429f`
+  (now on `main`).
+- **Triggered CI run** (workflow_dispatch, run [44877230664](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44877230664)):
+  - **Verify site — success.** All 12 steps green: static site gate, link check, dashboard logic, collector/engine
+    tests, headless render tests, Python layer checks, live row re-verification, snapshot contract.
+  - **Deploy — failure at "Pages readiness" only**; `configure-pages`, `upload-pages-artifact` and
+    `deploy-pages` were skipped. This is the F8 owner action, not a build/check failure. The site is not broken.
+- **GitHub Pages status:** still not enabled (`GET .../pages` → 404). Once the owner performs the one-time F8
+  action, the next push to `main` (or "Deploy GitHub Pages" → Run workflow) publishes `docs/` at
+  `https://wingbangboozle1-lang.github.io/Trade3/` with no further code change.
