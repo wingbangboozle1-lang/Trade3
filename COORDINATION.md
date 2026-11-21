@@ -1602,4 +1602,23 @@ Their records agree with this one on every shared fact (gates green, F8 = enable
 category, 3 anchor rows match live). Two notes that differ only in coverage, not in content: they re-read
 3 rows, this session re-read 5 series + the markets field shape; both remain honest about what was sampled.
 
+### PR + merge record (T-74d)
+
+- **PR #41:** https://github.com/wingbangboozle1-lang/Trade3/pull/41 — **MERGED** 2026-11-21T07:20:54Z,
+  merge commit `1dea997` on `main`. Merged without waiting for approval, per the brief. Scope: `COORDINATION.md` only.
+- Winning the merge took two rounds: GitHub reported `CONFLICTING/DIRTY` while `main` advanced underneath
+  the PR every few minutes (PRs #37–#43 landed during this session). Re-resolved with the same keep-both
+  rule; nothing from any session was dropped.
+- **No new deploy run for `1dea997`** by design: `pages.yml` triggers on `docs/**`, `app/**`, `server/**`,
+  `scripts/**`, `tests/**`, `pages.yml` — a coordination-only change cannot and should not republish. The
+  authoritative deploy evidence on the same tree stays: [44879350060](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879350060)
+  → `Verify site = success`, `Deploy = failure` at `Run actions/configure-pages@v5`.
+- **Pages at session end:** `GET /repos/.../pages` → **404** — still not enabled; **F8 stands**. Owner fix,
+  one click: Repo → Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save, then
+  Actions → "Deploy site to GitHub Pages" → Run workflow. Expected URL `https://wingbangboozle1-lang.github.io/Trade3/`.
+  No content change this session, so the site is not broken — it is complete and gated green, only unpublished.
+- **Sandbox note for readers:** `curl` from this sandbox to `github.io` returns `000` (egress allow-list), so the
+  404 from the Pages REST API — not a curl probe — is the evidence used above. Same reason the live Kalshi
+  re-reads were done through the fetch path.
+
 Marking T-74a … T-74d **done**.
