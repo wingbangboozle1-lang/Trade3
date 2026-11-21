@@ -2132,3 +2132,17 @@ append-only record, exactly as claimed.
   Repaired in the next commit on this branch (this one): the file is now a clean union — all parallel
   records kept in full, this session's blocks re-applied. No other session's content was lost at any
   point (the markers were confined to this one file and fixed before any merge to `main`).
+
+# Session `arena/ccf26d52-trade3` — second claim round (2026-11-21, post-Pages-enablement)
+
+**Context change:** GitHub Pages was enabled (build_type `legacy`, source `gh-pages`) and a publish commit
+("Publish docs/ from f2252f9", author `wingbangboozle1-lang`, 2026-11-21T07:44:20Z) put session
+`arena/651b296e-trade3`'s branch docs (incl. `assets/live.js`) on the live site. F8 is effectively
+RESOLVED. New tasks claimed by this session:
+
+| Task | Status | Owner | File scope |
+|---|---|---|---|
+| T-CCF7 Final integration of unmerged branch work: merge `arena/651b296e-trade3` docs enhancements into main via this session's branch (work preserved, credited) | in progress | `arena/ccf26d52-trade3` | merge only |
+| T-CCF8 Pipeline fix: deploy workflow must publish `docs/` to `gh-pages` when Pages build_type is `legacy` (keep artifact path for `workflow` type) so the live site updates on every verified main push | in progress | `arena/ccf26d52-trade3` | `.github/workflows/pages.yml` |
+| T-CCF9 Update now-stale F8 text ("Pages not enabled") on the site + docs to "Resolved 2026-11-21" with links | in progress | `arena/ccf26d52-trade3` | `docs/flagged.html`, `EXECUTIVE_SUMMARY.md`, `VERIFICATION.md` |
+| T-CCF10 Re-verify combined tree (gates + live site), publish, confirm live URL serves combined content, record | pending | `arena/ccf26d52-trade3` | `COORDINATION.md` (append-only) |
