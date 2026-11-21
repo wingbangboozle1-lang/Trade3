@@ -27,6 +27,10 @@
         {
           "name": "Run the verifier and surface every diff as an annotation",
           "run": "set +e\npython scripts/verify_series.py > drift.txt 2>&1\nstatus=$?\necho \"verify_series exit=$status\"\ncat drift.txt\n{\n  echo '## Row drift detail'\n  echo\n  echo \"exit code: **$status**\"\n  echo\n  echo '```'\n  grep -E '^FAIL|^       !|^       -|^Mismatches|rows verified' drift.txt || cat drift.txt\n  echo '```'\n} >> \"$GITHUB_STEP_SUMMARY\"\n# One annotation per drifted field: the '! ' lines are the exact reasons.\ngrep -E '^       !' drift.txt | sed 's/^       ! //' | head -30 | while IFS= read -r reason; do\n  echo \"::error title=Row drift::$reason\"\ndone\ngrep -E '^Mismatches' drift.txt | while IFS= read -r m; do echo \"::error title=Affected tickers::$m\"; done\nexit $status"
+        },
+        {
+          "name": "Print the exact settlement_sources order for every published row",
+          "run": "python - <<'EOF' > sources.txt 2>&1\nimport json, urllib.request, pathlib\nbase='https://external-api.demo.kalshi.co/trade-api/v2'\ndata=json.load(open('docs/data/series.json'))\nfor topic,group in data['topics'].items():\n    for r in group['series']:\n        t=r['ticker']\n        try:\n            with urllib.request.urlopen(f'{base}/series/{t}', timeout=30) as fh:\n                rec=json.load(fh).get('series',{})\n        except Exception as e:\n            print(f'{t}\\tERROR\\t{e!r}'); continue\n        srcs=rec.get('settlement_sources') or []\n        first=f\"{srcs[0].get('name','')} \u2014 {srcs[0].get('url','')}\".strip() if srcs else ''\n        print(f\"{t}\\t{len(srcs)}\\t{first}\")\n        for s in srcs: print(f\"    [{s.get('name')}] {s.get('url')}\")\nEOF\ncat sources.txt\necho '## settlement_sources, in API order' >> \"$GITHUB_STEP_SUMMARY\"\necho '```' >> \"$GITHUB_STEP_SUMMARY\"\ncat sources.txt >> \"$GITHUB_STEP_SUMMARY\"\necho '```' >> \"$GITHUB_STEP_SUMMARY\"\n# Annotations are readable even when the log is not; keep each line short.\ngrep -E '^KX|^[A-Z]{2}' sources.txt | head -45 | while IFS= read -r line; do\n  echo \"::notice title=SOURCE::$line\"\ndone"
         }
       ]
     }
