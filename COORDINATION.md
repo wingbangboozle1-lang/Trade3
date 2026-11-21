@@ -1776,7 +1776,7 @@ immediately after this edit.
 | T-CCF3 GitHub Pages (F8) retry + monitor deploy run `44879350060`; record outcome | **done** (F8 reproduced; run 44879350060: Verify ✓, Deploy ✗ at `configure-pages` only) | `arena/ccf26d52-trade3` | none (API calls only) |
 | T-CCF4 Doc cleanup flagged by earlier sessions: `requirements/REQUIREMENTS.md` stale `site/` paths → published `docs/` paths | **done** (R6/R25/R26 paths fixed; R19 missing "Where" cell restored) | `arena/ccf26d52-trade3` | `requirements/REQUIREMENTS.md` |
 | T-CCF5 Sandbox live preview of the built site (`docs/`) so the dashboard is viewable before F8 | **done** (port 8000, 16 key URLs all HTTP 200) | `arena/ccf26d52-trade3` | none (runtime only) |
-| T-CCF6 Final integration: PR to `main`, merge, deploy check, record | in progress | `arena/ccf26d52-trade3` | `COORDINATION.md` (append-only) |
+| T-CCF6 Final integration: PR to `main`, merge, deploy check, record | **done** (PR #49 merged `7e85db2`; deploy check recorded below — F8 owner-only) | `arena/ccf26d52-trade3` | `COORDINATION.md` (append-only) |
 
 ## Results — session `arena/ccf26d52-trade3` (2026-11-21)
 
@@ -2098,3 +2098,37 @@ re-checked at integration time below; no code change.
 
 **Handoff:** no other session's files were edited. Scope stayed inside `requirements/REQUIREMENTS.md` + this
 append-only record, exactly as claimed.
+
+
+## Merge record (session `arena/ccf26d52-trade3`, T-CCF6) — 2026-11-21
+
+- **PR #49:** https://github.com/wingbangboozle1-lang/Trade3/pull/49 — "Final integration (ccf26d52):
+  re-verification 8/8 match, REQUIREMENTS.md path cleanup, F8 reproduced, gates green".
+  **MERGED** to `main` 2026-11-21T07:27:11Z, merge commit [`7e85db2`](https://github.com/wingbangboozle1-lang/Trade3/commit/7e85db232e81887630f7979ce3425225b4b02032).
+  Merged together with parallel session `arena/6d7662fe-trade3`'s PR #47; both sides' records preserved
+  (verified: `origin/main` carries all T-CCF blocks plus the 33 T-6D lines).
+- **Deploy check after merge:** PR #49 changed only `COORDINATION.md`, `VERIFICATION.md`,
+  `requirements/REQUIREMENTS.md` — none under the deploy workflow's `paths:` filter — so the merge did not
+  trigger a deploy run. Latest deploy run on `main`
+  ([44879704914](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879704914), PR #29 merge):
+  **Verify site ✓** (all gates green) · **Deploy ✗ at "Pages readiness"** — the site does not exist yet
+  (`GET /repos/wingbangboozle1-lang/Trade3/pages` → **404**; `POST …/pages` → **403 "Resource not
+  accessible by integration"** from every automation credential). Scheduled re-verification run
+  [44880069455](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44880069455) ("Re-verify
+  published rows against the live API"): **success** at 2026-11-21T07:23Z.
+- **Pages status: not live — F8, owner action required (one click, no code change):**
+  Repo → Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save, then
+  Actions → "Deploy site to GitHub Pages" → Run workflow. Every site check is green; the artifact is ready.
+  Expected URL: https://wingbangboozle1-lang.github.io/Trade3/
+- **Live preview meanwhile:** sandbox preview serves `docs/` on port 8000 ("Kalshi dashboard site preview")
+  with live Kalshi data rendered browser-side.
+- This addendum is itself the final record; it merges as **PR #55** (https://github.com/wingbangboozle1-lang/Trade3/pull/55).
+
+### Mishap log (honest record)
+
+- While resolving a repeat append collision during the PR #55 update, a failed sanity assertion was
+  followed by the chained `git add/commit/push` still executing (shell lines do not stop on error),
+  which briefly pushed merge commit `b8f8c48` containing unresolved `COORDINATION.md` conflict markers.
+  Repaired in the next commit on this branch (this one): the file is now a clean union — all parallel
+  records kept in full, this session's blocks re-applied. No other session's content was lost at any
+  point (the markers were confined to this one file and fixed before any merge to `main`).
