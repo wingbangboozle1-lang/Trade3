@@ -1,4 +1,4 @@
-# Coordination Board — Trade3 Kalshi Dashboard
+n Board — Trade3 Kalshi Dashboard
 
 > Shared task board for parallel sessions. Read before starting. Claim by writing your
 > session ID + file scope, then **commit and push the claim immediately**.
@@ -2033,6 +2033,71 @@ Marking T-63a … T-63e **done**.
 - PR #50's merge result is now recorded above. The follow-up merged no site files; the Pages deploy workflow remains unchanged.
 - A fourth explicit post-merge manual dispatch attempt at 2026-11-21 07:33:58Z again returned **HTTP 403 API rate limit exceeded**. No new Pages run was created; latest site-bearing run 44879704914 still shows Verify success and Pages-readiness failure. F8 remains owner-only.
 - The latest local suite passed on site-identical main @ `7a97edd`; main @ `e674f04` adds only PR #52's coordination record. The site is validated but is not published to GitHub Pages until the owner enables Pages.
+# Session `arena/3a5fe603-trade3` — claim (2026-11-21)
+
+**Branch:** `arena/3a5fe603-trade3` (based on `main` @ `262f22a`, PR #22 merged). Claim committed and
+pushed before any other task work, per board rules. Open PRs at claim time: **#29** (`arena/77ec3a0e-trade3`),
+**#33** (`arena/22ed9fdf-trade3`), **#34** (`arena/6c20e938-trade3`) — their file scopes are respected
+(`.github/workflows/pages.yml`, `EXECUTIVE_SUMMARY.md`, `docs/flagged.html`, plus append-only `COORDINATION.md`).
+
+| Task | Status | Owner | File scope |
+|---|---|---|---|
+| T-3A1 Requirements-gap audit of the published site/app against the original brief (line by line; fix any gap found in files not claimed by PRs #29/#33/#34) | in progress | `arena/3a5fe603-trade3` | to be scoped in an update to this claim before any edit |
+| T-3A2 Re-run all local gates on the current merged tree + live spot re-verification via the official demo API/docs | in progress | `arena/3a5fe603-trade3` | none (read-only) |
+| T-3A3 Final integration: coordinate open PRs, PR to `main`, merge, Pages deploy attempt + record | pending | `arena/3a5fe603-trade3` | `COORDINATION.md` (append-only), integration only |
+
+### T-3A1 scope update (before any edit, per claim rule)
+
+**File scope for T-3A1 fixes:** `requirements/REQUIREMENTS.md` only. Not touched (owned by open PR #29):
+`.github/workflows/pages.yml`, `EXECUTIVE_SUMMARY.md`, `docs/flagged.html`. `COORDINATION.md` stays append-only
+for this session.
+
+**Audit findings (line-by-line of `requirements/REQUIREMENTS.md` against the code, 2026-11-21):** the *requirements*
+themselves are implemented, but 16 traceability cells overstate or misname what the code does — R4/R5 (WS URLs are
+configured and test-asserted but no socket is ever opened; live path is REST polling), R7 (ranking is
+Σ(volume_fp × last price), no ticker-channel `dollar_volume` is consumed), R10 (chats are newest-first at top with a
+Pause button + freeze-feed checkbox, not "bottom + auto-scroll/pause-on-hover"), R12 (resolutions come from REST
+`status=settled`/`result` fields, not `market_lifecycle_v2` WS events), R13 (no queue-position model; "tournament" is
+the portfolio page running all strategies on one snapshot), R15 (no price-bucket, EV or max-drawdown metric; strategy
+cards are static rule definitions), R17 (windows are 60s/5m/15m/1h/6h/24h/7d, Y always $0.00–$1.00, no step/line
+toggle — the `chart-mode-pill` is a static label), R18 (no "cost to cross N contracts"), R19 (malformed 5-cell row),
+R21 (news feeds in `research/topics.json` are research data only — never consumed by the dashboard), R22 (no sort
+control — fixed dollar-volume ranking + filter box), R6/R25/R26 (stale `site/` paths — the published site is
+`docs/`), R27/R28 (fields are `source`/`source_url`/`verified_on`, not `source_id`/`as_of`, and there is no
+`unverified: true` escape hatch — `scripts/check_site.py` requires six keys plus an official
+`https://external-api.` source URL). Fix = correct the doc to match the code; no product code changes.
+
+### T-3A2 results (2026-11-21, this session)
+
+**Gates on `main` @ `262f22a` + this branch's fixes (all run in this sandbox):**
+
+| Gate | Result |
+|---|---|
+| `npm test` (logic + engine + site render) | **pass** — smoke 15/15, site-render 13/13 |
+| `npm run test:render` (jsdom, after `npm i --no-save jsdom`) | **pass** — full Build A headless render suite |
+| `python3 scripts/check_site.py` | **pass** — 29 pages, 387 local links, 20 JS modules, 39 series rows |
+| `node scripts/check-links.js` | **pass** — 387 references, 0 broken links/anchors/imports/DOM targets |
+| `python3 -m py_compile` (6 files) · `node --check` (app, server, scripts, docs/assets) | **pass** |
+| REQUIREMENTS row integrity (6 cells/row, all `[K…]` refs defined) | **pass** after the T-3A1 fixes (32 rows, 0 bad, 0 undefined refs) |
+
+**Live spot re-verification (official demo REST, fetched 2026-11-21):**
+
+| Check | Official source | Result |
+|---|---|---|
+| Exchange status | [GET /exchange/status](https://external-api.demo.kalshi.co/trade-api/v2/exchange/status) | `exchange_active: true`, `trading_active: true`, shards 0–3 |
+| Culture category | [GET /series?category=Culture](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture) | 2 series (`KXXBANNEDGROK`, `KXXBANNEDMURRAYHILLGUY1`), both `category: Culture` |
+| Gas `KXAAAGASM` | [series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASM) | "US gas price", Economics, monthly, AAA → gasprices.aaa.com — matches `series.json` |
+| Golf `KXPGAGOLFERSCORE` | [series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAGOLFERSCORE) | "Golf Round Strokes", Sports, Golf tag, 5 sources — matches (F26 label nuance unchanged) |
+| Golf `KXPGAT20` | [series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAT20) | "T 20", Sports, Golf, sources Fox/ESPN/"the Governing League"(pgatour.com) — matches; published name "PGA Tour" remains the flagged F26 inference |
+| Crypto `KXETHD` | [series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXETHD) | "Ethereum price Above/below", Crypto, hourly, CF Benchmarks ETHUSD_RTI — matches |
+| Elections `POPVOTEKHVA` | [series record](https://external-api.demo.kalshi.co/trade-api/v2/series/POPVOTEKHVA) | "Kamala Virginia", Elections, one_off, US Congress — matches |
+
+**Pages (F8):** the `gh api -X POST …/pages` retry this session hit the shared-token **GitHub API rate limit**
+(not a 403 this time — the token quota shared across parallel sessions was exhausted at 07:27Z). Pages state is
+re-checked at integration time below; no code change.
+
+**Handoff:** no other session's files were edited. Scope stayed inside `requirements/REQUIREMENTS.md` + this
+append-only record, exactly as claimed.
 
 
 ## Merge record (session `arena/ccf26d52-trade3`, T-CCF6) — 2026-11-21
