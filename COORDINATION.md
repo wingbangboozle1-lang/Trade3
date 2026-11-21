@@ -1917,3 +1917,10 @@ Marking T-B1, T-B2 **done**; T-B3 **blocked** (rate-limited, F8 unchanged); T-B4
 
 None new. All pre-existing flags live on the Flagged for Review page (`docs/flagged.html` for Build A, `docs/dashboard-site/flagged.html` for Build B) with source links; F8 (Pages enablement) and F6 (browser CORS on Pages) remain open by design and do not block the merge.
 
+## Integration result
+
+- **PR #48:** https://github.com/wingbangboozle1-lang/Trade3/pull/48 — "Final integration: verification record, Pages blocker documentation" (`arena/1abd6620-trade3` → `main`). **MERGED** 2026-11-21 via `gh pr merge 48 --merge`, merge commit `7a97edd687b3818a3d8a82e57d986bebc5c2043d`. Fast-forward: this branch contained all of `main` plus the one session record commit.
+- **Deploy:** not triggered by this merge — `pages.yml`'s `paths:` filter covers `docs/`, `app/`, `server/`, `scripts/`, `tests/` and `.github/workflows/pages.yml` only, so this `COORDINATION.md`-only merge starts no deploy run (same as prior record-only merges PR #33 / #40). Last site-bearing deploy run [44879704914](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879704914): **Verify site ✓**; **Deploy ✗** at the `Pages readiness` gate — `GET /pages` → 404, `POST /pages` → 403 "Resource not accessible by integration" (F8, owner-only).
+- **F8 owner action (still pending):** Repository Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save; then Actions → "Deploy site to GitHub Pages" → Run workflow (or any push touching `docs/`). After that, `docs/` publishes at https://wingbangboozle1-lang.github.io/Trade3/ with no further code change; the verify job passes on every push.
+- **All source tasks T1–T7 complete** (executive summary, dashboard with dual ≥ $0.10 alert feeds and charts, five topic subpages, simulated trading + portfolio/strategy analysis, resolution tracking, GitHub Pages site structure) — verified against official Kalshi sources and green on `npm test`, `check-links.js`, `check_site.py`. Nothing blocks the merge; F8 is documented for the owner.
+
