@@ -65,7 +65,17 @@ jobs:
         run: node tests/ws.test.mjs && node tests/relay.test.mjs
 
       - name: Collector and engine tests
-        run: node tests/smoke-test.js
+        run: |
+          # Watchdog: a hang must fail fast and name itself. The smoke harness
+          # streams START/PASS lines, so the tail of the output names the hanging
+          # test (and the harness watchdog prints the active handle at 120s).
+          timeout 300 node tests/smoke-test.js > /tmp/smoke.out 2>&1
+          code=$?
+          cat /tmp/smoke.out
+          if [ "$code" != "0" ]; then
+            echo "::error title=Collector and engine tests failed or hung (exit ${code})::last output: $(tr '\n' '|' < /tmp/smoke.out | tail -c 700)"
+            exit "$code"
+          fi
 
       - name: Render tests (headless DOM)
         run: |
