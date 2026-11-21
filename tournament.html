@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Strategy Tournament — Trade3 · Kalshi</title>
+<meta name="description" content="Four simulated Kalshi strategies trading the same swing stream, compared like-for-like and categorised by topic, side and swing direction. No API key, no manual input, nothing settled before the exchange publishes a result.">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">Trade3 <span>· Tournament</span></div>
+  <nav class="main">
+    <a href="index.html">Home</a>
+    <a href="executive-summary.html">Summary</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="index.html#topics">Topics</a>
+    <a href="portfolio.html">Portfolio</a>
+    <a href="tournament.html" class="active">Tournament</a>
+    <a href="methodology.html">Method</a>
+    <a href="verification.html">Verification</a>
+    <a href="suggestions.html">Suggestions</a>
+    <a href="flagged.html">Flagged</a>
+    <a href="dashboard-site/index.html">Audit edition</a>
+  </nav>
+</header>
+
+<main class="stack">
+
+  <section class="card">
+    <div class="card-head">
+      <h1 style="font-size:22px;margin:0">Strategy tournament</h1>
+      <span id="tourney-status" class="pill info">no relay</span>
+      <span class="right dim" id="tourney-meta"></span>
+    </div>
+    <p class="muted" style="max-width:88ch">
+      One swing, four strategies. Every time the collector detects a move of <b>≥ $0.10</b> in either
+      direction, each strategy is offered the <em>same</em> swing at the <em>same</em> quote, and each
+      decides for itself whether to trade and which side to take. Results stay open until Kalshi
+      publishes <code>result: yes|no</code>.
+    </p>
+    <p class="dim" style="max-width:88ch">
+      Buying YES costs the YES ask; buying NO costs <code>1 − best YES bid</code>, because
+      “a bid for yes at price X is equivalent to an ask for no at (1 − X)”
+      (<a href="https://docs.kalshi.com/api-reference/market/get-market-orderbook" target="_blank" rel="noopener">Get Market Orderbook</a>).
+      A winning contract pays $1.00
+      (<a href="https://docs.kalshi.com/getting_started/market_settlement" target="_blank" rel="noopener">Market Settlement</a>).
+      <b>No fees are charged</b>, because the demo environment's fee behaviour cannot be verified here without
+      placing real demo orders — so treat every figure as gross, and see
+      <a href="flagged.html">Flagged</a> for that open item.
+    </p>
+    <p class="dim" id="tourney-note" style="max-width:88ch"></p>
+  </section>
+
+  <!-- ranking -->
+  <section class="card">
+    <div class="card-head"><h2>Leaderboard</h2>
+      <div class="right dim">ranked only once a strategy has a settled position</div></div>
+    <div class="table-wrap"><table>
+      <thead><tr>
+        <th>#</th><th>Strategy</th><th>Rule</th>
+        <th class="num">Events</th><th class="num">Opened</th><th class="num">Skipped</th>
+        <th class="num">Settled</th><th class="num">W / L</th><th class="num">Hit rate</th>
+        <th class="num">P&amp;L</th><th class="num">¢ / contract</th>
+      </tr></thead>
+      <tbody id="board-body">
+        <tr><td colspan="11" class="muted">Loading…</td></tr>
+      </tbody>
+    </table></div>
+    <p class="dim" style="margin-top:8px">
+      P&amp;L is blank — not $0.00 — until a strategy has a settled position. A strategy that has traded nothing
+      is not ranked against the others.
+    </p>
+  </section>
+
+  <!-- categorisation -->
+  <section class="grid cols-2">
+    <div class="card">
+      <div class="card-head"><h2>By topic</h2></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Topic</th><th class="num">Momentum</th><th class="num">Mean reversion</th><th class="num">Threshold break</th><th class="num">Fade extreme</th></tr></thead>
+        <tbody id="topic-body"><tr><td colspan="5" class="muted">Loading…</td></tr></tbody>
+      </table></div>
+      <p class="dim">Which topics each strategy actually ended up trading, so a good P&amp;L driven by one lucky
+      topic is visible rather than hidden in an average.</p>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>By side and swing direction</h2></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Strategy</th><th class="num">YES buys</th><th class="num">NO buys</th><th class="num">After an up swing</th><th class="num">After a down swing</th></tr></thead>
+        <tbody id="side-body"><tr><td colspan="5" class="muted">Loading…</td></tr></tbody>
+      </table></div>
+      <p class="dim">The same strategy can be right on rallies and wrong on sell-offs; separating the two shows
+      that instead of blending it away.</p>
+    </div>
+  </section>
+
+  <!-- skipped reasons -->
+  <section class="card">
+    <div class="card-head"><h2>Why strategies stood down</h2>
+      <div class="right dim">a skip is a decision, and it is recorded</div></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Strategy</th><th>Reason</th><th class="num">Times</th></tr></thead>
+      <tbody id="skip-body"><tr><td colspan="3" class="muted">Loading…</td></tr></tbody>
+    </table></div>
+  </section>
+
+  <!-- positions -->
+  <section class="card">
+    <div class="card-head"><h2>Shadow positions</h2>
+      <div class="right"><label class="switch"><input type="checkbox" id="only-settled"> settled only</label></div></div>
+    <div class="table-wrap" style="max-height:460px;overflow-y:auto"><table>
+      <thead><tr>
+        <th>Opened</th><th>Strategy</th><th>Contract</th><th>Topic</th><th>Side</th>
+        <th class="num">Entry</th><th class="num">Contracts</th><th class="num">Cost</th>
+        <th>Result</th><th class="num">P&amp;L</th><th>Why</th>
+      </tr></thead>
+      <tbody id="pos-body"><tr><td colspan="11" class="muted">Loading…</td></tr></tbody>
+    </table></div>
+    <div class="controls" style="margin-top:10px">
+      <button id="download" class="ghost sm">Download CSV</button>
+      <span class="dim" id="pos-count"></span>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>How to read this</h2>
+    <ul class="muted" style="max-width:88ch;line-height:1.7">
+      <li><b>Momentum</b> follows the swing; <b>mean reversion</b> fades it. They are near-exact opposites, so
+        they are a control on each other: when one makes money on the same events, the other loses it.</li>
+      <li><b>Threshold break</b> only trades when the swing crosses $0.25, $0.50 or $0.75 — a deliberately
+        selective rule, so expect far fewer trades.</li>
+      <li><b>Fade extreme</b> only trades when a swing lands above $0.85 or below $0.15, testing the
+        “overreaction at the edges” idea.</li>
+      <li><b>¢ / contract</b> is the average settled P&amp;L per contract, which lets strategies that traded
+        different sizes be compared honestly.</li>
+      <li><b>Nothing here is advice</b>, and nothing is filled in. An empty cell means the exchange has not
+        settled anything yet.</li>
+    </ul>
+  </section>
+
+</main>
+<footer>
+  Trade3 · Kalshi Trade API v2 ·
+  <a href="https://docs.kalshi.com/" target="_blank" rel="noopener">docs.kalshi.com</a> ·
+  <a href="methodology.html">Methodology &amp; sources</a> ·
+  <a href="verification.html">Verification log</a> ·
+  <a href="flagged.html">Flagged for review</a><br>
+  Simulated trading only. Demo markets use mock funds and their prices may not reflect real markets (Kalshi docs).
+  Not financial advice.
+</footer>
+<script type="module" src="assets/tournament.js"></script>
+</body>
+</html>
