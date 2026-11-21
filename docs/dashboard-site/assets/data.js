@@ -743,4 +743,15 @@ export const FLAGS = [
     sourceUrl: 'https://docs.kalshi.com/api-reference/market/get-market',
     status: 'Handled: verified API-record URLs are the primary links; UI pattern flagged for human confirmation.',
   },
+
+  {
+    id: 'F26',
+    severity: 'Low',
+    item: 'Golf settlement label differs between the two published builds',
+    detail:
+      'The live record for KXPGAT20 lists settlement sources as Fox Sports, ESPN and "the Governing League" with the URL https://www.pgatour.com/. The static series table (docs/data/series.json) labels that source "PGA Tour", while this build labels it "the Governing League (pgatour.com)". The URL is the official record value; the name "PGA Tour" is this project\'s reading of the URL, not a name the API gives. Kept as the API text; the wording is flagged, not changed.',
+    evidence: 'GET /series/KXPGAT20 re-read 2026-11-21: settlement_sources = [Fox Sports, ESPN, the Governing League -> https://www.pgatour.com/].',
+    sourceUrl: `${DEMO_REST}/series/KXPGAT20`,
+    status: 'Open. Reviewer to confirm the wording; no value changed.',
+  },
 ];

@@ -3,12 +3,10 @@
 # The site is plain HTML/CSS/ES modules with no build step, so this workflow verifies it and
 # then uploads /docs. A site that fails a check never deploys.
 #
-# KNOWN ENVIRONMENT BLOCKER (recorded in COORDINATION.md): a repository whose Pages site has
-# never been created returns 403 "Resource not accessible by integration" to every token that
-# GitHub issues for automation, so the "Pages readiness" step below stops with an explicit
-# instruction instead of a confusing mid-deploy failure. One-time owner action, no code change:
+# PAGES ENABLEMENT: actions/configure-pages with `enablement: true` creates the Pages site
+# (build type: workflow) on first run if the repository has none. If the token is not allowed to
+# create it, that step fails and the run log says so; the one-time manual fallback is:
 #   Repo -> Settings -> Pages -> Build and deployment -> Source: GitHub Actions -> Save
-# After that click, every push to main deploys automatically.
 # Manual alternative: Actions -> "Deploy site to GitHub Pages" -> Run workflow.
 
 name: Deploy site to GitHub Pages
@@ -141,20 +139,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Pages readiness
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          code=$(curl -s -o /dev/null -w '%{http_code}' \
-            -H "Authorization: Bearer $GH_TOKEN" \
-            -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/repos/$GITHUB_REPOSITORY/pages")
-          echo "GET /repos/$GITHUB_REPOSITORY/pages -> $code"
-          if [ "$code" = "404" ]; then
-            echo "::error title=GitHub Pages is not enabled on this repository::Pages has never been created for $GITHUB_REPOSITORY. Automation tokens are not allowed to create it (403 from POST/PUT /pages). Owner action, one time: Settings -> Pages -> Build and deployment -> Source: GitHub Actions -> Save, then re-run this workflow. The site itself passed every check in the verify job."
-            exit 1
-          fi
-
+      # configure-pages with enablement: true creates the Pages site (build type: workflow) if it
+      # does not exist yet. The earlier pre-check that exited on 404 is removed: it stopped the run
+      # before this step could ever try the enablement.
+      # (Sessions arena/8214edf2-trade3 PR #18 and arena/8373696a-trade3 independently made
+      # this same fix; upstream version kept, both COORDINATION records kept.)
       - uses: actions/configure-pages@v5
         with:
           enablement: true
