@@ -1667,3 +1667,40 @@ Marking T-74a … T-74d **done**.
 | T-22c Sandbox live preview of built site (`docs/` + `app/`) so dashboard is viewable before F8 | in progress | `arena/22ed9fdf-trade3` | none (runtime only) |
 | T-22d GitHub Pages enablement retry + deploy-run status confirmation (F8) | in progress | `arena/22ed9fdf-trade3` | none (API calls only) |
 | T-22e Final record + PR to `main` + merge + deploy check | pending | `arena/22ed9fdf-trade3` | `COORDINATION.md` (append-only) |
+
+## Results — session `arena/22ed9fdf-trade3` (2026-11-21)
+
+### T-22a Live re-verification (official demo API via page fetch; sandbox shell has no direct egress to `*.kalshi.co`)
+
+| Check | Official source | Result |
+|---|---|---|
+| Exchange status | [GET /exchange/status](https://external-api.demo.kalshi.co/trade-api/v2/exchange/status) | `exchange_active: true`, `trading_active: true`, shards 0–3 (live 2026-11-21) |
+| Gas KXAAAGASM | [series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASM) | "US gas price", Economics, tags `Oil & Gas`, AAA settlement — matches published row |
+| Golf KXPGAGOLFERSCORE | [series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAGOLFERSCORE) | "Golf Round Strokes", Sports + Golf tag, 5 official settlement sources — matches |
+| Culture KXXBANNEDGROK | [series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXXBANNEDGROK) | Category Culture confirmed; settlement list contains non-official entries (Google-search URLs, personal X account) — published row correctly blanks it (flag F10) |
+| Crypto KXETHD | [series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXETHD) | "Ethereum price Above/below", Crypto, CF Benchmarks settlement — matches |
+| Base URLs / WS | [API Environments](https://docs.kalshi.com/getting_started/api_environments) | Demo REST `external-api.demo.kalshi.co`, WS `external-api-ws.demo.kalshi.co` — exactly as specified in the task |
+
+### T-22b Gates on merged tree (`main` @ `49397f2`)
+
+| Gate | Result |
+|---|---|
+| `npm test` | **pass** — logic OK, engine 15/15, site render 13/13 |
+| `python3 scripts/check_site.py` | **pass** — 29 pages, 387 local links, 20 JS modules, 39 series rows |
+| `node scripts/check-links.js` | **pass** — 387 references resolve, 0 broken |
+| `py_compile` (6 files) · `node --check` (app, server) | **pass** |
+
+### T-22c Sandbox live preview (before F8)
+
+- `docs/` on **port 8000** ("Kalshi dashboard site preview"): `/index.html`, `/dashboard.html`, `/flagged.html`, `/dashboard-site/index.html` all **HTTP 200**.
+- App server on **port 3000** (`DATA_MODE=snapshot`): `/app/` and `/api/health` **HTTP 200**; health reports snapshot mode with capture timestamp (truthful, not live — sandbox cannot reach Kalshi from shell). Browser-side pages fetch Kalshi directly, so live data appears for the human visitor.
+
+### T-22d Pages (F8) — reproduced, still owner-only
+
+- `GET .../pages` → **404**; `POST .../pages` (`build_type=workflow`) → **403 "Resource not accessible by integration"** ([Pages REST docs](https://docs.github.com/rest/pages/pages)).
+- Latest `main` deploy run [44879180202](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879180202): **Verify site ✓** · **Deploy ✗ at `actions/configure-pages@v5`** (enablement call only; no site defect).
+- Conclusion unchanged: **one owner click** — Repo → Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save — then "Deploy site to GitHub Pages" → Run workflow. Expected URL: `https://wingbangboozle1-lang.github.io/Trade3/`.
+
+### T-22e PR + merge record
+
+- PR link and merge result recorded below after PR creation.
