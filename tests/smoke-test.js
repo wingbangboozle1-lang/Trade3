@@ -15,14 +15,29 @@ import { buildSeriesMarkets } from './fixtures.js';
 const quiet = { info() {}, warn() {}, error() {} };
 const results = [];
 const test = async (name, fn) => {
+  console.log(`START ${name}`); // streamed so a hang names itself even without a summary
   try {
     await fn();
     results.push(`PASS ${name}`);
+    console.log(`PASS ${name}`);
   } catch (err) {
     results.push(`FAIL ${name}: ${err.message}`);
+    console.log(`FAIL ${name}: ${err.message}`);
     process.exitCode = 1;
   }
 };
+
+// Watchdog: if every test finished but something still holds the event loop,
+// name the handle and exit non-zero instead of freezing CI. An unresolved
+// top-level await with an empty loop exits on its own (code 13); a hang always
+// means an active resource — print exactly which.
+const watchdog = setTimeout(() => {
+  console.log('WATCHDOG: process still alive 120s after the last test start.');
+  console.log(`Active resources: ${process.getActiveResourcesInfo().join(', ')}`);
+  console.log(`Results so far: ${results.length}`);
+  process.exit(3);
+}, 120_000);
+watchdog.unref();
 
 // --- swing detector ---------------------------------------------------------
 await test('isSwing uses an inclusive $0.10 threshold in both directions', () => {
