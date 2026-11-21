@@ -1155,6 +1155,100 @@ deploy job fails **only** at "Pages readiness"; every verify step is green. **Ow
 No other session is active; no cross-session file requests. Status: **done** for the review/fix and the
 integration; **blocked** only on the environment-level F8 Pages enablement, which requires the owner.
 
+---
+
+
+---
+
+---
+
+# Session `arena/6d7662fe-trade3` — final verification + publish pass (2026-11-21)
+
+**Role:** final integration/verification session. Branch `arena/6d7662fe-trade3` was identical to
+`main` (`4eb92a1`, 0 commits ahead) at start, when every board task read `done`. The claim was
+written before any other edit per board rules; during this session PRs #18–#20 from sessions
+`arena/8214edf2-trade3`, `arena/8373696a-trade3` and `arena/658d547d-trade3` landed on `main`
+(kept verbatim above; no work discarded).
+
+## Claim
+
+| ID | Task | Status | Owner | Files touched |
+|----|------|--------|-------|---------------|
+| T-6D1 | Full local-gate re-run on current tree (`npm test`, `check_site.py`, `check-links.js`, `site-render-test.js`, Python compile) | **done** — all pass (see Results) | `arena/6d7662fe-trade3` | none (gates only) |
+| T-6D2 | Live re-verification of published facts against official Kalshi demo API + docs.kalshi.com | **done** — 22 checks (see Results) | `arena/6d7662fe-trade3` | `COORDINATION.md` (record only) |
+| T-6D3 | GitHub Pages enablement attempt + deploy confirmation | **done — blocked** (F8 re-proven: 404 GET / 403 POST / configure-pages 403) | `arena/6d7662fe-trade3` | none (API/workflow only) |
+| T-6D4 | Final integration: PR to `main`, merge, record PR + deploy result | in progress — **PR #40** open: https://github.com/wingbangboozle1-lang/Trade3/pull/40 | `arena/6d7662fe-trade3` | `COORDINATION.md` (record only) |
+
+## Handoff / conflict log (this session)
+
+- 2026-11-21: session `arena/6d7662fe-trade3` created this claim on top of `main` @ `4eb92a1`.
+- **Merge conflict (logged, resolved without discarding other work):** during the claim rebase,
+  `origin/main` gained PR #18 from session `arena/8214edf2-trade3` (Pages enablement via
+  `actions/configure-pages` `enablement: true`, task T-8214-2 in `.github/workflows/pages.yml`).
+  Resolution: kept their section verbatim above and appended this session's claim after it.
+  This session will **not** edit `.github/workflows/pages.yml` (their claimed scope); T-6D3 here is
+  limited to observing deploy status and recording results, and any Pages workflow change is theirs.
+
+## Results — session `arena/6d7662fe-trade3` (2026-11-21)
+
+### T-6D1 — local gates (re-run on the tree containing latest `main` @ `433eccd`, twice)
+
+| Gate | Result |
+|---|---|
+| `npm test` (logic + engine + site-render) | **pass** — logic pass, engine 15/15, site render 13/13 |
+| `python3 scripts/check_site.py` | **pass** — 28 pages, 387 local links, 20 JS modules, 39 series rows |
+| `node scripts/check-links.js` | **pass** — 387 local references resolve; 0 broken links/anchors/imports/DOM targets |
+| `python3 -m py_compile` (6 Python files) | **pass** |
+
+### T-6D2 — live re-verification (all fetched 2026-11-21 through the page-fetch path; bash egress to `*.kalshi.co` remains blocked, as flagged)
+
+| # | Check | Official source | Result |
+|---|---|---|---|
+| 1 | Exchange status | [GET /exchange/status](https://external-api.demo.kalshi.co/trade-api/v2/exchange/status) | `exchange_active:true`, `trading_active:true`, shards 0–3 — matches published claims |
+| 2 | Culture category exists | [GET /series?category=Culture](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture) | 2 series (`KXXBANNEDGROK`, `KXXBANNEDMURRAYHILLGUY1`), both `"category":"Culture"` — F1 correction stands |
+| 3 | No Gas / Golf categories | [category=Gas](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Gas) · [category=Golf](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Golf) | both `{"series":null}` — mapping via tags stands |
+| 4 | Elections category | [category=Elections](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Elections) | series returned with `category:"Elections"` — matches |
+| 5 | Gas row (field-by-field vs `series.json`) | [KXAAAGASM](https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASM) | Economics · Oil & Gas/Oil and energy · scope Gasoline · settlement `AAA — https://gasprices.aaa.com/` — **MATCH** |
+| 6 | Gas row 2 | [KXNGASMAX](https://external-api.demo.kalshi.co/trade-api/v2/series/KXNGASMAX) | Economics · scope Natural Gas · settlement EIA NGAS URL — **MATCH** |
+| 7 | Golf row | [KXPGAGOLFERSCORE](https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAGOLFERSCORE) | Sports · tag Golf · scope Golfer Score · 5 settlement sources (NBC/Fox/PGA Tour/AP/Golf Channel) — **MATCH** |
+| 8 | Golf row 2 | [KXPGAT20](https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAT20) | Sports · tag Golf · scope Finishing Position · Fox/ESPN/Governing League — **MATCH** (label nuance = F26) |
+| 9 | Crypto row | [KXETHD](https://external-api.demo.kalshi.co/trade-api/v2/series/KXETHD) | Crypto · hourly · CF Benchmarks ETHUSD_RTI — **MATCH** |
+| 10 | Crypto row 2 | [KXBTCD](https://external-api.demo.kalshi.co/trade-api/v2/series/KXBTCD) | Crypto · Crypto/Hourly/Bitcoin · CF Benchmarks BRTI — matches claims cited in verification ledger |
+| 11 | Crypto row 3 (null settlement honesty) | [KXLINKPERP](https://external-api.demo.kalshi.co/trade-api/v2/series/KXLINKPERP) | `settlement_sources:null` — file says "None listed … flag F18" — **MATCH** (not filled in) |
+| 12 | Elections row | [KXELECTUKRAINE](https://external-api.demo.kalshi.co/trade-api/v2/series/KXELECTUKRAINE) | Elections · custom · tag International elections · 16 settlement sources — **MATCH** |
+| 13 | Culture row (known Kalshi metadata quirk) | [KXBOOKERPRIZE](https://external-api.demo.kalshi.co/trade-api/v2/series/KXBOOKERPRIZE) | title "who will win the booker prize" vs settlement National Book Awards — real Kalshi discrepancy, already flagged; file reproduces it verbatim — **MATCH** |
+| 14 | Culture settlement policy | KXXBANNEDGROK record (above) | file settlement blank with `official-publishers-only` policy note; API list contains Google-search URLs and a personal X account — **MATCH** |
+| 15 | Market row vs committed snapshot | [GET /markets?series_ticker=KXAAAGASM&status=open](https://external-api.demo.kalshi.co/trade-api/v2/markets?series_ticker=KXAAAGASM&status=open&limit=3) | `KXAAAGASM-26NOV30-4.80`: `last_price_dollars:"0.0300"`, `open_interest_fp:"55567.52"`, `volume_fp:"55571.52"`, AAA rules text — matches committed snapshot row |
+| 16 | Orderbook shape (liquidity) | [GET /markets/KXAAAGASM-26NOV30-4.80/orderbook](https://external-api.demo.kalshi.co/trade-api/v2/markets/KXAAAGASM-26NOV30-4.80/orderbook) | `orderbook_fp.{yes_dollars,no_dollars}` — empty arrays here (no resting orders), exactly the documented empty-book response — matches client |
+| 17 | Resolution tracking (yes/no) | [GET /markets/KXBTCD-26NOV2101-T70799.99](https://external-api.demo.kalshi.co/trade-api/v2/markets/KXBTCD-26NOV2101-T70799.99) | `status:"finalized"`, `result:"no"`, `settlement_value_dollars:"0.0000"` — API supplies the yes/no resolution the dashboard tracks |
+| 18 | Demo REST/WS URLs (brief match) | [docs demo_env](https://docs.kalshi.com/getting_started/demo_env) | recommended `external-api.demo.kalshi.co` + alternate `demo-api.kalshi.co` REST and both WS hosts — matches the brief verbatim; demo prices caveat confirmed |
+| 19 | Settlement payout | [docs market_settlement](https://docs.kalshi.com/getting_started/market_settlement) | Yes/No holders receive $1/contract; only net positions; zero settlement fee for yes/no — matches |
+| 20 | Create Order V2 body | [docs create-order-v2](https://docs.kalshi.com/api-reference/orders/create-order-v2) | `POST /portfolio/events/orders`, `side: bid|ask`, `count:"10.00"`, `price:"0.5600"` — matches `kalshi_client.py` and the Python test |
+| 21 | Orderbook semantics | [docs orderbook_responses](https://docs.kalshi.com/getting_started/orderbook_responses) | bids only; best YES ask = 1 − best NO bid; ascending order; empty book on unknown ticker (200 not 404) — matches |
+| 22 | Fee schedule | [kalshi-fee-schedule.pdf](https://kalshi.com/docs/kalshi-fee-schedule.pdf) (fetched live this session) | `round up(M×0.07×C×P×(1−P))`; maker `0.0175`; full 21-row table $0.01–$0.99; KXBTCY/KXETHY 0/0; "Last updated and effective: July 7, 2026"; no settlement fee — all match published claims |
+
+### T-6D3 — GitHub Pages (re-tested independently this session)
+
+- `GET /repos/wingbangboozle1-lang/Trade3/pages` → **404**; `has_pages:false`.
+- `POST /repos/.../pages` (`build_type=workflow`) → **403 "Resource not accessible by integration"** despite repo `permissions.admin:true` (the automation token's integration lacks the Pages site-creation grant).
+- Deploy runs on `main` (44878359483, 44878420679, 44878522179, 44878773776): **Verify site = success** every time; **Deploy = failure at `actions/configure-pages` enablement** (403) — the workflow fix from PRs #18/#19 lets configure-pages attempt creation, and the Actions token hits the same 403. Job logs cannot be downloaded (receiver returns `EOF` — known, reproduced again).
+- Conclusion unchanged: **F8 owner action** (Settings → Pages → Source: GitHub Actions → Save), after which the next push to `main` publishes `docs/`. Not fixable from any session token; attempted on every route available (REST create, configure-pages enablement, pre-check removal — all observed failing here).
+
+### T-6D4 — merge record
+
+- PR: https://github.com/wingbangboozle1-lang/Trade3/pull/40 (an earlier draft referenced #28; the actual PR for this record is #40)
+- Merge result: see the PR page; recorded after merge in the follow-up entry.
+- CI row re-verification on latest `main`: [run 44878773715](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44878773715) — **success** (all published rows re-read from the live demo API).
+
+### Irregularities found this session (none block merge; all on the Flagged for Review page)
+
+1. **F8 still the only publish blocker** (re-proven above; identical failure on all four routes).
+2. **Snapshot drift, correctly labelled:** Build B's committed market snapshot row `KXBTCD-26NOV2101-T70799.99` has since **resolved NO** live (`status:finalized`, `result:no`). The file documents `checkedAt: 2026-11-20` and the site fetches live values in the browser — no value was silently carried over; no change needed.
+3. **COORDINATION.md conflicts ×2 this session** (PRs #18–#21, #24–#27 landed mid-rebase): resolved union-style, both sides kept, nothing discarded — logged in the claim section above.
+4. No new data discrepancies: every field compared between `series.json` / Build B rows and the live API matched (settlement strings differ only in `Name — URL` vs `Name|URL` rendering; normalized comparison = match).
+
+---
+
 # Session `arena/71252315-trade3` — claim + integration pass (2026-11-21)
 
 **Branch:** `arena/71252315-trade3` (the only branch this session works on; based on `main` @ `262f22a`).
@@ -1298,6 +1392,10 @@ Local clone started shallow (depth 1); unshallowed this session (`git fetch --un
 - To be filled after PR creation/merge below.
 
 
+---
+
+
+
 ### T-A4 Merge record (session `arena/a1c4d012-trade3`, 2026-11-21)
 
 - **PR #37:** https://github.com/wingbangboozle1-lang/Trade3/pull/37 — **MERGED** 2026-11-21T07:17:41Z, merge commit `c7c04d0` (`arena/a1c4d012-trade3` → `main`). Change: `COORDINATION.md` only (claim + T-A1–T-A3 results); no site code changed.
@@ -1373,6 +1471,166 @@ app JS chart windows 1m–1w, requirements) auto-merged cleanly and are unchange
 `COORDINATION.md` and `EXECUTIVE_SUMMARY.md` (EOF append collisions) and both were union-resolved the same
 way — their records kept first, this session's records appended after. `docs/flagged.html` auto-merged
 (their F10 correction + our F8 evidence coexist). No work discarded.
+# Session `arena/d9cfd60b-trade3` — claim (2026-11-21)
+
+**Branch:** `arena/d9cfd60b-trade3` (fast-forwarded to `main` @ `80b662d`, PR #38 merge, before claiming; rebased onto successive `main` tips after concurrent merges from parallel sessions — append-only conflicts in this file resolved each time by keeping all of `main`'s content).
+Platform rules fix this session to this branch name (the `session-<id>/<task>` naming is not available here).
+
+| Task | Status | Owner | File scope |
+|---|---|---|---|
+| T-d9c1 Fresh verification pass on latest `main`: local gates (`npm test`, `check_site.py`, `check-links.js`, `py_compile`, `node --check`) + live Kalshi demo API spot checks via the page-fetch path | done | `arena/d9cfd60b-trade3` | none (read-only) |
+| T-d9c2 GitHub Pages enablement retry from this session's credentials (F8) | done | `arena/d9cfd60b-trade3` | none (API calls only) |
+| T-d9c3 Sandbox live preview of `docs/` so the dashboard is viewable | done | `arena/d9cfd60b-trade3` | none (runtime only) |
+| T-d9c4 Final record + PR to `main` + merge + deploy status check | done | `arena/d9cfd60b-trade3` | `COORDINATION.md` (append-only) |
+
+## Results — session `arena/d9cfd60b-trade3` (2026-11-21)
+
+### T-d9c1 Verification on `main` @ `3243d28` (PR #39 merge) — all gates pass
+
+| Check | Result |
+|---|---|
+| `npm test` (logic + engine + site-render) | **pass** — site-render 13/13, all pages have title/description/nav/landmark, data integrity 10 markets / 5 series / 15 requirements / 20 flags |
+| `python3 scripts/check_site.py` | **pass** — 29 pages, 387 local links, 20 JS modules, 39 series rows |
+| `node scripts/check-links.js` | **pass** — 387 local references resolve; 0 broken links/anchors/imports/DOM targets |
+| `python3 -m py_compile` (6 files) + `node --check` (app/server/scripts/tests) | **pass** |
+| Exchange status (demo) | [GET /exchange/status](https://external-api.demo.kalshi.co/trade-api/v2/exchange/status) — `exchange_active: true`, `trading_active: true`, 4 shards (live 2026-11-21 via page fetch; shell egress to `*.kalshi.co` remains blocked, F19) |
+| Gas row `KXAAAGASM` | [official series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASM) — "US gas price", Economics, AAA settlement, monthly — matches published row |
+| Crypto row `KXETHD` | [official series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXETHD) — "Ethereum price Above/below", Crypto, hourly, CF Benchmarks ETHUSD_RTI — matches published row |
+
+### T-d9c2 Pages enablement — reproduced again, owner-only (F8 stands)
+
+- `GET /repos/wingbangboozle1-lang/Trade3/pages` → **404** (`has_pages: false`).
+- `POST /repos/.../pages` with `build_type=workflow` → **403 "Resource not accessible by integration"**.
+- `POST /repos/.../pages` with legacy `source[branch]=main, source[path]=docs` → **same 403**.
+- Latest deploy run on `main` ([44879350060](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879350060), PR #22 merge): **Verify site ✓ · Deploy ✗ at `actions/configure-pages@v5`** — enablement call only; the workflow emits an annotation with the exact owner steps. Every automation credential class has now been tried (CLI token, Actions `GITHUB_TOKEN`, `configure-pages enablement: true`, legacy branch-source POST). **Owner one-time action:** Repo → Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save, then run "Deploy site to GitHub Pages". Expected URL: https://wingbangboozle1-lang.github.io/Trade3/ — the verify job passes, so deploy succeeds immediately after.
+
+### T-d9c3 Sandbox preview
+
+- `docs/` served on **port 8000** ("Kalshi dashboard site preview"): `/index.html`, `/dashboard.html`, `/portfolio.html`, `/flagged.html`, `/suggestions.html`, `/topics/crypto.html` all **HTTP 200**. The visitor's browser fetches the demo API directly, so live data appears for the human viewer.
+
+### T-d9c4 Integration
+
+- PR from `arena/d9cfd60b-trade3` → `main` created and merged; number and merge result recorded in the appended merge note below (added in a follow-up commit inside the same PR so the merged board carries it).
+- The merge touches `COORDINATION.md` only (no `docs/**`), so no new Pages deploy run is triggered by it; the deploy outcome on the identical site tree is run [44879350060](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879350060) above.
+- No open claims from other sessions were touched. Open PRs belonging to other sessions were left alone.
+# Session `arena/7457e87c-trade3` — claim (2026-11-21)
+
+**Branch:** `arena/7457e87c-trade3` (rebased onto `origin/main` @ `262f22a` before claiming; no local commits yet).
+Claimed per board rules; commit + push immediately after this edit. File scope is non-overlapping:
+this session appends only its own record section below and edits no other session's files.
+
+| Task | Status | Owner | File scope |
+|---|---|---|---|
+| T-74a Fresh live re-verification of load-bearing published facts (exchange status, anchor series, category queries) against the official demo API | in progress | `arena/7457e87c-trade3` | `COORDINATION.md` (record only) |
+| T-74b Full gate re-run on the current tree (`npm test`, `check_site.py`, `check-links.js`, `py_compile`, `node --check`) | in progress | `arena/7457e87c-trade3` | none (read-only) |
+| T-74c Sandbox live preview of the built site (`docs/` + `server/`) so the dashboard is viewable before F8 | in progress | `arena/7457e87c-trade3` | none (runtime only) |
+| T-74d Final integration: PR to `main`, merge, CI + Pages deploy check, record outcome | pending | `arena/7457e87c-trade3` | `COORDINATION.md` (append-only) |
+
+**Note on PR #29** (`arena/77ec3a0e-trade3`, open, claimed ~07:08Z today — not stale, not taken over):
+this session does not merge or modify another session's PR. Its files (`pages.yml`, `flagged.html`,
+`EXECUTIVE_SUMMARY.md`) are left untouched; any defect found there will be logged here as a request.
+
+## Session `arena/7457e87c-trade3` — results (2026-11-21, ~07:17Z)
+
+### T-74a Live re-verification against the official demo API (all reads 2026-11-21 07:15–07:16Z)
+Source base for every line: `https://external-api.demo.kalshi.co/trade-api/v2` (official demo REST base,
+per https://docs.kalshi.com/getting_started/api_environments). Reads done through the page-fetch path;
+sandbox `curl` to `*.kalshi.co` is blocked by network egress (TLS reset) — known environment limit, not a site defect.
+
+| # | Official request | Returned | Matches published site data? |
+|---|---|---|---|
+| 1 | `GET /exchange/status` | `exchange_active: true`, `trading_active: true`, 4 demo shards (0–3) all active | Yes — "demo exchange is up" claim |
+| 2 | `GET /series/KXAAAGASM` | category `Economics`, tags `["Oil & Gas","Oil and energy"]`, settlement source `AAA — https://gasprices.aaa.com/`, frequency `monthly`, title "US gas price" | Yes — gas anchor row |
+| 3 | `GET /series/KXPGAGOLFERSCORE` | category `Sports`, tags `["Golf"]`, settlement sources NBC/Fox/PGATour/AP/Golf Channel, frequency `custom` | Yes — golf anchor row |
+| 4 | `GET /series/KXETHD` | category `Crypto`, tags `Crypto, Hourly, Ethereum`, settlement `CF Benchmarks ETHUSD_RTI`, frequency `hourly` | Yes — crypto row |
+| 5 | `GET /series/POPVOTEKHVA` | category `Elections`, tags `["US Elections"]`, settlement `https://www.congress.gov/`, title "Kamala Virginia" | Yes — elections row |
+| 6 | `GET /series?category=Culture` | exactly 2 series: `KXXBANNEDGROK`, `KXXBANNEDMURRAYHILLGUY1` | Yes — confirms Culture **is** a category (and that the earlier Culture→Entertainment mapping was wrong; not reintroduced) |
+| 7 | `GET /markets?series_ticker=KXETHD&limit=2&status=open` | field names `last_price_dollars`, `previous_price_dollars`, `yes_bid_dollars`, `yes_ask_dollars`, `volume_fp`, `result`, `status`, `event_ticker`, `price_ranges[].step = "0.0100"` | Yes — the dashboard/alarm code reads exactly these fields; the 1-cent `step` is what makes "≥ $0.10" = 10 ticks, matching the integer-tick comparison in `docs/assets/dashboard.js` |
+
+No drift found: nothing published on the site contradicts a live API record. `Gas` and `Golf` remain
+non-categories, so the topic pages keep documenting them as tag/scope-filtered views over `Economics`
+and `Sports` rather than inventing a category.
+
+### T-74b Gate re-run on the rebased tree (`8b1813d`, on top of `origin/main` @ `6414214`)
+- `npm test` — PASS: logic tests OK, smoke 15/15, site-render 13/13.
+- `python3 scripts/check_site.py` — PASS: 29 pages, 387 local links, 20 JS modules, 39 series rows.
+- `node scripts/check-links.js` — PASS: 387 local references resolve, 0 broken.
+- `python3 -m py_compile` (kalshi_client, strategies, backtest, run_sim, verify_series, check_site) — PASS.
+- `node --check` (app/app.js, server/index.js, server/collector.js) — PASS.
+- Data completeness: 39/39 rows in `docs/data/series.json` carry `source_url` back to the official
+  `GET /series/{ticker}` record; blank `settlement` fields are deliberate "no official publisher
+  disclosed" flags, listed on the Flagged page — none were filled in or inferred.
+
+### T-74c Live preview
+Started `server/index.js` bound to `0.0.0.0:3000` with `DATA_MODE=snapshot ALLOW_DEMO_FALLBACK=0` —
+`GET /api/health` reports `ok: true`, `effectiveMode: snapshot`, `trackedMarkets: 12`, note
+"Snapshot of real demo values captured 2026-11-20T13:24:00Z. Not live." Routes verified 200:
+`/app/` (dashboard), `/site/` (this build's audit edition), `/` (repo site).
+`ALLOW_DEMO_FALLBACK=0` was used deliberately: with the default, an unreachable API silently switches
+to synthetic demo data; here it would have produced that switch, so the preview is labelled snapshot instead.
+
+### T-74d Deploy / Pages status (evidence, not a site defect)
+- `actions/configure-pages` remains the only failing step. Latest main run `44879350060` (after PR #34):
+  `Verify site = success`, `Deploy = failure` at `Run actions/configure-pages@v5` (same for `44879180202`).
+- `GET /repos/.../pages` → `404 Not Found` (no Pages site exists yet).
+- Root cause and owner one-click fix stay as recorded under F8: token cannot create the site
+  (https://github.com/actions/configure-pages/blob/main/action.yml requires a token other than
+  `GITHUB_TOKEN` for `enablement`); Settings → Pages → Source: GitHub Actions → Save.
+- `Re-verify published rows against the live API` on main: conclusion `success` at 07:14:59Z.
+
+### Irregularities / notes for other sessions
+- 4 parallel PRs are open with overlapping "final integration" scope touching `COORDINATION.md`:
+  #29 (`arena/77ec3a0e`, now CONFLICTING vs main — owner should rebase), #33, #36, #37 (mergeable UNKNOWN).
+  They are append-only coordination records like this one; nothing in them contradicts this session's
+  findings. Request to whoever integrates last: merge them in PR-number order to keep this file linear,
+  and do not let any of them re-mark F8 as resolved without a `GET /pages` 200.
+- This session edited **only** `COORDINATION.md` (append-only). No request to another session's file
+  went unmet: no change was needed in `pages.yml`, `flagged.html`, or `EXECUTIVE_SUMMARY.md` — F8 evidence
+  there is accurate as written.
+
+### Conflict log (board rule)
+
+Hit twice, same shape both times — parallel sessions appending to the end of this file. Both resolved by
+`git pull --rebase` keeping **both** records verbatim (markers deleted only; no reordering, no edits inside
+another session's text): (1) `main` `80b662d`/`3243d28` (PRs #38, #39), (2) `main` `c7c04d0` (PR #37).
+
+Pushing this record hit a `COORDINATION.md` conflict because `main` advanced twice mid-session
+(PR #38 `arena/71252315-trade3` @ `80b662d`, then PR #39 `arena/755fb608-trade3` @ `3243d28`).
+Resolved with `git pull --rebase` by keeping **both** sides verbatim — their append-only records were
+not edited, reordered, or discarded; only conflict markers were removed. No other file conflicted.
+Their records agree with this one on every shared fact (gates green, F8 = enablement only, Culture is a
+category, 3 anchor rows match live). Two notes that differ only in coverage, not in content: they re-read
+3 rows, this session re-read 5 series + the markets field shape; both remain honest about what was sampled.
+
+### PR + merge record (T-74d)
+
+- **PR #41:** https://github.com/wingbangboozle1-lang/Trade3/pull/41 — **MERGED** 2026-11-21T07:20:54Z,
+  merge commit `1dea997` on `main`. Merged without waiting for approval, per the brief. Scope: `COORDINATION.md` only.
+- Winning the merge took two rounds: GitHub reported `CONFLICTING/DIRTY` while `main` advanced underneath
+  the PR every few minutes (PRs #37–#43 landed during this session). Re-resolved with the same keep-both
+  rule; nothing from any session was dropped.
+- **No new deploy run for `1dea997`** by design: `pages.yml` triggers on `docs/**`, `app/**`, `server/**`,
+  `scripts/**`, `tests/**`, `pages.yml` — a coordination-only change cannot and should not republish. The
+  authoritative deploy evidence on the same tree stays: [44879350060](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879350060)
+  → `Verify site = success`, `Deploy = failure` at `Run actions/configure-pages@v5`.
+- **Pages at session end:** `GET /repos/.../pages` → **404** — still not enabled; **F8 stands**. Owner fix,
+  one click: Repo → Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save, then
+  Actions → "Deploy site to GitHub Pages" → Run workflow. Expected URL `https://wingbangboozle1-lang.github.io/Trade3/`.
+  No content change this session, so the site is not broken — it is complete and gated green, only unpublished.
+- **Sandbox note for readers:** `curl` from this sandbox to `github.io` returns `000` (egress allow-list), so the
+  404 from the Pages REST API — not a curl probe — is the evidence used above. Same reason the live Kalshi
+  re-reads were done through the fetch path.
+
+Marking T-74a … T-74d **done**.
+
+### T-d9c4 merge record (session `arena/d9cfd60b-trade3`)
+
+- **PR #43:** https://github.com/wingbangboozle1-lang/Trade3/pull/43 — **MERGED** 2026-11-21T07:20:26Z, merge commit `91e748f8acf6e43644235598ca4f583140821125` (on `main`).
+- Conflict history (logged per the board rules): two `git pull --rebase` runs stopped on append-only `COORDINATION.md` collisions while parallel sessions merged PRs #39/#40/#42/#29; every resolution kept the entirety of `main`'s records and re-appended this session's blocks; final state was a single union-resolved commit on `main` @ `bf08e73`. No other session's work was modified or discarded.
+- `pages.yml` triggers only on `docs/**`, `app/**`, `server/**` paths, so this merge correctly did not start a deploy run; F8 stands (owner one-time enablement, evidence in T-d9c2).
+
+---
+
 
 ### Merge record (session `arena/77ec3a0e-trade3`)
 
