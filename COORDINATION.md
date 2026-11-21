@@ -2223,3 +2223,39 @@ This session's record is appended to `COORDINATION.md` and committed on the sess
 - T-FIN3 integration/merge status — **done**
 
 - **Record PR #57** (this record): https://github.com/wingbangboozle1-lang/Trade3/pull/57 — **MERGED** 2026-11-21, merge commit `76c7ffc`. Final state: T-3A1/T-3A2/T-3A3 all **done**; live site confirmed at https://wingbangboozle1-lang.github.io/Trade3/.
+
+# Session `arena/ccf26d52-trade3` — second claim round (2026-11-21, post-Pages-enablement)
+
+**Context change:** GitHub Pages was enabled (build_type `legacy`, source `gh-pages`) and a publish commit
+("Publish docs/ from f2252f9", author `wingbangboozle1-lang`, 2026-11-21T07:44:20Z) put session
+`arena/651b296e-trade3`'s branch docs (incl. `assets/live.js`) on the live site. F8 is effectively
+RESOLVED. New tasks claimed by this session:
+
+| Task | Status | Owner | File scope |
+|---|---|---|---|
+| T-CCF7 Final integration of unmerged branch work: merge `arena/651b296e-trade3` docs enhancements into main via this session's branch (work preserved, credited) | **done** (merged; their 10 commits credited; COORDINATION union, nothing discarded) | `arena/ccf26d52-trade3` | merge only |
+| T-CCF8 Pipeline fix: deploy workflow must publish `docs/` to `gh-pages` when Pages build_type is `legacy` so the live site updates on every verified main push | **done** (deploy job: freshness check → publish + POST /pages/builds → hard gate; supersedes verify-only design with rationale; ws/relay tests added to CI) | `arena/ccf26d52-trade3` | `.github/workflows/pages.yml` |
+| T-CCF9 Update now-stale F8 text ("Pages not enabled") on the site + docs to "Resolved 2026-11-21" with links | **done** (site F8/F3 text fixed by session 651b296e and integrated; EXECUTIVE_SUMMARY.md 4 stale spots + VERIFICATION.md addendum updated here) | `arena/ccf26d52-trade3` | `docs/flagged.html`, `EXECUTIVE_SUMMARY.md`, `VERIFICATION.md` |
+| T-CCF10 Re-verify combined tree (gates + live site), publish, confirm live URL serves combined content, record | pending | `arena/ccf26d52-trade3` | `COORDINATION.md` (append-only) |
+
+# Session `arena/651b296e-trade3` — real-time WebSocket upgrade + publish verification
+
+**Claimed 2026-11-21T07:2xZ, committed and pushed immediately (per board rules).**
+
+| ID | Task | Status | Owner | File scope |
+|----|------|--------|-------|------------|
+| T65-1 | Verify live-state facts from official Kalshi docs + API (WS auth, channel names, orderbook schema, candle params, CORS) | in progress | arena/651b296e-trade3 | record only |
+| T65-2 | Add a genuine real-time WebSocket feed to the browser dashboard (public market-data channels if the official docs allow unauthenticated subscribe), with polling fallback that degrades visibly, never silently | in progress | arena/651b296e-trade3 | `docs/assets/*.js`, `docs/dashboard.html`, `docs/assets/style.css`, `server/*`, `app/*` |
+| T65-3 | Re-run every local gate + start a browser-reachable live preview of the published `docs/` site | in progress | arena/651b296e-trade3 | record only |
+| T65-4 | Integration: PR to `main`, merge, record deploy result; re-attempt Pages enablement and document the exact failing permission | in progress | arena/651b296e-trade3 | `COORDINATION.md` |
+
+**Non-overlap note:** this session does not rewrite any table row, `docs/data/series.json`, or the
+existing page structure of either build. It adds a transport layer (WS) alongside the existing REST
+poller and records verification. If a row needs a change, it is logged here, not edited.
+
+**Environment note (new, reproducible evidence for F8/F12):** from this sandbox, `curl` returns
+`000` (TLS reset) for **every** Kalshi host (`external-api.demo.kalshi.co`, `demo-api.kalshi.co`,
+`external-api.kalshi.com`, `api.elections.kalshi.com`) **and** for `wingbangboozle1-lang.github.io`.
+The only working egress is the page-fetch path and GitHub. Therefore any server-side collector
+running *in this sandbox* can never read Kalshi; browser-side polling is the only transport that
+works for the published site, which is why T65-2 keeps the browser as the WS client.

@@ -66,7 +66,7 @@ required for market data.
 | Culture topic | **Corrected.** Kalshi has a Culture category (2 series, no markets). The earlier "no Culture category" claim was wrong. | [Series by category: Culture](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture) |
 | Market rows in the published data file (Build B: 10 rows; 9 re-read) | 6 matched. 2 golf rows had yes-ask and no-bid reversed and were corrected. 1 row (KXELONMARS-99) had drifted volume and open interest and was updated. `KXAAAGASM-26NOV30-4.50` was not re-read in this pass. | [data.js](docs/dashboard-site/assets/data.js) `REVERIFIED` · V25 |
 | Fee schedule | Formula and effective date (July 7, 2026) confirmed. | [Fee schedule PDF](https://kalshi.com/docs/kalshi-fee-schedule.pdf) · V26 |
-| GitHub Pages | **Not live yet.** The build token cannot enable Pages (HTTP 403). One owner action is needed: Settings → Pages → Source: **GitHub Actions**. | [Flagged F8](docs/flagged.html) |
+| GitHub Pages | **LIVE (updated 2026-11-21).** Previously "not live yet": the build token could not enable Pages (HTTP 403). The site is now published at [wingbangboozle1-lang.github.io/Trade3](https://wingbangboozle1-lang.github.io/Trade3/) — Pages is enabled (`status: built`, `build_type: legacy`, source branch `gh-pages`). See F8 on the flag page for the full resolution record. | [Flagged F8](docs/flagged.html) |
 
 **Decisions for the owner (not blocking):** whether Culture should include Kalshi's larger Entertainment category (F15), and whether “highest dollar amount” should be volume × price or raw volume (F4).
 
@@ -83,8 +83,11 @@ Full list with source links: [Flagged for Review](docs/flagged.html).
 - **F21 Demo-UI URL pattern** (ledger renumbering: this item was F8 in an earlier draft):
   `demo.kalshi.co/markets/{ticker}` could not be verified from an official source; market links
   now use the verified API-record URL instead (flagged, needs human confirmation in a browser).
-- **F8 GitHub Pages:** still not enabled (403 for automation tokens, retried 2026-11-21);
-  the one-time owner click is documented on the flag page and in the workflow's failure summary.
+- **F8 GitHub Pages (RESOLVED 2026-11-21):** the site is live at
+  [wingbangboozle1-lang.github.io/Trade3](https://wingbangboozle1-lang.github.io/Trade3/). Every
+  automation route to *create* the Pages site returned 403 (documented on the flag page); publishing
+  the `docs/` tree to a `gh-pages` branch enabled legacy Pages, and the deploy workflow now verifies
+  (and, when stale, re-publishes) that branch.
 
 ## Second line-by-line review (2026-11-20, session `arena/2100849c-trade3`)
 
@@ -170,7 +173,7 @@ the decision to leave settlement blank under the official-publishers-only policy
 | Culture category | 2 series, `category: Culture` — confirms the earlier correction | [Series by category: Culture](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture) |
 | Culture markets | empty — confirms F9 | [Markets for KXXBANNEDGROK](https://external-api.demo.kalshi.co/trade-api/v2/markets?series_ticker=KXXBANNEDGROK&status=open) |
 | Local gates | `npm test`, `check_site.py`, `check-links.js`, `py_compile`, JSON parse — all pass | See [VERIFICATION.md](VERIFICATION.md) |
-| GitHub Pages | **Still not enabled** (404; enablement returns 403 to automation). Owner action required — see F8 | [docs/flagged.html](docs/flagged.html) |
+| GitHub Pages | **Live since 2026-11-21** ([wingbangboozle1-lang.github.io/Trade3](https://wingbangboozle1-lang.github.io/Trade3/)); previously "still not enabled" at this review — resolved later the same day, see F8 | [docs/flagged.html](docs/flagged.html) |
 
 ---
 
@@ -215,4 +218,6 @@ gets its chance first (per the official `api-client.js`, it fetches the site and
 the site the readiness gate **repeats the `POST /pages` attempt itself** before surfacing the
 owner-action error, so the deploy self-heals if the repository token ever gains the required
 permission. Flag F8 on the [Flagged for Review](docs/flagged.html) page carries this evidence and
-all three source links.
+all three source links. **Resolution (2026-11-21):** the site went live via the `gh-pages` branch
+route (see F8); the deploy workflow now publishes `docs/` to that branch whenever the published
+tree falls behind a verified `main` build.

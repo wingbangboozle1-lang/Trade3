@@ -11,6 +11,8 @@
  *   GET /api/portfolio             simulated portfolio + Kalshi demo account (if keyed)
  *   GET /api/health                liveness + data mode + docs links
  *   GET /api/stream                Server-Sent Events (live push)
+ *   GET /api/live                  WebSocket relay status (Kalshi socket + browser clients)
+ *   WS  /live                      same-origin WebSocket push of alerts + Kalshi ticker deltas
  *   static                         /app (dashboard), /docs (published site)
  */
 
@@ -20,7 +22,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Collector, publicMarket } from './collector.js';
 import { TOPICS } from './topics.js';
-import { KalshiError } from './kalshi.js';
+import { KalshiError, ENVIRONMENTS, loadPrivateKey } from './kalshi.js';
+import { upgradeRequest, OPCODE, CLOSE_CODE } from './ws.js';
+import { KalshiWsFeed } from './kalshi-ws.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
@@ -48,14 +52,16 @@ export function createServer({
     // The rest of the repository's site (Build A)
     { prefix: '/', dir: path.join(ROOT, 'docs') },
   ],
+  feed = null,
   logger = console,
 } = {}) {
   const sseClients = new Set();
+  const wsClients = new Set();
   const server = http.createServer(async (req, res) => {
     const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
     try {
       if (url.pathname.startsWith('/api/')) {
-        await handleApi({ req, res, url, collector, sseClients, logger });
+        await handleApi({ req, res, url, collector, sseClients, wsClients, feed, logger });
         return;
       }
       serveStatic({ res, url, staticRoots, logger });
@@ -65,19 +71,124 @@ export function createServer({
     }
   });
 
-  collector.on('update', (payload) => broadcast(sseClients, { event: 'update', data: payload }));
-  collector.on('alert', (alert) => broadcast(sseClients, { event: 'alert', data: alert }));
-  collector.on('trade', (trade) => broadcast(sseClients, { event: 'trade', data: trade }));
+  collector.on('update', (payload) => {
+    broadcast(sseClients, { event: 'update', data: payload });
+    wsBroadcast(wsClients, { type: 'update', data: payload });
+  });
+  collector.on('alert', (alert) => {
+    broadcast(sseClients, { event: 'alert', data: alert });
+    wsBroadcast(wsClients, { type: 'alert', data: alert });
+  });
+  collector.on('trade', (trade) => {
+    broadcast(sseClients, { event: 'trade', data: trade });
+    wsBroadcast(wsClients, { type: 'trade', data: trade });
+  });
+
+  // Relay the Kalshi socket (when a key is configured) to same-origin browsers.
+  // A ticker frame is passed through as-is: the dashboard needs the documented
+  // field names, and re-shaping them here would be one more place to drift.
+  if (feed) {
+    feed.on('ticker', (t) => wsBroadcast(wsClients, { type: 'ticker', data: t }));
+    feed.on('trade', (t) => wsBroadcast(wsClients, { type: 'kalshi_trade', data: t }));
+    feed.on('lifecycle', (l) => wsBroadcast(wsClients, { type: 'lifecycle', data: l }));
+    feed.on('open', (s) => wsBroadcast(wsClients, { type: 'feed', data: { event: 'open', status: s } }));
+    feed.on('close', (s) => wsBroadcast(wsClients, { type: 'feed', data: { event: 'close', status: s } }));
+    feed.on('error', (e) => wsBroadcast(wsClients, { type: 'feed', data: { event: 'error', message: e.message } }));
+  }
+
+  // RFC 6455 upgrade. Same-origin only: the browser talks to this server, which
+  // holds the Kalshi key. Anything else on this port is refused.
+  server.on('upgrade', (req, socket) => {
+    let pathname = '/';
+    try { pathname = new URL(req.url, 'http://localhost').pathname; } catch { /* fall through */ }
+    if (pathname !== '/live') {
+      socket.write('HTTP/1.1 404 Not Found\r\nConnection: close\r\nContent-Length: 0\r\n\r\n');
+      socket.destroy();
+      return;
+    }
+    const conn = upgradeRequest(req, socket, {
+      checkOrigin: (origin) => {
+        const ok = sameOrigin(req.headers.host)(origin);
+        if (!ok) {
+          logger.warn?.(`/live refused an upgrade: Origin ${origin} does not match Host ${req.headers.host}`);
+        }
+        return ok;
+      },
+    });
+    if (!conn) return;
+
+    wsClients.add(conn);
+    conn.send(JSON.stringify({
+      type: 'hello',
+      data: {
+        relay: 'same-origin /live',
+        dataMode: collector.status.dataMode,
+        effectiveMode: collector.effectiveMode,
+        feed: feed ? feed.status() : null,
+        note: feed && feed.status().configured
+          ? 'Kalshi socket relayed from this server with a signed handshake.'
+          : 'No Kalshi API key here: market data is REST-polled; alert pushes are still live.',
+        at: new Date().toISOString(),
+      },
+    }));
+
+    // Answer application-level pings so a browser can measure round-trip latency.
+    conn.on('text', (text) => {
+      if (text === 'ping') { conn.send(JSON.stringify({ type: 'pong', data: { at: Date.now() } })); return; }
+      if (text === 'status') { conn.send(JSON.stringify({ type: 'feed', data: { event: 'status', status: feed ? feed.status() : null } })); }
+    });
+    conn.on('close', () => wsClients.delete(conn));
+    conn.on('error', () => wsClients.delete(conn));
+
+    // Keep-alive: RFC 6455 §5.5.2, an endpoint MAY ping at any time.
+    const hb = setInterval(() => {
+      if (conn.readyState !== 'open') return clearInterval(hb);
+      conn.ping(Buffer.from('hb'));
+    }, 25000);
+    hb.unref?.();
+    conn.on('close', () => clearInterval(hb));
+  });
 
   server.on('close', () => {
     for (const res of sseClients) res.end();
     sseClients.clear();
+    for (const c of wsClients) c.close(CLOSE_CODE.GOING_AWAY, 'server shutting down');
+    wsClients.clear();
   });
 
   return server;
 }
 
-async function handleApi({ req, res, url, collector, sseClients, logger }) {
+/**
+ * Same-origin policy for /live: the Origin header's host must equal the Host the
+ * request was addressed to. A non-browser client sends no Origin and is allowed
+ * (it can only read market data this server already publishes publicly), but a
+ * page served from another site is refused. This stops any third-party page from
+ * opening the relay against a visitor's browser.
+ */
+export function sameOrigin(hostHeader) {
+  return (origin) => {
+    if (!origin) return true;
+    try {
+      return new URL(origin).host === String(hostHeader || '');
+    } catch {
+      return false;
+    }
+  };
+}
+
+/** Push one JSON frame to every connected browser socket. */
+function wsBroadcast(clients, payload) {
+  if (!clients.size) return;
+  let text;
+  try { text = JSON.stringify(payload); } catch { return; }
+  for (const conn of clients) {
+    if (conn.readyState !== 'open') { clients.delete(conn); continue; }
+    if (!conn.send(text)) clients.delete(conn);
+  }
+}
+
+async function handleApi({ req, res, url, collector, sseClients, wsClients, feed, logger }) {
   const p = url.pathname.replace(/^\/api/, '');
 
   if (p === '/health') {
@@ -146,6 +257,20 @@ async function handleApi({ req, res, url, collector, sseClients, logger }) {
       };
     }
     return sendJson(res, 200, { ...state.portfolio, kalshiDemoAccount: kalshiAccount });
+  }
+
+  if (p === '/live') {
+    return sendJson(res, 200, {
+      ok: true,
+      relay: {
+        path: '/live', protocol: 'RFC 6455', framing: 'server/ws.js',
+        browserClients: wsClients ? wsClients.size : 0,
+        sameOriginOnly: true,
+      },
+      feed: feed ? feed.status() : null,
+      note: 'Browser-facing socket is same-origin only. Kalshi socket status is in `feed`.',
+      docs: 'https://docs.kalshi.com/getting_started/quick_start_websockets',
+    });
   }
 
   if (p === '/stream') {
@@ -319,12 +444,43 @@ if (isMain) {
     allowDemoFallback: ALLOW_DEMO_FALLBACK,
   });
 
-  const server = createServer({ collector });
+  // ---- Kalshi WebSocket feed (optional; needs the same demo key as the portfolio) ----
+  // WSS=0 disables it. Without a key the feed reports `unconfigured` and the
+  // dashboard keeps REST-polling — it never pretends to be streaming.
+  const WSS_ENABLED = process.env.WSS !== '0';
+  const feed = WSS_ENABLED && DATA_MODE === 'live'
+    ? new KalshiWsFeed({
+      url: ENVIRONMENTS[ENV]?.ws,
+      keyId: process.env.KALSHI_API_KEY_ID || '',
+      privateKey: loadPrivateKey({
+        pem: process.env.KALSHI_PRIVATE_KEY_PEM,
+        path: process.env.KALSHI_PRIVATE_KEY_PATH,
+      }),
+      // Only markets the collector is actually tracking for the five topics.
+      tickers: () => [...collector.markets.keys()],
+      logger: console,
+    })
+    : null;
+
+  const server = createServer({ collector, feed });
   server.listen(PORT, HOST, () => {
     console.log(`Kalshi dashboard: http://${HOST}:${PORT}/app/   (env=${ENV}, poll=${POLL_MS}ms, dataMode=${DATA_MODE})`);
     console.log(`This build's site: http://${HOST}:${PORT}/site/`);
     console.log(`Repository site:   http://${HOST}:${PORT}/`);
+    if (!feed) console.log('WebSocket relay: /live for browsers; Kalshi socket disabled (WSS=0 or non-live data mode).');
+    else if (feed.configured) feed.start().then(() => feed.status());
+    else console.log('WebSocket relay: /live for browsers; Kalshi socket idle (no API key -> REST polling, status "unconfigured").');
   });
+
+  // Subscribe newly tracked markets as the collector discovers them.
+  let lastTickerSignature = '';
+  const syncSubscriptions = () => {
+    if (!feed) return;
+    const signature = [...collector.markets.keys()].sort().join(',');
+    if (signature === lastTickerSignature) return;
+    lastTickerSignature = signature;
+    try { feed.resubscribe(); } catch { /* logged by the feed */ }
+  };
 
   let running = false;
   const tick = async () => {
@@ -335,6 +491,7 @@ if (isMain) {
       await collector.pollOnce();
       if (collector.effectiveMode === 'live') await collector.refreshResolutions().catch(() => {});
       collector.managePositions();
+      syncSubscriptions();
     } catch {
       /* logged inside collector */
     } finally {
@@ -347,6 +504,7 @@ if (isMain) {
 
   const shutdown = () => {
     clearInterval(pollTimer);
+    try { feed?.stop(); } catch { /* already closed */ }
     server.close(() => process.exit(0));
     setTimeout(() => process.exit(0), 3000).unref();
   };
