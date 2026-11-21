@@ -1879,3 +1879,41 @@ Branch `arena/b1c33964-trade3` (based on `main` @ `a2b6d13`). This session edits
 Only `COORDINATION.md` was edited (claim + this record). No other session's file, PR, or branch was touched. The site content is unchanged.
 
 Marking T-B1, T-B2 **done**; T-B3 **blocked** (rate-limited, F8 unchanged); T-B4 in progress.
+
+---
+
+
+# Session `arena/1abd6620-trade3` — final verification + integration PR and merge
+
+**Branch:** `arena/1abd6620-trade3`, branched from `main` @ `a2b6d13f` (identical to `main` at session start; no other session active on this repo)
+**Session date:** 2026-11-21
+
+## Claim (logged at session start)
+
+| Task | Status | Owner | File scope |
+|------|--------|-------|------------|
+| Final line-by-line verification + integration PR → main → merge + Pages deploy confirmation | in progress | arena/1abd6620-trade3 | `COORDINATION.md` (record only; no source changes — all source tasks T1–T7 were already done and merged on `main`) |
+
+## Verification performed this session (all re-confirmed live against official sources)
+
+| Check | Official source | Result |
+|---|---|---|
+| Demo REST base + prod base + demo WS URL | [Demo Environment](https://docs.kalshi.com/getting_started/demo_env) | Confirmed verbatim: `https://external-api.demo.kalshi.co/trade-api/v2`, prod `https://external-api.kalshi.com/trade-api/v2`, WS `wss://external-api-ws.demo.kalshi.co/trade-api/ws/v2`; matches the user brief exactly |
+| Exchange status live | [GET /exchange/status](https://external-api.demo.kalshi.co/trade-api/v2/exchange/status) | `exchange_active: true`, `trading_active: true`, shards 0–3 active (live JSON fetched 2026-11-21) |
+| Gas series record | [GET /series/KXAAAGASM](https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASM) | title \"US gas price\", category Economics, tags `[\"Oil & Gas\",\"Oil and energy\"]`, settlement AAA — matches published row |
+| Culture category exists | [GET /series?category=Culture](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture) | Returns 2 series — the earlier "no Culture category" claim was wrong and was already corrected across the repo (F1) |
+| Test suite | `npm test` | **pass** — logic 15/15, smoke 15/15, site-render 13/13 |
+| Link check | `node scripts/check-links.js` | **0 broken** local links / anchors / imports / DOM targets across 29 HTML pages and 20 JS files (387 references resolved) |
+| Site data gate | `python3 scripts/check_site.py` | **pass** — 29 pages, 387 links, 20 JS modules parsed, 39 series rows in series.json all carrying `source` + `source_url` |
+| GitHub API rate limit | api.github.com | Hit during this session (403); `gh pr`/`gh api` retried after the reset window |
+
+## GitHub Pages status (blocker F8, owner action)
+
+- Pages is **not enabled**: `GET /repos/wingbangboozle1-lang/Trade3/pages` → 404 in all prior checks.
+- Every automation route returns 403 \"Resource not accessible by integration\": `actions/configure-pages` with `enablement: true`, `POST /pages`, `PATCH /pages` — tested from both the Actions `GITHUB_TOKEN` and CLI tokens (recorded in prior sessions T25, b4e5648a, 77ec3a0e). Root cause per the official actions/configure-pages action.yml: the enablement option requires a token other than GITHUB_TOKEN (PAT with repo scope/Pages write, or a GitHub App with administration:write + pages:write).
+- **One-time owner action:** Repository Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save. Then re-run the workflow (Actions → \"Deploy site to GitHub Pages\" → Run workflow, or push to `main`). Expected URL: https://wingbangboozle1-lang.github.io/Trade3/ . The site itself passed every verify-job check; the artifact is ready.
+
+## Irregularities
+
+None new. All pre-existing flags live on the Flagged for Review page (`docs/flagged.html` for Build A, `docs/dashboard-site/flagged.html` for Build B) with source links; F8 (Pages enablement) and F6 (browser CORS on Pages) remain open by design and do not block the merge.
+
