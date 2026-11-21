@@ -583,3 +583,67 @@ verify job should now pass and only the deploy job should fail on Pages enableme
 `check_site.py` 39 rows + all links **pass** · `check-links.js` 360 refs **pass** · `logic.test.mjs` **pass** ·
 `smoke-test.js` **15/15** · `site-render-test.js` **13/13** · `render.test.mjs` (jsdom) **pass** · CI's Python block
 run locally **pass** · `verify_series.py --from-cache docs/data/live-verification-2026-11-20.json` **4/4, exit 0**.
+
+---
+
+# Final verification & publish pass — session `arena/ef4556fb-trade3` (2026-11-21)
+
+**Scope:** final integration verification of the already-merged site on `main` (commit `39e3a3d`, PR #13). This
+session added **no site data**; it re-verified the published outputs against official sources, re-ran every gate,
+probed the deploy, and recorded the result. Branch is identical to `main` (empty diff) — the record below is the
+only commit from this session.
+
+## Live re-verification performed (2026-11-21, via the fetch proxy — sandbox bash has no egress to kalshi.co)
+
+| Check | Official source | Result |
+|---|---|---|
+| Exchange status | [GET /exchange/status](https://external-api.demo.kalshi.co/trade-api/v2/exchange/status) | `exchange_active:true`, `trading_active:true`, shards 0–3 — **matches VERIFICATION.md V22** |
+| Culture category (2 series) | [GET /series?category=Culture](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture) | `KXXBANNEDGROK` + `KXXBANNEDMURRAYHILLGUY1`, both `category:"Culture"` — **F1 correction stands** |
+| Gas series row | [GET /series/KXAAAGASM](https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASM) | `Economics`, tags `Oil & Gas`/`Oil and energy`, scope `Gasoline`, AAA settlement — **matches series.json** |
+| Crypto series row | [GET /series/KXETHD](https://external-api.demo.kalshi.co/trade-api/v2/series/KXETHD) | `Crypto`, hourly, CF Benchmarks settlement — **matches series.json** |
+| Elections series row | [GET /series/KXELECTUKRAINE](https://external-api.demo.kalshi.co/trade-api/v2/series/KXELECTUKRAINE) | `Elections`, tag `International elections`, 16 publishers — **matches series.json** |
+| Golf series row | [GET /series/KXPGAGOLFERSCORE](https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAGOLFERSCORE) | `Sports`, tag `Golf`, scope `Golfer Score`, PGATour/AP/NBC/Fox/Golf Channel — **matches series.json** |
+| Elections series row 2 | [GET /series/KXIATREASR](https://external-api.demo.kalshi.co/trade-api/v2/series/KXIATREASR) | `Elections`, tag `US Elections`, Iowa SoS settlement — **matches series.json** |
+| Golf series row 2 | [GET /series/KXPGAT20](https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAT20) | `Sports`, tag `Golf`, scope `Finishing Position` — **matches series.json** |
+| Crypto blank settlement | [GET /series/KXLINKPERP](https://external-api.demo.kalshi.co/trade-api/v2/series/KXLINKPERP) | `settlement_sources: null` — published blank is **correct** (F18) |
+| Entertainment supplement | [GET /series/KXTOPARTIST](https://external-api.demo.kalshi.co/trade-api/v2/series/KXTOPARTIST) | `Entertainment`, tag `Music`, Spotify settlement — **matches series.json** |
+| Market record (gas) | [GET /markets/KXAAAGASM-26NOV30-4.80](https://external-api.demo.kalshi.co/trade-api/v2/markets/KXAAAGASM-26NOV30-4.80) | Field-for-field identical to VERIFICATION.md V22: last 0.0300, prev 0.0300, bid 0.0000/ask 1.0000, vol 55571.52, OI 55567.52, close 2026-11-30T04:59:00Z, status `active`, result `""`, markdown title |
+| BTC markets active | [GET /markets?series_ticker=KXBTCD&status=open](https://external-api.demo.kalshi.co/trade-api/v2/markets?series_ticker=KXBTCD&status=open) | Active strike ladder, BRTI settlement rules — **market data flow confirmed** |
+| Orderbook | [GET /markets/KXAAAGASM-26NOV30-4.80/orderbook?depth=5](https://external-api.demo.kalshi.co/trade-api/v2/markets/KXAAAGASM-26NOV30-4.80/orderbook?depth=5) | Empty book at 0.03/1.00 quote (expected: ask 1.00/bid 0.00 = no liquidity) — **endpoint contract as used by the dashboard** |
+| REST/WS base URLs + signing | [docs.kalshi.com/getting_started/api_environments](https://docs.kalshi.com/getting_started/api_environments) | Demo/prod REST + WS URLs, user-ws hosts, "sign path without query string" — **confirmed verbatim** |
+| Candle intervals | [docs.kalshi.com/api-reference/market/get-market-candlesticks.md](https://docs.kalshi.com/api-reference/market/get-market-candlesticks.md) | 1/60/1440 minutes only — **chart window claims are honest** |
+| Fee schedule | [kalshi.com/docs/kalshi-fee-schedule.pdf](https://kalshi.com/docs/kalshi-fee-schedule.pdf) | Formula `round up(M×0.07×C×P×(1−P))`, maker `0.0175`, KXBTCY/KXETHY multiplier 0, "Last updated and effective: July 7, 2026" — **all confirmed** |
+
+## Gates re-run in this session's sandbox
+
+| Gate | Result |
+|---|---|
+| `npm test` (logic + engine + site render) | **pass** — 15/15 + 13/13 |
+| `python3 scripts/check_site.py` | **pass** — 28 pages, 360 local links, 20 JS modules, 39 series rows |
+| `node scripts/check-links.js` | **pass** — 360 references, no broken links/anchors/imports/DOM targets |
+| `python3 -m py_compile` (all 6 Python files) | **pass** |
+| `node --check` (all 6 dashboard JS modules) | **pass** |
+| `verify_series.py --from-cache` (cached rows) | **4/4, exit 0** |
+| CI verify job (run `44877230664`, workflow_dispatch) | **success** — all 12 steps green, including "Re-verify published rows against the live demo API" |
+
+## PR #5 closure
+
+PR #5 (`arena/b28d6df0-trade3`, "Coordination: re-verification and Pages enablement blocker") was **closed without
+merging**: its branch has an unrelated history (no merge-base with `main`) and its sole content (a session log of
+re-verification checks + the Pages blocker) is fully duplicated by later merged sessions (#12/#13/#14) already in
+`COORDINATION.md`. No unique site data. The closing comment records this rationale.
+
+## Deploy status (the one remaining blocker)
+
+| Item | Result |
+|---|---|
+| Deploy workflow run `44877230664` | Verify job **success**; Deploy job **failure** at step "Pages readiness" |
+| Root cause | `GET /repos/.../pages` → HTTP 404 (Pages never created). The workflow's readiness probe exits with an explicit instruction. |
+| Why it can't be enabled here | `POST/PUT /repos/.../pages` → HTTP 403 `Resource not accessible by integration` — automation tokens lack Pages scope. **One-time owner action required:** Repo → Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save, then re-run the workflow. Expected site: `https://wingbangboozle1-lang.github.io/Trade3/` |
+| Site quality gate | All verification steps pass (above); only the environment-level Pages enablement blocks publishing. This is flag F8 on [docs/flagged.html](docs/flagged.html), published with source links. |
+
+## Handoff note
+
+- No other session is active on this repo; no outstanding claims or conflicts. All tasks on the board are **done**
+  except the environment-level Pages enablement, which is outside any session's reach from the sandbox.
+- Final PR for this record: **PR #15** `arena/ef4556fb-trade3` → `main` (COORDINATION.md record only).
