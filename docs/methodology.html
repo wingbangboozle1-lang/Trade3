@@ -239,6 +239,17 @@ KALSHI_PRIVATE_KEY_PATH=./demo_private_key.pem
       <li><b>Demo ≠ live.</b> Demo books are thin and synthetic; a strategy that looks fine here has proven nothing about
         real markets.</li>
       <li><b>No news attribution.</b> Causation for a jump is not in the API; the site links sources instead of guessing.</li>
+      <li><b>Two transports, both labelled.</b> The published site polls Kalshi's public REST API from your browser. Run
+        <code>npm start</code> and the same pages also get a same-origin <code>/live</code> WebSocket
+        (<a href="https://www.rfc-editor.org/rfc/rfc6455.html" target="_blank" rel="noopener">RFC 6455</a>), which pushes
+        alerts instead of waiting for the next poll. The header pill always names the one in use, and neither is ever
+        described as live when it is not.</li>
+      <li><b>Why the published page cannot use Kalshi's own socket.</b> Kalshi's WebSocket requires a signed handshake —
+        "WebSocket connections require authentication during the connection handshake"
+        (<a href="https://docs.kalshi.com/getting_started/quick_start_websockets" target="_blank" rel="noopener">Quick Start: WebSockets</a>).
+        A static page has nowhere safe to keep a private key, so the socket belongs on a server: the collector holds the
+        key, opens the socket, and relays it. That relay now exists in <code>server/ws.js</code> and
+        <code>server/kalshi-ws.js</code>; it reports <code>unconfigured</code> until a demo key is supplied.</li>
       <li><b>Static hosting.</b> No server means no shared state: paper trades live in your browser's local storage and
         are exported as CSV/JSON if you want them elsewhere.</li>
       <li><b>Egress.</b> The site is a plain browser app, so it only works where Kalshi's API is reachable and its CORS

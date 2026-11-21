@@ -2146,3 +2146,25 @@ RESOLVED. New tasks claimed by this session:
 | T-CCF8 Pipeline fix: deploy workflow must publish `docs/` to `gh-pages` when Pages build_type is `legacy` (keep artifact path for `workflow` type) so the live site updates on every verified main push | in progress | `arena/ccf26d52-trade3` | `.github/workflows/pages.yml` |
 | T-CCF9 Update now-stale F8 text ("Pages not enabled") on the site + docs to "Resolved 2026-11-21" with links | in progress | `arena/ccf26d52-trade3` | `docs/flagged.html`, `EXECUTIVE_SUMMARY.md`, `VERIFICATION.md` |
 | T-CCF10 Re-verify combined tree (gates + live site), publish, confirm live URL serves combined content, record | pending | `arena/ccf26d52-trade3` | `COORDINATION.md` (append-only) |
+
+# Session `arena/651b296e-trade3` — real-time WebSocket upgrade + publish verification
+
+**Claimed 2026-11-21T07:2xZ, committed and pushed immediately (per board rules).**
+
+| ID | Task | Status | Owner | File scope |
+|----|------|--------|-------|------------|
+| T65-1 | Verify live-state facts from official Kalshi docs + API (WS auth, channel names, orderbook schema, candle params, CORS) | in progress | arena/651b296e-trade3 | record only |
+| T65-2 | Add a genuine real-time WebSocket feed to the browser dashboard (public market-data channels if the official docs allow unauthenticated subscribe), with polling fallback that degrades visibly, never silently | in progress | arena/651b296e-trade3 | `docs/assets/*.js`, `docs/dashboard.html`, `docs/assets/style.css`, `server/*`, `app/*` |
+| T65-3 | Re-run every local gate + start a browser-reachable live preview of the published `docs/` site | in progress | arena/651b296e-trade3 | record only |
+| T65-4 | Integration: PR to `main`, merge, record deploy result; re-attempt Pages enablement and document the exact failing permission | in progress | arena/651b296e-trade3 | `COORDINATION.md` |
+
+**Non-overlap note:** this session does not rewrite any table row, `docs/data/series.json`, or the
+existing page structure of either build. It adds a transport layer (WS) alongside the existing REST
+poller and records verification. If a row needs a change, it is logged here, not edited.
+
+**Environment note (new, reproducible evidence for F8/F12):** from this sandbox, `curl` returns
+`000` (TLS reset) for **every** Kalshi host (`external-api.demo.kalshi.co`, `demo-api.kalshi.co`,
+`external-api.kalshi.com`, `api.elections.kalshi.com`) **and** for `wingbangboozle1-lang.github.io`.
+The only working egress is the page-fetch path and GitHub. Therefore any server-side collector
+running *in this sandbox* can never read Kalshi; browser-side polling is the only transport that
+works for the published site, which is why T65-2 keeps the browser as the WS client.
