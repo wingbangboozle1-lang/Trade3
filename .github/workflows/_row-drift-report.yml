@@ -26,7 +26,7 @@
         },
         {
           "name": "Run the verifier and surface every diff as an annotation",
-          "run": "set +e\npython scripts/verify_series.py > drift.txt 2>&1\nstatus=$?\necho \"verify_series exit=$status\"\ncat drift.txt\n{\n  echo '## verify_series.py result'\n  echo\n  echo \"exit code: **$status**\"\n  echo\n  echo '```'\n  cat drift.txt\n  echo '```'\n} >> \"$GITHUB_STEP_SUMMARY\"\n# Annotations survive even when the raw log is not downloadable.\nif [ \"$status\" -ne 0 ]; then\n  echo \"::error title=DRIFT (exit $status)::$(grep -vE '^\\s*$' drift.txt | head -25 | tr '\\n' '|' | cut -c1-900)\"\n  grep -iE 'mismatch|drift|FAIL|diff|changed' drift.txt | head -12 | while IFS= read -r line; do\n    echo \"::error::$line\"\n  done\nelse\n  echo \"::notice title=Rows clean::verify_series.py exited 0 - every published row matches GET /series/{ticker}\"\nfi\nexit $status"
+          "run": "set +e\npython scripts/verify_series.py > drift.txt 2>&1\nstatus=$?\necho \"verify_series exit=$status\"\ncat drift.txt\n{\n  echo '## Row drift detail'\n  echo\n  echo \"exit code: **$status**\"\n  echo\n  echo '```'\n  grep -E '^FAIL|^       !|^       -|^Mismatches|rows verified' drift.txt || cat drift.txt\n  echo '```'\n} >> \"$GITHUB_STEP_SUMMARY\"\n# One annotation per drifted field: the '! ' lines are the exact reasons.\ngrep -E '^       !' drift.txt | sed 's/^       ! //' | head -30 | while IFS= read -r reason; do\n  echo \"::error title=Row drift::$reason\"\ndone\ngrep -E '^Mismatches' drift.txt | while IFS= read -r m; do echo \"::error title=Affected tickers::$m\"; done\nexit $status"
         }
       ]
     }
