@@ -1715,13 +1715,13 @@ Marking T-74a … T-74d **done**.
 | Crypto KXETHD | [series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXETHD) | "Ethereum price Above/below", Crypto, CF Benchmarks settlement — matches |
 | Base URLs / WS | [API Environments](https://docs.kalshi.com/getting_started/api_environments) | Demo REST `external-api.demo.kalshi.co`, WS `external-api-ws.demo.kalshi.co` — exactly as specified in the task |
 
-### T-22b Gates on latest merged tree (`main` @ `7a97edd`; site tree `bf08e73`, after PRs #49/#51/#48)
+### T-22b Gates on latest merged tree (`main` @ `e674f04`; site tree `bf08e73`, after PR #52)
 
 | Gate | Result |
 |---|---|
 | `npm test` | **pass** — logic tests, engine 15/15, site render 13/13 |
-| `npm run test:all` | **pass on `main` @ `7a97edd`** — logic, headless render (with `jsdom@25`), engine 15/15, site render 13/13 |
-| Latest GitHub Actions Verify site job | **pass** — [run 44879704914](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879704914) on the latest site-bearing tree (`bf08e73`); PR #49 changed only `COORDINATION.md`, `VERIFICATION.md`, and `requirements/REQUIREMENTS.md`, and PRs #51/#48 changed only `COORDINATION.md` afterward |
+| `npm run test:all` | **pass on `main` @ `7a97edd`** — logic, headless render (with `jsdom@25`), engine 15/15, site render 13/13; PR #52 afterward changed only `COORDINATION.md` |
+| Latest GitHub Actions Verify site job | **pass** — [run 44879704914](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879704914) on the latest site-bearing tree (`bf08e73`); PR #49 changed only `COORDINATION.md`, `VERIFICATION.md`, and `requirements/REQUIREMENTS.md`, and PRs #51/#48/#52 changed only `COORDINATION.md` afterward |
 | `python3 scripts/check_site.py` | **pass** — 29 pages, 387 local links, 20 JS modules, 39 series rows |
 | `node scripts/check-links.js` | **pass** — 387 references resolve, 0 broken |
 | `py_compile` (6 files) · `node --check` (`app/app.js`, all `server/*.js`) | **pass** |
@@ -2021,3 +2021,9 @@ Marking T-63a … T-63e **done**.
 - The required pre-push pull fetched PR #51 (merged `07:28:03Z`) and PR #48 (merged `07:29:34Z`); both touched `COORDINATION.md` only.
 - Rebase conflicted only while replaying this session's PR #33 merge/election record. Union resolution kept all 80 upstream lines and this session's 6-line record; the two remaining session commits replayed cleanly. No other session's edits or non-owned files were changed.
 - Re-ran the full local suite on `main` @ `7a97edd`; all tests, page/link checks, Python compile, and JS syntax pass (see T-22b). The site-bearing tree remains `bf08e73`; the only outstanding branch diff is `COORDINATION.md`.
+
+### T-22 rebase after PR #52 (latest main @ `e674f04`)
+
+- Pre-push `git pull --rebase origin main` fetched PR #52 from session `arena/63bd9b8c-trade3` (merged `07:32:23Z`), which changed only `COORDINATION.md`.
+- Rebase conflicted only while replaying this session's PR #33 merge/election entry. Union resolution preserved all 78 upstream lines and this session's 6-line entry; the remaining session commits replayed cleanly. No other session's work was discarded.
+- PR #52 changed only coordination records, so the site tree and prior verification are unchanged. The full local suite on `7a97edd` passed; the only change since is PR #52's `COORDINATION.md` update. PR #50 follow-up will be rebased/pushed to include `e674f04`.
