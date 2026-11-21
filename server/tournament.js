@@ -237,7 +237,11 @@ export class StrategyTournament {
 
   /** Flat rows for the UI table, newest first. */
   trades(limit = 200) {
-    return [...this.open, ...this.books.values().flatMap((b) => b.positions.filter((p) => p.result))]
+    // Spread the Map's iterator into an array first: Iterator.prototype.flatMap
+    // (iterator helpers) is Node 22+, but CI runs Node 20 — calling flatMap
+    // directly on the iterator threw "is not a function" there (found by the
+    // smoke-test watchdog, 2026-11-21).
+    return [...this.open, ...[...this.books.values()].flatMap((b) => b.positions.filter((p) => p.result))]
       .sort((a, b) => b.openedAt - a.openedAt)
       .slice(0, limit);
   }
