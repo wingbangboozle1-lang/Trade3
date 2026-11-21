@@ -1913,3 +1913,35 @@ control — fixed dollar-volume ranking + filter box), R6/R25/R26 (stale `site/`
 `docs/`), R27/R28 (fields are `source`/`source_url`/`verified_on`, not `source_id`/`as_of`, and there is no
 `unverified: true` escape hatch — `scripts/check_site.py` requires six keys plus an official
 `https://external-api.` source URL). Fix = correct the doc to match the code; no product code changes.
+
+### T-3A2 results (2026-11-21, this session)
+
+**Gates on `main` @ `262f22a` + this branch's fixes (all run in this sandbox):**
+
+| Gate | Result |
+|---|---|
+| `npm test` (logic + engine + site render) | **pass** — smoke 15/15, site-render 13/13 |
+| `npm run test:render` (jsdom, after `npm i --no-save jsdom`) | **pass** — full Build A headless render suite |
+| `python3 scripts/check_site.py` | **pass** — 29 pages, 387 local links, 20 JS modules, 39 series rows |
+| `node scripts/check-links.js` | **pass** — 387 references, 0 broken links/anchors/imports/DOM targets |
+| `python3 -m py_compile` (6 files) · `node --check` (app, server, scripts, docs/assets) | **pass** |
+| REQUIREMENTS row integrity (6 cells/row, all `[K…]` refs defined) | **pass** after the T-3A1 fixes (32 rows, 0 bad, 0 undefined refs) |
+
+**Live spot re-verification (official demo REST, fetched 2026-11-21):**
+
+| Check | Official source | Result |
+|---|---|---|
+| Exchange status | [GET /exchange/status](https://external-api.demo.kalshi.co/trade-api/v2/exchange/status) | `exchange_active: true`, `trading_active: true`, shards 0–3 |
+| Culture category | [GET /series?category=Culture](https://external-api.demo.kalshi.co/trade-api/v2/series?category=Culture) | 2 series (`KXXBANNEDGROK`, `KXXBANNEDMURRAYHILLGUY1`), both `category: Culture` |
+| Gas `KXAAAGASM` | [series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXAAAGASM) | "US gas price", Economics, monthly, AAA → gasprices.aaa.com — matches `series.json` |
+| Golf `KXPGAGOLFERSCORE` | [series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAGOLFERSCORE) | "Golf Round Strokes", Sports, Golf tag, 5 sources — matches (F26 label nuance unchanged) |
+| Golf `KXPGAT20` | [series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXPGAT20) | "T 20", Sports, Golf, sources Fox/ESPN/"the Governing League"(pgatour.com) — matches; published name "PGA Tour" remains the flagged F26 inference |
+| Crypto `KXETHD` | [series record](https://external-api.demo.kalshi.co/trade-api/v2/series/KXETHD) | "Ethereum price Above/below", Crypto, hourly, CF Benchmarks ETHUSD_RTI — matches |
+| Elections `POPVOTEKHVA` | [series record](https://external-api.demo.kalshi.co/trade-api/v2/series/POPVOTEKHVA) | "Kamala Virginia", Elections, one_off, US Congress — matches |
+
+**Pages (F8):** the `gh api -X POST …/pages` retry this session hit the shared-token **GitHub API rate limit**
+(not a 403 this time — the token quota shared across parallel sessions was exhausted at 07:27Z). Pages state is
+re-checked at integration time below; no code change.
+
+**Handoff:** no other session's files were edited. Scope stayed inside `requirements/REQUIREMENTS.md` + this
+append-only record, exactly as claimed.
