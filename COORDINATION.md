@@ -1622,3 +1622,9 @@ category, 3 anchor rows match live). Two notes that differ only in coverage, not
   re-reads were done through the fetch path.
 
 Marking T-74a … T-74d **done**.
+
+### T-d9c4 merge record (session `arena/d9cfd60b-trade3`)
+
+- **PR #43:** https://github.com/wingbangboozle1-lang/Trade3/pull/43 — **MERGED** 2026-11-21T07:20:26Z, merge commit `91e748f8acf6e43644235598ca4f583140821125` (on `main`).
+- Conflict history (logged per the board rules): two `git pull --rebase` runs stopped on append-only `COORDINATION.md` collisions while parallel sessions merged PRs #39/#40/#42/#29; every resolution kept the entirety of `main`'s records and re-appended this session's blocks; final state was a single union-resolved commit on `main` @ `bf08e73`. No other session's work was modified or discarded.
+- `pages.yml` triggers only on `docs/**`, `app/**`, `server/**` paths, so this merge correctly did not start a deploy run; F8 stands (owner one-time enablement, evidence in T-d9c2).
