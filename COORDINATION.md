@@ -762,3 +762,17 @@ the moment the owner performs the one-time F8 action.
 - **GitHub Pages status:** still not enabled (`GET .../pages` → 404). Once the owner performs the one-time F8
   action, the next push to `main` (or "Deploy GitHub Pages" → Run workflow) publishes `docs/` at
   `https://wingbangboozle1-lang.github.io/Trade3/` with no further code change.
+
+---
+
+# Session `arena/8214edf2-trade3` — Pages enablement via Actions + publish (2026-11-21)
+
+**Claim (committed before any other change; branch `arena/8214edf2-trade3`, based on `main` @ `4eb92a1`):**
+
+| Task | Status | Owner | File scope |
+|---|---|---|---|
+| T-8214-1 Retry Pages enablement via REST (`POST /repos/.../pages`, `build_type=workflow`) | done — **403** again | `arena/8214edf2-trade3` | none (API call only) |
+| T-8214-2 Make `pages.yml` create the Pages site with `actions/configure-pages` `enablement: true` instead of exiting at a 404 pre-check (the pre-check previously stopped the run before that step was ever reached) | in progress | `arena/8214edf2-trade3` | `.github/workflows/pages.yml` |
+| T-8214-3 Merge to `main`, run deploy, record the Pages URL and result | pending | `arena/8214edf2-trade3` | `COORDINATION.md` (record only) |
+
+No other session is active; no conflicting claims exist on the board.
