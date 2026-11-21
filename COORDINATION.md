@@ -2132,3 +2132,70 @@ append-only record, exactly as claimed.
   Repaired in the next commit on this branch (this one): the file is now a clean union — all parallel
   records kept in full, this session's blocks re-applied. No other session's content was lost at any
   point (the markers were confined to this one file and fixed before any merge to `main`).
+# Session `arena/6eecc9df-trade3` — final integration & publish verification (2026-11-21)
+
+**Branch:** `arena/6eecc9df-trade3` (fast-forwarded to `main` @ `a2b6d13` = PR #46 merge; **0 ahead /
+0 behind main** at session start, so this session carried no unmerged content — its job is the final
+integration gate, a line-by-line re-verification, a fresh publish attempt, and this record).
+**Scope:** `COORDINATION.md` only (append-only record). No other session's file was edited.
+
+## T-FIN1 Repo review + line-by-line verification (done)
+
+Re-reviewed the whole tree against the brief and re-ran every gate on the current tree:
+
+| Check | Tool / official source | Result |
+|---|---|---|
+| Logic + engine + site suites | `npm test` (`logic.test.mjs`, `smoke-test.js`, `site-render-test.js`) | **pass** — logic pass, smoke 15/15, site-render 13/13 |
+| Full suite incl. headless render | `npm run test:all` | **pass** |
+| Static site gate | `python3 scripts/check_site.py` | **pass** — 29 pages, 387 local links, 20 JS modules, 39 series rows |
+| Link/anchor/import/DOM check (both builds) | `node scripts/check-links.js` | **pass** — 387 local references resolve, 0 broken |
+| Published-row contract (offline) | `verify_series.py --from-cache … --skip-uncached` | **pass** — 4/4 cached rows match; 35 reported NOT CHECKED (absent from cache) |
+| Python layer syntax | `python3 -m py_compile` (6 files) | **pass** |
+| Live preview | `server/index.js` on `0.0.0.0:3000`, `DATA_MODE=snapshot ALLOW_DEMO_FALLBACK=0` | `/api/health` ok, `trackedMarkets:12`, `effectiveMode:snapshot`; all 14 static pages + `/app/`, `/site/` → **200**; `/api/topics`, `/api/alerts`, `/api/resolutions`, `/api/portfolio` all answer |
+
+**Data contract re-confirmed:** `docs/data/series.json` holds **39 series rows** across the five topics
+(gas 10 · elections 5 · culture 10 · crypto 10 · golf 4); **every row carries an official
+`source_url`** (`GET /series/{ticker}`), none missing. Topic mapping re-confirmed: gas = `Economics` +
+`Oil & Gas`/`Oil and energy`; golf = `Sports` + `Golf`; culture = `Culture` (+ labelled `Entertainment`
+supplement, F15/F20); elections = `Elections`; crypto = `Crypto`. The core ≥ $0.10 swing rule is
+verified in **integer 1/10,000-dollar tick space** (`ticks`/`movedTicks`/`isSwing` in
+`docs/assets/app.js`, consumed by `dashboard.js` and `portfolio.js`), with the exactly-$0.10 regression
+case (`0.42 − 0.32`) asserted in `tests/logic.test.mjs`.
+
+**No new irregularities found.** The 26-item flag ledger (F1–F26) stands; nothing published
+contradicts a live API record or an official doc.
+
+## T-FIN2 Publish attempt — GitHub Pages (F8 stands; not a site defect)
+
+Re-attempted Pages enablement from this session's credentials after the GitHub API rate limit reset:
+
+| Step | Command / source | Result |
+|---|---|---|
+| Pages site exists? | `GET /repos/wingbangboozle1-lang/Trade3/pages` | **404 Not Found** — never created |
+| Create Pages site | `POST /repos/…/pages` (`build_type=workflow`) | **403 "Resource not accessible by integration"** — automation token lacks Pages permission |
+| Fresh deploy run | `gh workflow run pages.yml` → run [44881305054](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44881305054) | **Verify site → success** · **Deploy → failure**, failing step = **"Pages readiness"** only (configure-pages enablement + the create attempt); upload/deploy steps never ran |
+
+**Conclusion:** the site is **complete, gated green, and deploy-ready**. The single remaining blocker is
+the environment-level **F8** owner permission: per the official
+[`actions/configure-pages` action.yml](https://github.com/actions/configure-pages/blob/main/action.yml),
+the `enablement` option (the only automated route to create a Pages site) "requires a token other than
+`GITHUB_TOKEN`" (a PAT with the `repo` scope / Pages write permission, or a GitHub App with
+`administration:write` + `pages:write`). No such token exists in this environment, so **one owner click**
+publishes the site with no code change:
+**Repo → Settings → Pages → Build and deployment → Source: GitHub Actions → Save**, then
+Actions → "Deploy site to GitHub Pages" → Run workflow. Expected URL:
+`https://wingbangboozle1-lang.github.io/Trade3/`.
+
+## T-FIN3 Merge / PR status (no new content PR needed)
+
+This branch is **at `main` (a2b6d13) with no content changes**, so there is nothing new to merge — the
+content build (dashboard, topic pages, portfolio, methodology, verification, flagged, both editions,
+workflows, tests) is already merged on `main` via PRs #1–#46. The only open PR is **#47** (a
+coordination record from session `arena/6d7662fe-trade3`); it is append-only and was left untouched.
+This session's record is appended to `COORDINATION.md` and committed on the session branch.
+
+## Status
+
+- T-FIN1 repo review + line-by-line verification — **done**
+- T-FIN2 publish attempt + F8 evidence — **done** (blocker is owner permission, not code)
+- T-FIN3 integration/merge status — **done**
