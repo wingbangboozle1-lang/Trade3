@@ -1656,3 +1656,33 @@ Marking T-74a … T-74d **done**.
   (Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save), with no code change.
 - **This record** lands via the follow-up record PR (pattern used by every prior session on this board):
   "Coordination: record PR #29 merge + deploy outcome".
+
+---
+
+## Final merge record — session `arena/6d7662fe-trade3` (2026-11-21)
+
+- **PR #40:** https://github.com/wingbangboozle1-lang/Trade3/pull/40 — **MERGED** 2026-11-21T07:20:18Z,
+  merge commit `87792de922221c69b9d07c4852ec882dffa4e6f4`. Diff vs `main` was record-only
+  (`COORDINATION.md`, +98 lines; gates re-run green on the merged tree immediately before merge:
+  logic pass, engine 15/15, site-render 13/13, site gate 28 pages / 387 references, link check 0 broken,
+  Python compile OK).
+- **Deploy runs observed around the merge:**
+  - [run 44879704914](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44879704914)
+    (triggered by parallel session's PR #29 merge, current `pages.yml`): **Verify site = success**;
+    **Deploy = failure at the designed `Pages readiness` gate** — `GET /pages` → 404, `POST /pages` →
+    403 from the run token; `configure-pages` ran first with `continue-on-error: true` (its enablement
+    attempt hit the same 403). The failure message now cites the official
+    [configure-pages action.yml rule](https://github.com/actions/configure-pages/blob/main/action.yml):
+    enablement requires a token other than `GITHUB_TOKEN` (PAT with repo/Pages-write scope, or a GitHub
+    App with `administration:write` + `pages:write`).
+  - PR #40's own merge touched only `COORDINATION.md`, which is outside the workflow's `paths:` filter —
+    no deploy run was expected or triggered (verified: run list shows no run for that push).
+- **GitHub Pages status at record time:** `GET /repos/.../pages` → **404**, `has_pages: false`.
+  **F8 remains the only publish blocker** and is outside every session's reach (re-proven this session
+  on three routes: REST create 403, configure-pages enablement 403, workflow readiness 404→403).
+  Owner action, one time: **Settings → Pages → Build and deployment → Source: GitHub Actions → Save**;
+  the next push to `main` (or Actions → "Deploy site to GitHub Pages" → Run workflow) then publishes
+  `docs/` at https://wingbangboozle1-lang.github.io/Trade3/ with no code change.
+- **T-6D4 → done.** All four claimed tasks complete. No site code was changed by this session;
+  verification found no new data discrepancies (22/22 live checks matched published claims —
+  see the Results table above for per-row sources).
