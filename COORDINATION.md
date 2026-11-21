@@ -1860,5 +1860,4 @@ in the visitor's browser (browser-side fetch); sandbox shell egress to `*.kalshi
   Expected URL: https://wingbangboozle1-lang.github.io/Trade3/
 - **Live preview meanwhile:** sandbox preview serves `docs/` on port 8000 ("Kalshi dashboard site preview")
   with live Kalshi data rendered browser-side.
-- This addendum is itself the final record; it merges as PR #50 (number recorded here after creation —
-  superseded value from any earlier draft indicates a stale copy).
+- This addendum is itself the final record; it merges as **PR #55** (https://github.com/wingbangboozle1-lang/Trade3/pull/55).
