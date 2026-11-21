@@ -973,3 +973,13 @@ No other session has an open claim on the board. Files owned by other sessions a
   - Run [44878420679](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44878420679) (PR #19): **Verify site — success**; **Deploy — same 403 at `configure-pages`**.
 - **Conclusion:** The site itself is verified and not broken (every check passes). GitHub Pages cannot be created by any automation token (403 on `POST /pages` from CLI, Actions `configure-pages`, and REST). **Owner action (one click, F8):** Repo → Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save. The next push to `main` (or Actions → "Deploy GitHub Pages" → Run workflow) then publishes `docs/` at `https://wingbangboozle1-lang.github.io/Trade3/` with no further code change. Expected URL: https://wingbangboozle1-lang.github.io/Trade3/
 - **T9 status:** done. All verification sources linked in the table above; no values inferred; flags F1–F25 remain on the Flagged page and do not block merge.
+
+### Merge and deploy record — session `arena/658d547d-trade3` (2026-11-21, final)
+
+- **PR #20** https://github.com/wingbangboozle1-lang/Trade3/pull/20 — **MERGED** 2026-11-21T07:04:32Z, merge commit `9baaec4`.
+- **Verify site job** on the merge commit (run [44878522179](https://github.com/wingbangboozle1-lang/Trade3/actions/runs/44878522179)): **success**, all 12 steps green (static site gate, link check, logic/engine/render tests, Python checks, live row re-verification, snapshot contract).
+- **Deploy job** on the same run: **failure at `actions/configure-pages@v5`** (the step that now runs `enablement: true`). Annotation from the runner: `HttpError: Resource not accessible by integration` — `Create Pages site failed`, pointing at the Pages REST docs. `upload-pages-artifact` and `deploy-pages` were skipped. This is the same owner-only blocker F8: the workflow's `GITHUB_TOKEN` is not allowed to create the Pages site, and the API token used by sessions gets the same 403.
+- **Not done, by design:** no workaround (no second token, no `gh-pages` branch, no change to the trust model). Nothing was merged that was not verified; the failing step is the enablement call only.
+- **Site status:** **not live.** Expected URL once enabled: https://wingbangboozle1-lang.github.io/Trade3/
+
+**One owner action is required (no code change):** Repo → Settings → Pages → Build and deployment → Source: **GitHub Actions** → Save. Then run the "Deploy site to GitHub Pages" workflow (Actions → Run workflow on `main`). The verify job already passes, so the deploy should succeed right after that click.
