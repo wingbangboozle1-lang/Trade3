@@ -79,7 +79,9 @@
         <tr>
           <td><b>Dashboard edition</b> (this site)</td>
           <td><code>docs/</code> — <a href="dashboard.html">live dashboard</a>, <a href="portfolio.html">portfolio</a>, <a href="topics/gas.html">topics</a></td>
-          <td>Static pages calling Kalshi's public REST API straight from your browser. No server, no key, no build step.</td>
+          <td>Static pages calling Kalshi's public REST API straight from your browser. No key, no build step.
+            When served by the repo's own Node server it also opens a same-origin <code>/live</code> socket for push alerts;
+            on GitHub Pages there is no server, so it polls and says so in the transport pill.</td>
           <td>You want the alert chats, the chart, the depth ladder and the paper strategies, running wherever the page is opened.</td>
         </tr>
         <tr>
